@@ -12,6 +12,27 @@ export interface CreateReaderRequest {
   diaChi?: string;
 }
 
+export interface UpdateReaderRequest {
+  maDg: string;
+  hoTen: string;
+  ngaySinh: string;
+  gioiTinh: string;
+  diaChi?: string;
+  soDt: string;
+  email?: string;
+  maLdg: string;
+}
+
+export interface UpdateBookRequest {
+  maDs: string;
+  tenDs: string;
+  maTl: string;
+  maNxb: string;
+  namXb: number;
+  soTrang: number;
+  gia: number;
+}
+
 export interface BorrowRequest {
   maDg: string;
   maNv: string;
@@ -19,7 +40,7 @@ export interface BorrowRequest {
 }
 
 export interface ReturnRequest {
-  maPm?: string; 
+  maPm?: string;
   maNv: string;
   dsMaCs: string[];
 }
