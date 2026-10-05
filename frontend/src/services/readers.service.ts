@@ -1,5 +1,5 @@
 import { apiClient } from '../lib/api';
-import { CreateReaderRequest, GenericApiResponse } from '../types/api.types';
+import type {  CreateReaderRequest, GenericApiResponse  } from '../types/api.types';
 
 export const readersService = {
   createReader: async (data: CreateReaderRequest): Promise<GenericApiResponse> => {

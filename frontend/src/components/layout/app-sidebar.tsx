@@ -1,3 +1,4 @@
+import { Link, useLocation } from "react-router-dom"
 import {
   Sidebar,
   SidebarContent,
@@ -7,21 +8,43 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarHeader,
+  SidebarFooter,
+  SidebarRail,
 } from "@/components/ui/sidebar"
 import { Home, BookOpen, Users, ArrowRightLeft, BarChart, Settings } from "lucide-react"
 
 const menuItems = [
-  { title: "Trang chủ", url: "#", icon: Home },
-  { title: "Quản lý Sách", url: "#", icon: BookOpen },
-  { title: "Quản lý Độc giả", url: "#", icon: Users },
-  { title: "Quản lý Mượn trả", url: "#", icon: ArrowRightLeft },
-  { title: "Báo cáo thống kê", url: "#", icon: BarChart },
-  { title: "Cài đặt", url: "#", icon: Settings },
+  { title: "Trang chủ", url: "/", icon: Home },
+  { title: "Quản lý Sách", url: "/books", icon: BookOpen },
+  { title: "Quản lý Độc giả", url: "/readers", icon: Users },
+  { title: "Quản lý Mượn trả", url: "/transactions", icon: ArrowRightLeft },
+  { title: "Báo cáo thống kê", url: "/reports", icon: BarChart },
+  { title: "Cài đặt", url: "/settings", icon: Settings },
 ]
 
 export function AppSidebar() {
+  const location = useLocation()
+
   return (
-    <Sidebar>
+    <Sidebar collapsible="icon">
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" asChild>
+              <Link to="/">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                  <BookOpen className="size-4" />
+                </div>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-semibold">QL Thư viện</span>
+                  <span className="truncate text-xs text-sidebar-foreground/70">v1.0.0</span>
+                </div>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Quản lý Thư viện</SidebarGroupLabel>
@@ -29,11 +52,11 @@ export function AppSidebar() {
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <a href={item.url}>
+                  <SidebarMenuButton asChild isActive={location.pathname === item.url}>
+                    <Link to={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -41,6 +64,26 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" asChild>
+              <a href="#">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                  <Users className="size-4" />
+                </div>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-semibold">Nhóm 2</span>
+                  <span className="truncate text-xs text-sidebar-foreground/70">Dự án môn học</span>
+                </div>
+              </a>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
+      <SidebarRail />
     </Sidebar>
   )
 }
+
+

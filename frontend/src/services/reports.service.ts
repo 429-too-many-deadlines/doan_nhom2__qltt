@@ -1,5 +1,5 @@
 import { apiClient } from '../lib/api';
-import { MonthlyStatsResponse, GenericApiResponse } from '../types/api.types';
+import type {  MonthlyStatsResponse, GenericApiResponse  } from '../types/api.types';
 
 export const reportsService = {
   getMonthlyStats: async (month: number, year: number): Promise<MonthlyStatsResponse> => {

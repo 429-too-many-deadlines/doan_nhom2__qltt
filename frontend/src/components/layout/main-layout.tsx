@@ -1,16 +1,25 @@
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { AppSidebar } from "./app-sidebar"
+import { AppHeader } from "./app-header"
+import { Outlet } from "react-router-dom"
+import { Suspense } from "react"
 
-export function MainLayout({ children }: { children: React.ReactNode }) {
+export function MainLayout() {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <main className="w-full flex-1 relative">
-        <div className="absolute top-4 left-4 z-10 md:hidden">
-          <SidebarTrigger />
+      <SidebarInset>
+        <AppHeader />
+        <div className="flex-1">
+          <Suspense fallback={<div className="p-6 text-muted-foreground">Đang tải...</div>}>
+            <Outlet />
+          </Suspense>
         </div>
-        {children}
-      </main>
+      </SidebarInset>
     </SidebarProvider>
   )
 }
+
+
+
+

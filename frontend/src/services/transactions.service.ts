@@ -1,5 +1,5 @@
 import { apiClient } from '../lib/api';
-import { BorrowRequest, ReturnRequest, PayFineRequest, GenericApiResponse } from '../types/api.types';
+import type {  BorrowRequest, ReturnRequest, PayFineRequest, GenericApiResponse  } from '../types/api.types';
 
 export const transactionsService = {
   borrowBook: async (data: BorrowRequest): Promise<GenericApiResponse> => {
