@@ -1,4 +1,5 @@
 using Dapper;
+using QuanLyThuVien.Server.Endpoints.Shared;
 using QuanLyThuVien.Server.Shared;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -23,14 +24,15 @@ public class DeleteReaderEndpoint : IEndpoint
 
             return result switch
             {
-                0 => Results.NotFound(new { Message = "Mã độc giả không tồn tại." }),
-                1 => Results.BadRequest(new { Message = "Độc giả đã có lịch sử mượn trả, không thể xóa." }),
-                2 => Results.Ok(new { Message = "Xóa độc giả thành công." }),
+                0 => Results.NotFound(new MessageResponse("Mã độc giả không tồn tại.")),
+                1 => Results.BadRequest(new MessageResponse("Độc giả đã có lịch sử mượn trả, không thể xóa.")),
+                2 => Results.Ok(new MessageResponse("Xóa độc giả thành công.")),
                 _ => Results.StatusCode(500)
             };
         })
         .WithName("DeleteReader")
-        .WithTags("Readers")
+        .RequireAuthorization("QuanLyHoacThuThu")
+           .WithTags("Readers")
         .WithGroupName("v1")
         .WithSummary("Xóa độc giả");
     }

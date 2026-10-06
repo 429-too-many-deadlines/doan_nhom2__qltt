@@ -1,4 +1,5 @@
 using Dapper;
+using QuanLyThuVien.Server.Endpoints.Shared;
 using QuanLyThuVien.Server.Shared;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -29,21 +30,23 @@ public class BorrowBookEndpoint : IEndpoint
                 if (result == 1)
                 {
                     var mapm = parameters.Get<string>("@MAPM");
-                    return Results.Ok(new { Message = $"Lập phiếu mượn {mapm} thành công.", MaPm = mapm });
+                    return Results.Ok(new BorrowResponse($"Lập phiếu mượn {mapm} thành công.", mapm));
                 }
                 
-                return Results.BadRequest(new { Message = "Lập phiếu mượn thất bại." });
+                return Results.BadRequest(new MessageResponse("Lập phiếu mượn thất bại."));
             }
             catch (Exception ex)
             {
-                return Results.BadRequest(new { Message = ex.Message });
+                return Results.BadRequest(new MessageResponse(ex.Message));
             }
         })
         .WithName("BorrowBooks")
-        .WithTags("Transactions")
+        .RequireAuthorization("ThuThuOnly")
+           .WithTags("Transactions")
         .WithGroupName("v1")
         .WithSummary("Lập phiếu mượn sách");
     }
 }
 
 public record BorrowRequest(string MaDg, string MaNv, string[] DsMaCs);
+public record BorrowResponse(string Message, string MaPm);

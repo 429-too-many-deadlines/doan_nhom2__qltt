@@ -1,4 +1,5 @@
 using Dapper;
+using QuanLyThuVien.Server.Endpoints.Shared;
 using QuanLyThuVien.Server.Shared;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -15,7 +16,7 @@ public class UpdateReaderEndpoint : IEndpoint
         app.MapPut("api/readers/{maDg}", async (IDbConnection db, string maDg, [FromBody] UpdateReaderRequest req) =>
         {
             if (maDg != req.MaDg)
-                return Results.BadRequest(new { Message = "Mã độc giả không khớp." });
+                return Results.BadRequest(new MessageResponse("Mã độc giả không khớp."));
 
             var parameters = new DynamicParameters();
             parameters.Add("@MADG", req.MaDg);
@@ -33,14 +34,15 @@ public class UpdateReaderEndpoint : IEndpoint
 
             return result switch
             {
-                0 => Results.NotFound(new { Message = "Mã độc giả không tồn tại." }),
-                1 => Results.BadRequest(new { Message = "Loại độc giả không tồn tại." }),
-                2 => Results.Ok(new { Message = "Cập nhật độc giả thành công." }),
+                0 => Results.NotFound(new MessageResponse("Mã độc giả không tồn tại.")),
+                1 => Results.BadRequest(new MessageResponse("Loại độc giả không tồn tại.")),
+                2 => Results.Ok(new MessageResponse("Cập nhật độc giả thành công.")),
                 _ => Results.StatusCode(500)
             };
         })
         .WithName("UpdateReader")
-        .WithTags("Readers")
+        .RequireAuthorization("QuanLyHoacThuThu")
+           .WithTags("Readers")
         .WithGroupName("v1")
         .WithSummary("Cập nhật thông tin độc giả");
     }

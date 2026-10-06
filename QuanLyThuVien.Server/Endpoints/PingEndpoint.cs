@@ -1,4 +1,5 @@
 using QuanLyThuVien.Server.Shared;
+using QuanLyThuVien.Server.Endpoints.Shared;
 
 namespace QuanLyThuVien.Server.Endpoints;
 

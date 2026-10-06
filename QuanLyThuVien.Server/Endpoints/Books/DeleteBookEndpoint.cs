@@ -1,4 +1,5 @@
 using Dapper;
+using QuanLyThuVien.Server.Endpoints.Shared;
 using QuanLyThuVien.Server.Shared;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -23,14 +24,15 @@ public class DeleteBookEndpoint : IEndpoint
 
             return result switch
             {
-                0 => Results.NotFound(new { Message = "Mã đầu sách không tồn tại." }),
-                1 => Results.BadRequest(new { Message = "Đầu sách này vẫn còn các cuốn sách, không thể xóa." }),
-                2 => Results.Ok(new { Message = "Xóa đầu sách thành công." }),
+                0 => Results.NotFound(new MessageResponse("Mã đầu sách không tồn tại.")),
+                1 => Results.BadRequest(new MessageResponse("Đầu sách này vẫn còn các cuốn sách, không thể xóa.")),
+                2 => Results.Ok(new MessageResponse("Xóa đầu sách thành công.")),
                 _ => Results.StatusCode(500)
             };
         })
         .WithName("DeleteBook")
-        .WithTags("Books")
+        .RequireAuthorization("QuanLyHoacThuThu")
+           .WithTags("Books")
         .WithGroupName("v1")
         .WithSummary("Xóa đầu sách");
     }

@@ -531,6 +531,13 @@ BEGIN
         RETURN 1
     END
 
+	-- Xóa các bản ghi tham chiếu ở các bảng khác
+	IF OBJECT_ID('DOCGIA_XEPLOAI') IS NOT NULL
+	BEGIN
+		EXEC('DELETE FROM DOCGIA_XEPLOAI WHERE MADG = ''' + @MADG + '''')
+	END
+	
+	DELETE FROM TAIKHOAN WHERE MADG = @MADG
 	DELETE FROM DOCGIA WHERE MADG = @MADG
 
 	PRINT N'Xóa độc giả thành công.'

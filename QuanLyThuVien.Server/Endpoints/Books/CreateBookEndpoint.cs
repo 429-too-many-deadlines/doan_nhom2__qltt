@@ -1,4 +1,5 @@
 using Dapper;
+using QuanLyThuVien.Server.Endpoints.Shared;
 using QuanLyThuVien.Server.Shared;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -24,12 +25,23 @@ public class CreateBookEndpoint : IEndpoint
             parameters.Add("@NAMXB", req.NamXB);
             parameters.Add("@SOTRANG", req.SoTrang);
             parameters.Add("@GIA", req.Gia);
+            parameters.Add("@ReturnValue", dbType: DbType.Int32, direction: ParameterDirection.ReturnValue);
 
-            var result = await db.ExecuteAsync("SP_THEMDAUSACH", parameters, commandType: CommandType.StoredProcedure);
-            return Results.Ok(new { message = "Thêm đầu sách thành công" });
+            await db.ExecuteAsync("SP_THEMDAUSACH", parameters, commandType: CommandType.StoredProcedure);
+            var result = parameters.Get<int>("@ReturnValue");
+
+            return result switch
+            {
+                0 => Results.BadRequest(new MessageResponse("Mã đầu sách đã tồn tại.")),
+                1 => Results.BadRequest(new MessageResponse("Mã thể loại không tồn tại.")),
+                2 => Results.BadRequest(new MessageResponse("Mã nhà xuất bản không tồn tại.")),
+                3 => Results.Ok(new MessageResponse("Thêm đầu sách thành công")),
+                _ => Results.StatusCode(500)
+            };
         })
         .WithName("CreateBook")
-        .WithTags("Books")
+        .RequireAuthorization("QuanLyHoacThuThu")
+           .WithTags("Books")
         .WithSummary("Thêm mới đầu sách");
     }
 }

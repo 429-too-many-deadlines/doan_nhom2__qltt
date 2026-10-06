@@ -2,6 +2,9 @@ using Microsoft.OpenApi;
 using Scalar.AspNetCore;
 using Serilog;
 using QuanLyThuVien.Server.Shared;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseSerilog((context, loggerConfig) =>
@@ -16,6 +19,7 @@ builder.Services.AddScoped<System.Data.IDbConnection>(sp =>
     new Microsoft.Data.SqlClient.SqlConnection(builder.Configuration.GetConnectionString("QuanLyThuVien")));
 
 builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<QuanLyThuVien.Server.Infrastructure.ErrorHandling.GlobalExceptionHandler>();
 builder.Services.AddEndpoints(typeof(Program).Assembly);
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -38,6 +42,28 @@ builder.Services.AddOpenApi("v1", options =>
 
         return Task.CompletedTask;
     });
+});
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? "QuanLyThuVienSecretKey@12345678901234567890"))
+        };
+    });
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("QuanLyOnly", policy => policy.RequireRole("Quản lý"));
+    options.AddPolicy("ThuThuOnly", policy => policy.RequireRole("Thủ thư"));
+    options.AddPolicy("QuanLyHoacThuThu", policy => policy.RequireRole("Quản lý", "Thủ thư"));
+    options.AddPolicy("DocGiaOnly", policy => policy.RequireRole("Độc giả"));
 });
 
 var app = builder.Build();
@@ -81,6 +107,9 @@ api.MapGet("weatherforecast", () =>
     return forecast;
 })
 .WithName("GetWeatherForecast");
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapDefaultEndpoints();
 app.MapEndpoints();

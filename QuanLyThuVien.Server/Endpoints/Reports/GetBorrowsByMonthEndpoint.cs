@@ -1,4 +1,5 @@
 using Dapper;
+using QuanLyThuVien.Server.Endpoints.Shared;
 using QuanLyThuVien.Server.Shared;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -16,7 +17,8 @@ public class GetBorrowsByMonthEndpoint : IEndpoint
             return Results.Ok(data);
         })
         .WithName("GetBorrowsByMonth")
-        .WithTags("Reports")
+        .RequireAuthorization("QuanLyOnly")
+           .WithTags("Reports")
         .WithGroupName("v1")
         .WithSummary("Lượt mượn theo tháng và thể loại");
     }

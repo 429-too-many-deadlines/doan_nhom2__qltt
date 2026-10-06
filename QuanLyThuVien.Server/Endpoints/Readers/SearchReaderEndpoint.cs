@@ -1,4 +1,5 @@
 using Dapper;
+using QuanLyThuVien.Server.Endpoints.Shared;
 using QuanLyThuVien.Server.Shared;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -21,7 +22,8 @@ public class SearchReaderEndpoint : IEndpoint
             return Results.Ok(readers);
         })
         .WithName("SearchReaders")
-        .WithTags("Readers")
+        .RequireAuthorization()
+           .WithTags("Readers")
         .WithGroupName("v1")
         .WithSummary("Tìm kiếm độc giả theo từ khóa");
     }

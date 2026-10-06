@@ -29,6 +29,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchStats();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Fetch current month on mount
 
   const handleSubmit = (e: React.FormEvent) => {

@@ -12,19 +12,30 @@ import {
   SidebarFooter,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import { Home, BookOpen, Users, ArrowRightLeft, BarChart, Settings } from "lucide-react"
+import { Home, BookOpen, Users, ArrowRightLeft, BarChart, Settings, Shield, Tags, PenTool, Building, Contact, IdCard } from "lucide-react"
+
+import { useAuth } from "@/contexts/AuthContext"
 
 const menuItems = [
-  { title: "Trang chủ", url: "/", icon: Home },
-  { title: "Quản lý Sách", url: "/books", icon: BookOpen },
-  { title: "Quản lý Độc giả", url: "/readers", icon: Users },
-  { title: "Quản lý Mượn trả", url: "/transactions", icon: ArrowRightLeft },
-  { title: "Báo cáo thống kê", url: "/reports", icon: BarChart },
-  { title: "Cài đặt", url: "/settings", icon: Settings },
+  { title: "Trang chủ", url: "/", icon: Home, roles: ["R_QUANLY", "R_THUTHU", "R_DOCGIA"] },
+  { title: "Quản lý Sách", url: "/books", icon: BookOpen, roles: ["R_QUANLY", "R_THUTHU", "R_DOCGIA"] },
+  { title: "Thể loại", url: "/categories", icon: Tags, roles: ["R_QUANLY", "R_THUTHU"] },
+  { title: "Tác giả", url: "/authors", icon: PenTool, roles: ["R_QUANLY", "R_THUTHU"] },
+  { title: "Nhà xuất bản", url: "/publishers", icon: Building, roles: ["R_QUANLY", "R_THUTHU"] },
+  { title: "Quản lý Độc giả", url: "/readers", icon: Users, roles: ["R_QUANLY", "R_THUTHU"] },
+  { title: "Loại Độc Giả", url: "/readertypes", icon: IdCard, roles: ["R_QUANLY", "R_THUTHU"] },
+  { title: "Quản lý Nhân viên", url: "/employees", icon: Contact, roles: ["R_QUANLY"] },
+  { title: "Quản lý Mượn trả", url: "/transactions", icon: ArrowRightLeft, roles: ["R_QUANLY", "R_THUTHU", "R_DOCGIA"] },
+  { title: "Báo cáo thống kê", url: "/reports", icon: BarChart, roles: ["R_QUANLY", "R_THUTHU"] },
+  { title: "Tài khoản", url: "/accounts", icon: Shield, roles: ["R_QUANLY"] },
+  { title: "Cài đặt", url: "/settings", icon: Settings, roles: ["R_QUANLY"] },
 ]
 
 export function AppSidebar() {
   const location = useLocation()
+  const { user } = useAuth()
+
+  const filteredMenuItems = menuItems.filter(item => user && item.roles.includes(user.role))
 
   return (
     <Sidebar collapsible="icon">
@@ -50,7 +61,7 @@ export function AppSidebar() {
           <SidebarGroupLabel>Quản lý Thư viện</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => (
+              {filteredMenuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild isActive={location.pathname === item.url}>
                     <Link to={item.url}>

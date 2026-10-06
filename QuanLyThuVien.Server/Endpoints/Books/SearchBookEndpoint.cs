@@ -1,4 +1,5 @@
 using Dapper;
+using QuanLyThuVien.Server.Endpoints.Shared;
 using QuanLyThuVien.Server.Shared;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -21,7 +22,8 @@ public class SearchBookEndpoint : IEndpoint
             return Results.Ok(books);
         })
         .WithName("SearchBooks")
-        .WithTags("Books")
+        .RequireAuthorization()
+           .WithTags("Books")
         .WithGroupName("v1")
         .WithSummary("Tìm kiếm sách theo từ khóa");
     }

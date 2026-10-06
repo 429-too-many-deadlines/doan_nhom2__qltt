@@ -38,5 +38,17 @@ export const reportsService = {
     const response = await apiClient.get<GenericApiResponse[]>('/api/reports/top-borrowed-books');
     return response.data;
   },
+
+  runRankingCursor: async (): Promise<GenericApiResponse[]> => {
+    const response = await apiClient.post<GenericApiResponse[]>('/api/reports/ranking');
+    return response.data;
+  },
+
+  runReminderCursor: async (ngayKiemTra?: string): Promise<GenericApiResponse[]> => {
+    const response = await apiClient.post<GenericApiResponse[]>('/api/reports/reminders', {
+      ngayKiemTra
+    });
+    return response.data;
+  },
 };
 

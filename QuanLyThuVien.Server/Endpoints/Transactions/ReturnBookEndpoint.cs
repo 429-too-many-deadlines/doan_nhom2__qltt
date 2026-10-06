@@ -1,4 +1,5 @@
 using Dapper;
+using QuanLyThuVien.Server.Endpoints.Shared;
 using QuanLyThuVien.Server.Shared;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -26,8 +27,8 @@ public class ReturnBookEndpoint : IEndpoint
 
             return result switch
             {
-                0 => Results.NotFound(new { Message = "Không tìm thấy sách trong phiếu mượn." }),
-                1 => Results.BadRequest(new { Message = "Sách này đã được trả trước đó." }),
+                0 => Results.NotFound(new MessageResponse("Không tìm thấy sách trong phiếu mượn.")),
+                1 => Results.BadRequest(new MessageResponse("Sách này đã được trả trước đó.")),
                 2 => Results.Ok(new 
                 { 
                     Message = "Trả sách thành công.", 
@@ -37,7 +38,8 @@ public class ReturnBookEndpoint : IEndpoint
             };
         })
         .WithName("ReturnBook")
-        .WithTags("Transactions")
+        .RequireAuthorization("ThuThuOnly")
+           .WithTags("Transactions")
         .WithGroupName("v1")
         .WithSummary("Trả sách");
     }

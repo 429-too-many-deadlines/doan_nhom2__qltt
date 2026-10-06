@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { booksService } from '../services/books.service';
-import type { SearchBookResponse } from '../types/api.types';
+import type { Category, Publisher, SearchBookResponse } from '../types/api.types';
 import { toast } from 'sonner';
 import {
   Table,
@@ -14,11 +15,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import { Search } from 'lucide-react';
+import { categoriesService } from '../services/categories.service';
+import { publishersService } from '../services/publishers.service';
 
 export default function Books() {
+  const navigate = useNavigate();
   const [books, setBooks] = useState<SearchBookResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [query, setQuery] = useState('');
+  
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [publishers, setPublishers] = useState<Publisher[]>([]);
 
   const fetchBooks = async (searchQuery: string = '') => {
     try {
@@ -33,8 +40,21 @@ export default function Books() {
     }
   };
 
+  const fetchMasterData = async () => {
+    try {
+      const cats = await categoriesService.getCategories();
+      const pubs = await publishersService.getPublishers();
+      setCategories(cats);
+      setPublishers(pubs);
+    } catch {
+      console.error('Failed to fetch master data');
+    }
+  };
+
   useEffect(() => {
     fetchBooks();
+    fetchMasterData();
+   
   }, []);
 
   const handleSearch = (e: React.FormEvent) => {
@@ -106,7 +126,10 @@ export default function Books() {
                       <TableCell>{book.tenSach}</TableCell>
                       <TableCell>{book.tacGia}</TableCell>
                       <TableCell>
-                        <Button variant="destructive" size="sm" onClick={() => book.maSach && handleDeleteBook(book.maSach)}>Xóa</Button>
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm" onClick={() => navigate(`/books/${book.maSach}`)}>Chi tiết</Button>
+                          <Button variant="destructive" size="sm" onClick={() => book.maSach && handleDeleteBook(book.maSach)}>Xóa</Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))
@@ -127,15 +150,15 @@ export default function Books() {
               e.preventDefault();
               const formData = new FormData(e.currentTarget);
               const data = {
-                maDs: formData.get('maDs') as string,
-                tenDs: formData.get('tenDs') as string,
-                maTl: formData.get('maTl') as string,
-                maNxb: formData.get('maNxb') as string,
-                namXb: parseInt(formData.get('namXb') as string, 10),
+                maDS: formData.get('maDs') as string,
+                tenDS: formData.get('tenDs') as string,
+                maTL: formData.get('maTl') as string,
+                maNXB: formData.get('maNxb') as string,
+                namXB: parseInt(formData.get('namXb') as string, 10),
                 soTrang: parseInt(formData.get('soTrang') as string, 10),
                 gia: parseFloat(formData.get('gia') as string),
               };
-              if (!data.maDs) { toast.error('Vui lòng nhập mã đầu sách'); return; }
+              if (!data.maDS) { toast.error('Vui lòng nhập mã đầu sách'); return; }
               try {
                 await booksService.createBook(data);
                 toast.success('Thêm đầu sách thành công');
@@ -155,12 +178,22 @@ export default function Books() {
                 <Input name="tenDs" placeholder="Tên sách mới..." required />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Mã Thể Loại</label>
-                <Input name="maTl" placeholder="TL01" required />
+                <label className="text-sm font-medium">Thể Loại</label>
+                <select name="maTl" required className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                  <option value="">-- Chọn thể loại --</option>
+                  {categories.map((c: Category) => (
+                    <option key={c.maTL} value={c.maTL}>{c.tenTL}</option>
+                  ))}
+                </select>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Mã NXB</label>
-                <Input name="maNxb" placeholder="NXB01" required />
+                <label className="text-sm font-medium">Nhà Xuất Bản</label>
+                <select name="maNxb" required className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                  <option value="">-- Chọn NXB --</option>
+                  {publishers.map((p: Publisher) => (
+                    <option key={p.maNXB} value={p.maNXB}>{p.tenNXB}</option>
+                  ))}
+                </select>
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Năm Xuất Bản</label>
@@ -188,17 +221,17 @@ export default function Books() {
               e.preventDefault();
               const formData = new FormData(e.currentTarget);
               const data = {
-                maDs: formData.get('maDs') as string,
-                tenDs: formData.get('tenDs') as string,
-                maTl: formData.get('maTl') as string,
-                maNxb: formData.get('maNxb') as string,
-                namXb: parseInt(formData.get('namXb') as string, 10),
+                maDS: formData.get('maDs') as string,
+                tenDS: formData.get('tenDs') as string,
+                maTL: formData.get('maTl') as string,
+                maNXB: formData.get('maNxb') as string,
+                namXB: parseInt(formData.get('namXb') as string, 10),
                 soTrang: parseInt(formData.get('soTrang') as string, 10),
                 gia: parseFloat(formData.get('gia') as string),
               };
-              if (!data.maDs) { toast.error('Vui lòng nhập mã đầu sách'); return; }
+              if (!data.maDS) { toast.error('Vui lòng nhập mã đầu sách'); return; }
               try {
-                await booksService.updateBook(data.maDs, data);
+                await booksService.updateBook(data.maDS, data);
                 toast.success('Cập nhật đầu sách thành công');
                 fetchBooks(query);
               } catch(err) {
@@ -215,12 +248,22 @@ export default function Books() {
                 <Input name="tenDs" placeholder="Tên sách mới..." required />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Mã Thể Loại</label>
-                <Input name="maTl" placeholder="TL01" required />
+                <label className="text-sm font-medium">Thể Loại</label>
+                <select name="maTl" required className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                  <option value="">-- Chọn thể loại --</option>
+                  {categories.map((c: Category) => (
+                    <option key={c.maTL} value={c.maTL}>{c.tenTL}</option>
+                  ))}
+                </select>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Mã NXB</label>
-                <Input name="maNxb" placeholder="NXB01" required />
+                <label className="text-sm font-medium">Nhà Xuất Bản</label>
+                <select name="maNxb" required className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                  <option value="">-- Chọn NXB --</option>
+                  {publishers.map((p: Publisher) => (
+                    <option key={p.maNXB} value={p.maNXB}>{p.tenNXB}</option>
+                  ))}
+                </select>
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Năm Xuất Bản</label>

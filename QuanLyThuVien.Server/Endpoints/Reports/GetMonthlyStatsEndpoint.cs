@@ -1,4 +1,5 @@
 using Dapper;
+using QuanLyThuVien.Server.Endpoints.Shared;
 using QuanLyThuVien.Server.Shared;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -32,7 +33,8 @@ public class GetMonthlyStatsEndpoint : IEndpoint
             });
         })
         .WithName("GetMonthlyStats")
-        .WithTags("Reports")
+        .RequireAuthorization("QuanLyOnly")
+           .WithTags("Reports")
         .WithGroupName("v1")
         .WithSummary("Thống kê hoạt động thư viện theo tháng");
     }

@@ -1,4 +1,5 @@
 using Dapper;
+using QuanLyThuVien.Server.Endpoints.Shared;
 using QuanLyThuVien.Server.Shared;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -16,7 +17,8 @@ public class GetOverdueReadersEndpoint : IEndpoint
             return Results.Ok(data);
         })
         .WithName("GetOverdueReaders")
-        .WithTags("Reports")
+        .RequireAuthorization("QuanLyOnly")
+           .WithTags("Reports")
         .WithGroupName("v1")
         .WithSummary("Danh sách độc giả đang giữ sách quá hạn");
     }

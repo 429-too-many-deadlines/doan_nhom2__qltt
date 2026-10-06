@@ -1,4 +1,5 @@
 using Dapper;
+using QuanLyThuVien.Server.Endpoints.Shared;
 using QuanLyThuVien.Server.Shared;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -30,14 +31,15 @@ public class CreateReaderEndpoint : IEndpoint
 
             return result switch
             {
-                0 => Results.BadRequest(new { Message = "Mã độc giả đã tồn tại." }),
-                1 => Results.BadRequest(new { Message = "Loại độc giả không tồn tại." }),
-                2 => Results.Ok(new { Message = "Thêm độc giả thành công." }),
+                0 => Results.BadRequest(new MessageResponse("Mã độc giả đã tồn tại.")),
+                1 => Results.BadRequest(new MessageResponse("Loại độc giả không tồn tại.")),
+                2 => Results.Ok(new MessageResponse("Thêm độc giả thành công.")),
                 _ => Results.StatusCode(500)
             };
         })
         .WithName("CreateReader")
-        .WithTags("Readers")
+        .RequireAuthorization("QuanLyHoacThuThu")
+           .WithTags("Readers")
         .WithGroupName("v1")
         .WithSummary("Thêm độc giả mới");
     }

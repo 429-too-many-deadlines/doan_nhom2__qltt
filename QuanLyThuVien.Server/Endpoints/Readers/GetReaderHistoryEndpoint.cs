@@ -1,4 +1,5 @@
 using Dapper;
+using QuanLyThuVien.Server.Endpoints.Shared;
 using QuanLyThuVien.Server.Shared;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -19,7 +20,8 @@ public class GetReaderHistoryEndpoint : IEndpoint
             return Results.Ok(history);
         })
         .WithName("GetReaderHistory")
-        .WithTags("Readers")
+        .RequireAuthorization("QuanLyHoacThuThu")
+           .WithTags("Readers")
         .WithGroupName("v1")
         .WithSummary("Xem lịch sử mượn sách của độc giả");
     }

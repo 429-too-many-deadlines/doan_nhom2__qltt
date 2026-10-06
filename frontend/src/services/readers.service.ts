@@ -1,24 +1,24 @@
 import { apiClient } from '../lib/api';
-import type {  CreateReaderRequest, UpdateReaderRequest, GenericApiResponse  } from '../types/api.types';
+import type { CreateReaderRequest, MessageResponse, Reader, UpdateReaderRequest, GenericApiResponse } from '../types/api.types';
 
 export const readersService = {
-  createReader: async (data: CreateReaderRequest): Promise<GenericApiResponse> => {
-    const response = await apiClient.post<GenericApiResponse>('/api/readers', data);
+  createReader: async (data: CreateReaderRequest): Promise<MessageResponse> => {
+    const response = await apiClient.post<MessageResponse>('/api/readers', data);
     return response.data;
   },
 
-  updateReader: async (maDg: string, data: UpdateReaderRequest): Promise<GenericApiResponse> => {
-    const response = await apiClient.put<GenericApiResponse>(`/api/readers/${maDg}`, data);
+  updateReader: async (maDg: string, data: UpdateReaderRequest): Promise<MessageResponse> => {
+    const response = await apiClient.put<MessageResponse>(`/api/readers/${maDg}`, data);
     return response.data;
   },
 
-  deleteReader: async (maDg: string): Promise<GenericApiResponse> => {
-    const response = await apiClient.delete<GenericApiResponse>(`/api/readers/${maDg}`);
+  deleteReader: async (maDg: string): Promise<MessageResponse> => {
+    const response = await apiClient.delete<MessageResponse>(`/api/readers/${maDg}`);
     return response.data;
   },
 
-  searchReaders: async (query: string = ''): Promise<any[]> => {
-    const response = await apiClient.get<any[]>('/api/readers/search', {
+  searchReaders: async (query: string = ''): Promise<Reader[]> => {
+    const response = await apiClient.get<Reader[]>('/api/readers/search', {
       params: { query },
     });
     return response.data;

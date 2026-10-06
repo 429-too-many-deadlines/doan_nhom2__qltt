@@ -1,4 +1,5 @@
 using Dapper;
+using QuanLyThuVien.Server.Endpoints.Shared;
 using QuanLyThuVien.Server.Shared;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -16,7 +17,8 @@ public class GetLibrarianPerformanceEndpoint : IEndpoint
             return Results.Ok(data);
         })
         .WithName("GetLibrarianPerformance")
-        .WithTags("Reports")
+        .RequireAuthorization("QuanLyOnly")
+           .WithTags("Reports")
         .WithGroupName("v1")
         .WithSummary("Hiệu suất nhân viên theo tháng");
     }

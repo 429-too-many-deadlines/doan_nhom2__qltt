@@ -1,4 +1,5 @@
 using Dapper;
+using QuanLyThuVien.Server.Endpoints.Shared;
 using QuanLyThuVien.Server.Shared;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -24,12 +25,21 @@ public class UpdateBookEndpoint : IEndpoint
             parameters.Add("@NAMXB", req.NamXB);
             parameters.Add("@SOTRANG", req.SoTrang);
             parameters.Add("@GIA", req.Gia);
+            parameters.Add("@ReturnValue", dbType: DbType.Int32, direction: ParameterDirection.ReturnValue);
 
-            var result = await db.ExecuteAsync("SP_SUADAUSACH", parameters, commandType: CommandType.StoredProcedure);
-            return Results.Ok(new { message = "Cập nhật đầu sách thành công" });
+            await db.ExecuteAsync("SP_SUADAUSACH", parameters, commandType: CommandType.StoredProcedure);
+            var result = parameters.Get<int>("@ReturnValue");
+
+            return result switch
+            {
+                0 => Results.BadRequest(new MessageResponse("Mã đầu sách không tồn tại.")),
+                1 => Results.Ok(new MessageResponse("Cập nhật đầu sách thành công")),
+                _ => Results.StatusCode(500)
+            };
         })
         .WithName("UpdateBook")
-        .WithTags("Books")
+        .RequireAuthorization("QuanLyHoacThuThu")
+           .WithTags("Books")
         .WithSummary("Cập nhật đầu sách");
     }
 }

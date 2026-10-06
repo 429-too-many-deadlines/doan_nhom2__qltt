@@ -1,4 +1,5 @@
 using Dapper;
+using QuanLyThuVien.Server.Endpoints.Shared;
 using QuanLyThuVien.Server.Shared;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -17,6 +18,7 @@ public class GetCategoriesEndpoint : IEndpoint
             return Results.Ok(categories);
         })
         .WithName("GetCategories")
-        .WithTags("Categories");
+        .RequireAuthorization()
+           .WithTags("Categories");
     }
 }

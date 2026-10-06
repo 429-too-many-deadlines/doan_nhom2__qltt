@@ -1,4 +1,5 @@
 using Dapper;
+using QuanLyThuVien.Server.Endpoints.Shared;
 using QuanLyThuVien.Server.Shared;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -24,8 +25,8 @@ public class PayFineEndpoint : IEndpoint
 
             return result switch
             {
-                0 => Results.NotFound(new { Message = "Độc giả không tồn tại." }),
-                1 => Results.Ok(new { Message = "Độc giả không có khoản phạt nào chưa thanh toán." }),
+                0 => Results.NotFound(new MessageResponse("Độc giả không tồn tại.")),
+                1 => Results.Ok(new MessageResponse("Độc giả không có khoản phạt nào chưa thanh toán.")),
                 2 => Results.Ok(new 
                 { 
                     Message = "Thanh toán thành công.", 
@@ -35,7 +36,8 @@ public class PayFineEndpoint : IEndpoint
             };
         })
         .WithName("PayFine")
-        .WithTags("Transactions")
+        .RequireAuthorization("ThuThuOnly")
+           .WithTags("Transactions")
         .WithGroupName("v1")
         .WithSummary("Thanh toán tiền phạt");
     }
