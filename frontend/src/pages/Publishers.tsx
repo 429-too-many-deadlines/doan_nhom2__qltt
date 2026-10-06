@@ -1,79 +1,71 @@
-import { useEffect, useState } from 'react';
+import { DataTablePagination } from '../components/ui/data-table-pagination';
+import { useEffect, useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { toast } from 'sonner';
 import { publishersService } from '@/services/publishers.service';
-import { Plus, Trash2, Edit, Search } from 'lucide-react';
+import { Trash2, Edit, Search } from 'lucide-react';
 import type { Publisher } from '@/types/api.types';
+import { CreatePublisherDialog } from '@/components/features/publishers/CreatePublisherDialog';
+import { UpdatePublisherDialog } from '@/components/features/publishers/UpdatePublisherDialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export default function Publishers() {
   const [items, setItems] = useState<Publisher[]>([]);
   const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [query, setQuery] = useState('');
-  const [formData, setFormData] = useState({ maNXB: '', tenNXB: '', diaChi: '', soDT: '' });
-  const [isEditing, setIsEditing] = useState(false);
+  
+  const [selectedPublisher, setSelectedPublisher] = useState<Publisher | null>(null);
+  const [isUpdateOpen, setIsUpdateOpen] = useState(false);
 
-  const fetchItems = async (q = '') => {
+  const fetchItems = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await publishersService.getPublishers(q);
+      const dataResult = await publishersService.getPublishers(query || undefined, page, 10);
+      const data = dataResult.items || [];
+      setTotalPages(dataResult.totalPages);
       setItems(data);
     } catch {
       toast.error('Lỗi khi tải danh sách');
     } finally {
       setLoading(false);
     }
-  };
+  }, [query, page]);
 
   useEffect(() => {
-    fetchItems();
-   
-  }, []);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    fetchItems(query);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      if (isEditing) {
-        await publishersService.updatePublisher(formData.maNXB, formData);
-        toast.success('Cập nhật thành công');
-      } else {
-        await publishersService.createPublisher(formData);
-        toast.success('Thêm thành công');
-      }
-      setFormData({ maNXB: '', tenNXB: '', diaChi: '', soDT: '' });
-      setIsEditing(false);
-      fetchItems(query);
-    } catch {
-      toast.error('Lỗi thao tác');
-    }
-  };
+    const timer = setTimeout(() => {
+      fetchItems();
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [fetchItems]);
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Xoá nhà xuất bản này?')) return;
     try {
       await publishersService.deletePublisher(id);
       toast.success('Xoá thành công');
-      fetchItems(query);
+      fetchItems();
     } catch {
       toast.error('Lỗi khi xoá. Có thể NXB này đã có sách.');
     }
   };
 
   const handleEdit = (item: Publisher) => {
-    setFormData({ 
-      maNXB: item.maNXB, 
-      tenNXB: item.tenNXB, 
-      diaChi: item.diaChi || '', 
-      soDT: item.soDT || '' 
-    });
-    setIsEditing(true);
+    setSelectedPublisher(item);
+    setIsUpdateOpen(true);
   };
 
   return (
@@ -82,53 +74,28 @@ export default function Publishers() {
         <h1 className="text-3xl font-bold tracking-tight">Quản lý Nhà xuất bản</h1>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-1">
-          <CardHeader>
-            <CardTitle>{isEditing ? 'Cập nhật' : 'Thêm mới'}</CardTitle>
+      <div className="grid grid-cols-1 gap-6">
+        <Card className="col-span-1">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Danh sách Nhà xuất bản</CardTitle>
+            <div className="flex items-center space-x-2">
+              <div className="relative">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input 
+                  placeholder="Tìm kiếm..." 
+                  className="w-64 pl-8" 
+                  value={query}
+                  onChange={(e) => {
+                    setQuery(e.target.value);
+                    setPage(1);
+                  }}
+                />
+              </div>
+              <CreatePublisherDialog onSuccess={fetchItems} />
+            </div>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Mã NXB</label>
-                <Input value={formData.maNXB} onChange={(e) => setFormData({ ...formData, maNXB: e.target.value })} required disabled={isEditing} />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Tên NXB</label>
-                <Input value={formData.tenNXB} onChange={(e) => setFormData({ ...formData, tenNXB: e.target.value })} required />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Địa chỉ</label>
-                <Input value={formData.diaChi} onChange={(e) => setFormData({ ...formData, diaChi: e.target.value })} />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Số điện thoại</label>
-                <Input value={formData.soDT} onChange={(e) => setFormData({ ...formData, soDT: e.target.value })} />
-              </div>
-              <div className="flex gap-2">
-                <Button type="submit" className="flex-1">
-                  {isEditing ? <Edit className="w-4 h-4 mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
-                  {isEditing ? 'Lưu' : 'Thêm'}
-                </Button>
-                {isEditing && (
-                  <Button type="button" variant="outline" onClick={() => { setIsEditing(false); setFormData({ maNXB: '', tenNXB: '', diaChi: '', soDT: '' }); }}>Hủy</Button>
-                )}
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Danh sách</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSearch} className="flex gap-2 mb-4">
-              <Input placeholder="Tìm theo mã, tên..." value={query} onChange={(e) => setQuery(e.target.value)} className="max-w-sm" />
-              <Button type="submit"><Search className="w-4 h-4 mr-2" />Tìm</Button>
-            </form>
-
-            <div className="rounded-md border overflow-x-auto">
+            <div className="rounded-md border">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -136,25 +103,49 @@ export default function Publishers() {
                     <TableHead>Tên NXB</TableHead>
                     <TableHead>Địa chỉ</TableHead>
                     <TableHead>SĐT</TableHead>
-                    <TableHead>Hành Động</TableHead>
+                    <TableHead className="w-[150px]">Hành Động</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {loading ? (
-                    <TableRow><TableCell colSpan={5} className="text-center h-24">Đang tải...</TableCell></TableRow>
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center h-24">Đang tải...</TableCell>
+                    </TableRow>
                   ) : items.length === 0 ? (
-                    <TableRow><TableCell colSpan={5} className="text-center h-24">Không có dữ liệu</TableCell></TableRow>
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center h-24">Không có dữ liệu</TableCell>
+                    </TableRow>
                   ) : (
                     items.map((item) => (
-                      <TableRow key={item.maNXB}>
-                        <TableCell className="font-medium">{item.maNXB}</TableCell>
-                        <TableCell>{item.tenNXB}</TableCell>
-                        <TableCell>{item.diaChi}</TableCell>
-                        <TableCell>{item.soDT}</TableCell>
+                      <TableRow key={item.MANXB}>
+                        <TableCell className="font-medium">{item.MANXB}</TableCell>
+                        <TableCell>{item.TENNXB}</TableCell>
+                        <TableCell>{item.DIACHI}</TableCell>
+                        <TableCell>{item.SODT}</TableCell>
                         <TableCell>
                           <div className="flex gap-2">
-                            <Button size="icon" variant="outline" onClick={() => handleEdit(item)}><Edit className="w-4 h-4" /></Button>
-                            <Button size="icon" variant="destructive" onClick={() => handleDelete(item.maNXB)}><Trash2 className="w-4 h-4" /></Button>
+                            <Button size="icon" variant="outline" onClick={() => handleEdit(item)}>
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button size="icon" variant="destructive">
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Bạn có chắc chắn muốn xoá?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Hành động này không thể hoàn tác. Nhà xuất bản này sẽ bị xoá vĩnh viễn khỏi hệ thống.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Hủy</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => handleDelete(item.MANXB)}>Xác nhận</AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
                           </div>
                         </TableCell>
                       </TableRow>
@@ -162,10 +153,18 @@ export default function Publishers() {
                   )}
                 </TableBody>
               </Table>
-            </div>
+          </div>
+          <DataTablePagination page={page} totalPages={totalPages} onPageChange={setPage} />
           </CardContent>
         </Card>
       </div>
+
+      <UpdatePublisherDialog 
+        publisher={selectedPublisher} 
+        open={isUpdateOpen} 
+        onOpenChange={setIsUpdateOpen} 
+        onSuccess={fetchItems} 
+      />
     </div>
   );
 }

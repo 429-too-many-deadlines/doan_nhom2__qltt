@@ -2,10 +2,7 @@ using Aspire.Hosting;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-var database = builder.AddSqlServer("Database")
-                   .WithDataVolume()
-                   .WithDbGate()
-                   .AddDatabase("QuanLyThuVien");
+var database = builder.AddConnectionString("Database");
 
 var server = builder.AddProject<Projects.QuanLyThuVien_Server>("Backend")
     .WithReference(database)

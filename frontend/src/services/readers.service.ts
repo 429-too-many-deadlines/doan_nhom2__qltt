@@ -1,5 +1,5 @@
 import { apiClient } from '../lib/api';
-import type { CreateReaderRequest, MessageResponse, Reader, UpdateReaderRequest, GenericApiResponse } from '../types/api.types';
+import type { PagedResult, CreateReaderRequest, MessageResponse, Reader, UpdateReaderRequest, GenericApiResponse } from '../types/api.types';
 
 export const readersService = {
   createReader: async (data: CreateReaderRequest): Promise<MessageResponse> => {
@@ -7,25 +7,25 @@ export const readersService = {
     return response.data;
   },
 
-  updateReader: async (maDg: string, data: UpdateReaderRequest): Promise<MessageResponse> => {
-    const response = await apiClient.put<MessageResponse>(`/api/readers/${maDg}`, data);
+  updateReader: async (MADG: string, data: UpdateReaderRequest): Promise<MessageResponse> => {
+    const response = await apiClient.put<MessageResponse>(`/api/readers/${MADG}`, data);
     return response.data;
   },
 
-  deleteReader: async (maDg: string): Promise<MessageResponse> => {
-    const response = await apiClient.delete<MessageResponse>(`/api/readers/${maDg}`);
+  deleteReader: async (MADG: string): Promise<MessageResponse> => {
+    const response = await apiClient.delete<MessageResponse>(`/api/readers/${MADG}`);
     return response.data;
   },
 
-  searchReaders: async (query: string = ''): Promise<Reader[]> => {
-    const response = await apiClient.get<Reader[]>('/api/readers/search', {
-      params: { query },
+  searchReaders: async (query: string = '', page: number = 1, pageSize: number = 10): Promise<PagedResult<Reader>> => {
+    const response = await apiClient.get<PagedResult<Reader>>('/api/readers/search', {
+      params: { query, page, pageSize },
     });
     return response.data;
   },
 
-  getReaderHistory: async (maDg: string): Promise<GenericApiResponse[]> => {
-    const response = await apiClient.get<GenericApiResponse[]>(`/api/readers/${maDg}/history`);
+  getReaderHistory: async (MADG: string): Promise<GenericApiResponse[]> => {
+    const response = await apiClient.get<GenericApiResponse[]>(`/api/readers/${MADG}/history`);
     return response.data;
   },
 };

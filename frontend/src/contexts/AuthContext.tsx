@@ -5,8 +5,8 @@ export type User = {
   username: string;
   role: string;
   fullName: string;
-  manv?: string;
-  madg?: string;
+  MANV?: string;
+  MADG?: string;
 };
 
 interface AuthContextType {
@@ -18,14 +18,17 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
+  const [user, setUser] = useState<User | null>(() => {
     const savedUser = localStorage.getItem('user');
     if (savedUser) {
-      setUser(JSON.parse(savedUser));
+      try {
+        return JSON.parse(savedUser);
+      } catch {
+        return null;
+      }
     }
-  }, []);
+    return null;
+  });
 
   const login = (token: string, user: User) => {
     localStorage.setItem('token', token);

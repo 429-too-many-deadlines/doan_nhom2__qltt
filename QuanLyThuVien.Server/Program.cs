@@ -16,7 +16,7 @@ builder.AddServiceDefaults();
 
 // Add services to the container.
 builder.Services.AddScoped<System.Data.IDbConnection>(sp =>
-    new Microsoft.Data.SqlClient.SqlConnection(builder.Configuration.GetConnectionString("QuanLyThuVien")));
+    new Microsoft.Data.SqlClient.SqlConnection(builder.Configuration.GetConnectionString("Database")));
 
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<QuanLyThuVien.Server.Infrastructure.ErrorHandling.GlobalExceptionHandler>();
@@ -66,7 +66,19 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("DocGiaOnly", policy => policy.RequireRole("Độc giả"));
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
 var app = builder.Build();
+
+app.UseCors();
 
 // Configure the HTTP request pipeline.
 app.UseExceptionHandler();

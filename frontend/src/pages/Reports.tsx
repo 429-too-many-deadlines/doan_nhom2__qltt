@@ -1,3 +1,4 @@
+import { DataTablePagination } from '../components/ui/data-table-pagination';
 import { useState } from 'react';
 import { reportsService } from '../services/reports.service';
 import type { MonthlyStatsResponse, TopBookResponse, GenericApiResponse } from '../types/api.types';
@@ -18,6 +19,8 @@ export default function Reports() {
   const [reportData, setReportData] = useState<GenericApiResponse[]>([]);
   const [monthlyStats, setMonthlyStats] = useState<MonthlyStatsResponse | null>(null);
   const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [activeReport, setActiveReport] = useState<string>('');
 
   const [month, setMonth] = useState(new Date().getMonth() + 1);
@@ -147,15 +150,15 @@ export default function Reports() {
               <div className="grid grid-cols-3 gap-4">
                 <div className="p-4 border rounded shadow-sm text-center">
                   <div className="text-sm text-gray-500">Số Phiếu Mượn</div>
-                  <div className="text-xl font-bold">{monthlyStats.soPhieu}</div>
+                  <div className="text-xl font-bold">{monthlyStats.SOPHIEU}</div>
                 </div>
                 <div className="p-4 border rounded shadow-sm text-center">
                   <div className="text-sm text-gray-500">Số Lượt Sách</div>
-                  <div className="text-xl font-bold">{monthlyStats.soLuotSach}</div>
+                  <div className="text-xl font-bold">{monthlyStats.SOLUOTSACH}</div>
                 </div>
                 <div className="p-4 border rounded shadow-sm text-center">
                   <div className="text-sm text-gray-500">Tiền Phạt</div>
-                  <div className="text-xl font-bold">{monthlyStats.tienPhat?.toLocaleString()} VNĐ</div>
+                  <div className="text-xl font-bold">{monthlyStats.TIENPHAT?.toLocaleString()} VNĐ</div>
                 </div>
               </div>
               <h3 className="font-bold mt-4">Top 5 Sách Mượn Nhiều Nhất</h3>
@@ -178,7 +181,8 @@ export default function Reports() {
                     ))}
                   </TableBody>
                 </Table>
-              </div>
+          </div>
+          <DataTablePagination page={page} totalPages={totalPages} onPageChange={setPage} />
             </div>
           )}
         </CardContent>
@@ -223,7 +227,8 @@ export default function Reports() {
                   )}
                 </TableBody>
               </Table>
-            </div>
+          </div>
+          <DataTablePagination page={page} totalPages={totalPages} onPageChange={setPage} />
           </CardContent>
         </Card>
       )}

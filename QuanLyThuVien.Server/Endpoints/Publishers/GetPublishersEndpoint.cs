@@ -12,20 +12,32 @@ public class GetPublishersEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("api/publishers", async (IDbConnection db, string? query) =>
+        app.MapGet("api/publishers", async (IDbConnection db, string? query, int page = 1, int pageSize = 10) =>
         {
-            var sql = "SELECT * FROM NHAXUATBAN";
+            var offset = (page - 1) * pageSize;
+            var sqlCount = "SELECT COUNT(*) FROM NHAXUATBAN";
+            var sqlData = "SELECT * FROM NHAXUATBAN";
+            
             if (!string.IsNullOrEmpty(query))
             {
-                sql += " WHERE TENNXB LIKE @Query OR MANXB LIKE @Query";
-                var items = await db.QueryAsync(sql, new { Query = $"%{query}%" });
-                return Results.Ok(items);
+                sqlCount += " WHERE TENNXB LIKE @Query OR MANXB LIKE @Query";
+                sqlData += " WHERE TENNXB LIKE @Query OR MANXB LIKE @Query";
             }
-            else
+
+            sqlData += " ORDER BY MANXB OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY";
+
+            var parameters = new { Query = $"%{query}%", Offset = offset, PageSize = pageSize };
+            
+            var totalCount = await db.ExecuteScalarAsync<int>(sqlCount, parameters);
+            var items = await db.QueryAsync<dynamic>(sqlData, parameters);
+
+            return Results.Ok(new PagedResult<dynamic>
             {
-                var items = await db.QueryAsync(sql);
-                return Results.Ok(items);
-            }
+                Items = items,
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize
+            });
         })
         .WithName("GetPublishers")
         .RequireAuthorization("QuanLyHoacThuThu")

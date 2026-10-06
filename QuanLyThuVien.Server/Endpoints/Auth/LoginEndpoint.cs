@@ -31,71 +31,78 @@ public class LoginEndpoint : IEndpoint
         IDbConnection db,
         IConfiguration config)
     {
-        var parameters = new DynamicParameters();
-        parameters.Add("@TENDANGNHAP", req.Username);
-        parameters.Add("@MATKHAU", req.Password);
-        parameters.Add("@KETQUA", dbType: DbType.Int32, direction: ParameterDirection.Output);
-
-        var user = await db.QueryFirstOrDefaultAsync<UserResult>(
-            "SP_DANGNHAP", parameters, commandType: CommandType.StoredProcedure);
-
-        var ketQua = parameters.Get<int>("@KETQUA");
-
-        if (ketQua == 0)
+        try
         {
-            return Results.BadRequest(new MessageResponse("Sai tên đăng nhập hoặc mật khẩu"));
-        }
-        if (ketQua == 1)
-        {
-            return Results.BadRequest(new MessageResponse("Tài khoản đã bị khóa"));
-        }
-        if (ketQua == 2 && user != null)
-        {
-            // Generate JWT
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(config["Jwt:Key"]!);
+            var parameters = new DynamicParameters();
+            parameters.Add("@TENDANGNHAP", req.Username);
+            parameters.Add("@MATKHAU", req.Password);
+            parameters.Add("@KETQUA", dbType: DbType.Int32, direction: ParameterDirection.Output);
 
-            var claims = new List<Claim>
+            var user = await db.QueryFirstOrDefaultAsync<UserResult>(
+                "SP_DANGNHAP", parameters, commandType: CommandType.StoredProcedure);
+
+            var ketQua = parameters.Get<int>("@KETQUA");
+
+            if (ketQua == 0)
             {
-                new Claim(ClaimTypes.Name, user.TENDANGNHAP),
-                new Claim(ClaimTypes.Role, user.VAITRO),
-                new Claim("FullName", user.HOTEN ?? "")
-            };
-
-            if (!string.IsNullOrEmpty(user.MANV))
-                claims.Add(new Claim("MaNV", user.MANV));
-            if (!string.IsNullOrEmpty(user.MADG))
-                claims.Add(new Claim("MaDG", user.MADG));
-
-            var tokenDescriptor = new SecurityTokenDescriptor
+                return Results.BadRequest(new MessageResponse("Sai tên đăng nhập hoặc mật khẩu"));
+            }
+            if (ketQua == 1)
             {
-                Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddHours(24),
-                Issuer = config["Jwt:Issuer"],
-                Audience = config["Jwt:Audience"],
-                SigningCredentials = new SigningCredentials(
-                    new SymmetricSecurityKey(key),
-                    SecurityAlgorithms.HmacSha256Signature)
-            };
-
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            var tokenString = tokenHandler.WriteToken(token);
-
-            return Results.Ok(new
+                return Results.BadRequest(new MessageResponse("Tài khoản đã bị khóa"));
+            }
+            if (ketQua == 2 && user != null)
             {
-                token = tokenString,
-                user = new
+                // Generate JWT
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var key = Encoding.UTF8.GetBytes(config["Jwt:Key"]!);
+
+                var claims = new List<Claim>
                 {
-                    username = user.TENDANGNHAP,
-                    role = user.VAITRO,
-                    fullName = user.HOTEN,
-                    manv = user.MANV,
-                    madg = user.MADG
-                }
-            });
-        }
+                    new Claim(ClaimTypes.Name, user.TENDANGNHAP),
+                    new Claim(ClaimTypes.Role, user.VAITRO),
+                    new Claim("FullName", user.HOTEN ?? "")
+                };
 
-        return Results.BadRequest(new MessageResponse("Đăng nhập thất bại"));
+                if (!string.IsNullOrEmpty(user.MANV))
+                    claims.Add(new Claim("MaNV", user.MANV));
+                if (!string.IsNullOrEmpty(user.MADG))
+                    claims.Add(new Claim("MaDG", user.MADG));
+
+                var tokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Subject = new ClaimsIdentity(claims),
+                    Expires = DateTime.UtcNow.AddHours(24),
+                    Issuer = config["Jwt:Issuer"],
+                    Audience = config["Jwt:Audience"],
+                    SigningCredentials = new SigningCredentials(
+                        new SymmetricSecurityKey(key),
+                        SecurityAlgorithms.HmacSha256Signature)
+                };
+
+                var token = tokenHandler.CreateToken(tokenDescriptor);
+                var tokenString = tokenHandler.WriteToken(token);
+
+                return Results.Ok(new
+                {
+                    token = tokenString,
+                    user = new
+                    {
+                        username = user.TENDANGNHAP,
+                        role = user.VAITRO,
+                        fullName = user.HOTEN,
+                        manv = user.MANV,
+                        madg = user.MADG
+                    }
+                });
+            }
+
+            return Results.BadRequest(new MessageResponse("Đăng nhập thất bại"));
+        }
+        catch (Exception ex)
+        {
+            return Results.BadRequest(new MessageResponse(ex.Message));
+        }
     }
 }
 

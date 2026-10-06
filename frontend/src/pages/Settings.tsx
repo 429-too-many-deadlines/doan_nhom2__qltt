@@ -1,3 +1,4 @@
+import { DataTablePagination } from '../components/ui/data-table-pagination';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,9 +10,9 @@ import { toast } from 'sonner';
 export default function Settings() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('R_DOCGIA');
-  const [manv, setManv] = useState('');
-  const [madg, setMadg] = useState('');
+  const [role, setRole] = useState('Độc giả');
+  const [MANV, setManv] = useState('');
+  const [MADG, setMadg] = useState('');
   const [createMsg, setCreateMsg] = useState('');
 
   const [backupMsg, setBackupMsg] = useState('');
@@ -25,7 +26,7 @@ export default function Settings() {
     e.preventDefault();
     setCreateMsg('');
     try {
-      const res = await apiClient.post('/auth/create-account', { username, password, role, manv, madg });
+      const res = await apiClient.post('/api/auth/create-account', { username, password, role, MANV, MADG });
       setCreateMsg(res.data.message);
       toast.success(res.data.message);
     } catch (error) {
@@ -38,7 +39,7 @@ export default function Settings() {
   const handleBackup = async () => {
     setBackupMsg('Đang sao lưu...');
     try {
-      const res = await apiClient.post('/settings/backup', { type: backupType });
+      const res = await apiClient.post('/api/settings/backup', { type: backupType });
       setBackupMsg(res.data.message);
       toast.success(res.data.message);
     } catch (error) {
@@ -52,7 +53,7 @@ export default function Settings() {
     e.preventDefault();
     setChangePwdMsg('');
     try {
-      const res = await apiClient.post('/auth/change-password', { oldPassword, newPassword });
+      const res = await apiClient.post('/api/auth/change-password', { oldPassword, newPassword });
       setChangePwdMsg(res.data.message);
       toast.success(res.data.message);
       setOldPassword('');
@@ -107,19 +108,19 @@ export default function Settings() {
                   <SelectValue placeholder="Chọn vai trò" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="R_QUANLY">Quản lý</SelectItem>
-                  <SelectItem value="R_THUTHU">Thủ thư</SelectItem>
-                  <SelectItem value="R_DOCGIA">Độc giả</SelectItem>
+                  <SelectItem value="Quản lý">Quản lý</SelectItem>
+                  <SelectItem value="Thủ thư">Thủ thư</SelectItem>
+                  <SelectItem value="Độc giả">Độc giả</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
               <Label>Mã NV (nếu có)</Label>
-              <Input value={manv} onChange={e => setManv(e.target.value)} />
+              <Input value={MANV} onChange={e => setManv(e.target.value)} />
             </div>
             <div className="space-y-2">
               <Label>Mã ĐG (nếu có)</Label>
-              <Input value={madg} onChange={e => setMadg(e.target.value)} />
+              <Input value={MADG} onChange={e => setMadg(e.target.value)} />
             </div>
             <Button type="submit">Tạo tài khoản</Button>
           </form>

@@ -201,15 +201,14 @@ CREATE TABLE PHIEUPHAT
 )
 
 /* ---------------------------------------------------------------------
-   13. TAIKHOAN(TENDANGNHAP, MATKHAU, MUOI, VAITRO, MANV, MADG, TRANGTHAI)
+   13. TAIKHOAN(TENDANGNHAP, MATKHAU, VAITRO, MANV, MADG, TRANGTHAI)
        Dung cho chuc nang xac thuc cua ung dung. Mat khau duoc bam SHA2_256
-       kem chuoi muoi (salt), khong luu mat khau goc.
+       khong luu mat khau goc.
    --------------------------------------------------------------------- */
 CREATE TABLE TAIKHOAN
 (
 	TENDANGNHAP	VARCHAR(30)			PRIMARY KEY,
 	MATKHAU		VARBINARY(32)		NOT NULL,
-	MUOI		UNIQUEIDENTIFIER	NOT NULL,
 	VAITRO		NVARCHAR(20)		NOT NULL,
 	MANV		CHAR(4)				NULL FOREIGN KEY REFERENCES NHANVIEN (MANV),
 	MADG		CHAR(5)				NULL FOREIGN KEY REFERENCES DOCGIA (MADG),

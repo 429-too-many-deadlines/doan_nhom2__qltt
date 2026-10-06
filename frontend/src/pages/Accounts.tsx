@@ -1,3 +1,4 @@
+import { DataTablePagination } from '../components/ui/data-table-pagination';
 import { useState, useEffect } from 'react';
 import { authService } from '../services/auth.service';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
@@ -10,19 +11,19 @@ import { toast } from 'sonner';
 export interface Account {
   tendangnhap: string;
   vaitro: string;
-  manv?: string;
-  madg?: string;
+  MANV?: string;
+  MADG?: string;
   trangthai: boolean;
 }
 
 export default function Accounts() {
-  const [createData, setCreateData] = useState({ username: '', password: '', role: 'Thủ thư', maNV: '', maDG: '' });
+  const [createData, setCreateData] = useState({ username: '', password: '', role: 'Thủ thư', MANV: '', MADG: '' });
   const [changePwdData, setChangePwdData] = useState({ oldPassword: '', newPassword: '' });
   const [accounts, setAccounts] = useState<Account[]>([]);
 
   useEffect(() => {
     fetchAccounts();
-  }, []);
+  }, [page]);
 
   const fetchAccounts = async () => {
     try {
@@ -38,7 +39,7 @@ export default function Accounts() {
     try {
       await authService.createAccount(createData);
       toast.success('Tạo tài khoản thành công');
-      setCreateData({ username: '', password: '', role: 'Thủ thư', maNV: '', maDG: '' });
+      setCreateData({ username: '', password: '', role: 'Thủ thư', MANV: '', MADG: '' });
       fetchAccounts();
     } catch (error) {
       const err = error as { response?: { data?: { message?: string } } };
@@ -99,11 +100,11 @@ export default function Accounts() {
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Mã Nhân Viên (Nếu có)</label>
-                <Input value={createData.maNV} onChange={(e) => setCreateData({...createData, maNV: e.target.value})} />
+                <Input value={createData.MANV} onChange={(e) => setCreateData({...createData, MANV: e.target.value})} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Mã Độc Giả (Nếu có)</label>
-                <Input value={createData.maDG} onChange={(e) => setCreateData({...createData, maDG: e.target.value})} />
+                <Input value={createData.MADG} onChange={(e) => setCreateData({...createData, MADG: e.target.value})} />
               </div>
               <Button type="submit" className="w-full">Xác nhận tạo</Button>
             </form>
@@ -152,8 +153,8 @@ export default function Accounts() {
                   <TableRow key={acc.tendangnhap}>
                     <TableCell className="font-medium">{acc.tendangnhap}</TableCell>
                     <TableCell>{acc.vaitro}</TableCell>
-                    <TableCell>{acc.manv || '-'}</TableCell>
-                    <TableCell>{acc.madg || '-'}</TableCell>
+                    <TableCell>{acc.MANV || '-'}</TableCell>
+                    <TableCell>{acc.MADG || '-'}</TableCell>
                     <TableCell>
                       {acc.trangthai ? (
                         <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">Hoạt động</span>
@@ -182,6 +183,7 @@ export default function Accounts() {
               </TableBody>
             </Table>
           </div>
+          <DataTablePagination page={page} totalPages={totalPages} onPageChange={setPage} />
         </CardContent>
       </Card>
     </div>

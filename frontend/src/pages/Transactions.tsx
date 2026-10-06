@@ -1,212 +1,87 @@
-import { useState, useEffect } from 'react';
-import { transactionsService } from '../services/transactions.service';
-import type { BorrowRequest, BorrowSlip, FineSlip, PayFineRequest, ReturnRequest } from '../types/api.types';
+import { DataTablePagination } from '../components/ui/data-table-pagination';
+import { useEffect, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { toast } from 'sonner';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Input } from '../components/ui/input';
-import { Button } from '../components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
+import { transactionsService } from '@/services/transactions.service';
+import { Trash2, Edit } from 'lucide-react';
+import type { BorrowSlip } from '@/types/api.types';
+import { CreateTransactionDialog } from '@/components/features/transactions/CreateTransactionDialog';
+import { UpdateTransactionDialog } from '@/components/features/transactions/UpdateTransactionDialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export default function Transactions() {
-  // Mượn sách
-  const [borrowData, setBorrowData] = useState<BorrowRequest>({ maDg: '', maNv: '', dsMaCs: [] });
-  const [borrowMaCsInput, setBorrowMaCsInput] = useState('');
-  const [borrowing, setBorrowing] = useState(false);
+  const [transactions, setTransactions] = useState<BorrowSlip[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [selectedTransaction, setSelectedTransaction] = useState<BorrowSlip | null>(null);
+  const [isUpdateOpen, setIsUpdateOpen] = useState(false);
 
-  // Trả sách
-  const [returnData, setReturnData] = useState<ReturnRequest>({ maPm: '', maCs: '', tinhTrangTra: 'Bình thường' });
-  const [returnMaCsInput, setReturnMaCsInput] = useState('');
-  const [returning, setReturning] = useState(false);
-
-  // Đóng phạt
-  const [fineData, setFineData] = useState<PayFineRequest>({ maDg: '' });
-  const [payingFine, setPayingFine] = useState(false);
-
-  // Dữ liệu danh sách
-  const [borrowSlips, setBorrowSlips] = useState<BorrowSlip[]>([]);
-  const [fineSlips, setFineSlips] = useState<FineSlip[]>([]);
-
-  const fetchData = async () => {
+  const fetchTransactions = async () => {
+    setLoading(true);
     try {
-      const [bData, fData] = await Promise.all([transactionsService.getBorrowSlips(), transactionsService.getFineSlips()]);
-      setBorrowSlips(bData);
-      setFineSlips(fData);
-    } catch (e) {
-      console.error(e);
+      const dataResult = await transactionsService.getBorrowSlips(page, 10);
+      // Handle both PagedResult and array responses
+      const data = 'items' in dataResult ? dataResult.items : (Array.isArray(dataResult) ? dataResult : []);
+      const total = 'totalPages' in dataResult ? dataResult.totalPages : 1;
+      setTotalPages(total);
+      setTransactions(data);
+    } catch {
+      toast.error('Lỗi khi tải danh sách giao dịch');
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchData();
-   
-  }, []);
+    fetchTransactions();
+  }, [page]);
 
-  const handleBorrow = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleDelete = async (MAPM: string, MACS: string) => {
     try {
-      setBorrowing(true);
-      const dsMaCs = borrowMaCsInput.split(',').map(s => s.trim()).filter(Boolean);
-      await transactionsService.borrowBook({ ...borrowData, dsMaCs });
-      toast.success('Mượn sách thành công');
-      setBorrowData({ maDg: '', maNv: '', dsMaCs: [] });
-      setBorrowMaCsInput('');
-      fetchData();
-    } catch (error) {
-      console.error(error);
-      toast.error('Lỗi khi mượn sách');
-    } finally {
-      setBorrowing(false);
+      // Backend does not currently support delete via API, so we show an error toast
+      toast.error('Chức năng xoá chưa được hỗ trợ bởi API');
+      console.log('Delete clicked for', MAPM, MACS);
+    } catch {
+      toast.error('Lỗi khi xoá.');
     }
   };
 
-  const handleReturn = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      setReturning(true);
-      const dsMaCs = returnMaCsInput.split(',').map(s => s.trim()).filter(Boolean);
-      
-      let hasError = false;
-      for (const maCs of dsMaCs) {
-        try {
-          await transactionsService.returnBook({ ...returnData, maCs });
-        } catch (err) {
-          console.error(err);
-          hasError = true;
-          toast.error(`Lỗi khi trả sách mã: ${maCs}`);
-        }
-      }
-
-      if (!hasError) {
-        toast.success('Trả sách thành công');
-      } else if (dsMaCs.length > 1) {
-        toast.warning('Hoàn tất trả sách, có một số sách bị lỗi');
-      }
-
-      setReturnData({ maPm: '', maCs: '', tinhTrangTra: 'Bình thường' });
-      setReturnMaCsInput('');
-      fetchData();
-    } catch (error) {
-      console.error(error);
-      toast.error('Lỗi hệ thống khi trả sách');
-    } finally {
-      setReturning(false);
-    }
-  };
-
-  const handleFine = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      setPayingFine(true);
-      await transactionsService.payFine(fineData);
-      toast.success('Thu tiền phạt thành công');
-      setFineData({ maDg: '' });
-      fetchData();
-    } catch (error) {
-      console.error(error);
-      toast.error('Lỗi khi thu tiền phạt');
-    } finally {
-      setPayingFine(false);
-    }
+  const handleEdit = (transaction: BorrowSlip) => {
+    setSelectedTransaction(transaction);
+    setIsUpdateOpen(true);
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold">Giao Dịch</h1>
-      
-            <Tabs defaultValue="actions">
-        <TabsList className="mb-4">
-          <TabsTrigger value="actions">Thao tác</TabsTrigger>
-          <TabsTrigger value="borrow-slips">DS Phiếu Mượn</TabsTrigger>
-          <TabsTrigger value="fine-slips">DS Phiếu Phạt</TabsTrigger>
-        </TabsList>
+    <div className="space-y-6 p-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold tracking-tight">Quản lý Giao dịch</h1>
+      </div>
 
-        <TabsContent value="actions" className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Card Mượn Sách */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Mượn Sách</CardTitle>
+      <div className="grid grid-cols-1 gap-6">
+        <Card className="col-span-1">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Danh sách Giao dịch</CardTitle>
+            <div className="flex items-center space-x-2">
+              <Input placeholder="Tìm kiếm..." className="w-64" />
+              <CreateTransactionDialog onSuccess={fetchTransactions} />
+            </div>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleBorrow} className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Mã Độc Giả</label>
-                <Input value={borrowData.maDg} onChange={(e) => setBorrowData({...borrowData, maDg: e.target.value})} required />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Mã Nhân Viên</label>
-                <Input value={borrowData.maNv} onChange={(e) => setBorrowData({...borrowData, maNv: e.target.value})} required />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Danh Sách Mã Cuốn Sách</label>
-                <Input placeholder="VD: CS01, CS02" value={borrowMaCsInput} onChange={(e) => setBorrowMaCsInput(e.target.value)} required />
-              </div>
-              <Button type="submit" disabled={borrowing} className="w-full">
-                {borrowing ? 'Đang xử lý...' : 'Xác Nhận Mượn'}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-
-        {/* Card Trả Sách */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Trả Sách</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleReturn} className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Mã Phiếu Mượn (Tuỳ chọn)</label>
-                <Input value={returnData.maPm || ''} onChange={(e) => setReturnData({...returnData, maPm: e.target.value})} />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Danh Sách Mã Cuốn Sách</label>
-                <Input placeholder="VD: CS01, CS02" value={returnMaCsInput} onChange={(e) => setReturnMaCsInput(e.target.value)} required />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Tình trạng trả</label>
-                <select 
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  value={returnData.tinhTrangTra || ''} 
-                  onChange={(e) => setReturnData({...returnData, tinhTrangTra: e.target.value})}
-                >
-                  <option value="Bình thường">Bình thường</option>
-                  <option value="Hư hỏng">Hư hỏng</option>
-                  <option value="Mất">Mất</option>
-                </select>
-              </div>
-              <Button type="submit" disabled={returning} className="w-full">
-                {returning ? 'Đang xử lý...' : 'Xác Nhận Trả'}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-
-        {/* Card Thu Tiền Phạt */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Thu Tiền Phạt</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleFine} className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Mã Độc Giả</label>
-                <Input value={fineData.maDg} onChange={(e) => setFineData({...fineData, maDg: e.target.value})} required />
-              </div>
-              <Button type="submit" disabled={payingFine} className="w-full">
-                {payingFine ? 'Đang xử lý...' : 'Xác Nhận Thu'}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-
-        </TabsContent>
-
-        <TabsContent value="borrow-slips">
-          <Card>
-            <CardHeader><CardTitle>Danh sách Phiếu Mượn & Chi Tiết</CardTitle></CardHeader>
-            <CardContent>
+            <div className="rounded-md border">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -219,62 +94,73 @@ export default function Transactions() {
                     <TableHead>Ngày trả</TableHead>
                     <TableHead>Tình trạng PM</TableHead>
                     <TableHead>Tình trạng Sách</TableHead>
+                    <TableHead className="w-[150px]">Hành Động</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {borrowSlips.map((row, i) => (
-                    <TableRow key={i}>
-                      <TableCell>{row.mapm}</TableCell>
-                      <TableCell>{row.madg}</TableCell>
-                      <TableCell>{row.tendg}</TableCell>
-                      <TableCell>{row.macs}</TableCell>
-                      <TableCell>{row.ngaymuon?.split('T')[0]}</TableCell>
-                      <TableCell>{row.hantra?.split('T')[0]}</TableCell>
-                      <TableCell>{row.ngaytra?.split('T')[0] || 'Chưa trả'}</TableCell>
-                      <TableCell>{row.tinhtrang}</TableCell>
-                      <TableCell>{row.tinhtrangtra}</TableCell>
+                  {loading ? (
+                    <TableRow>
+                      <TableCell colSpan={10} className="text-center h-24">Đang tải...</TableCell>
                     </TableRow>
-                  ))}
+                  ) : transactions.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={10} className="text-center h-24">Không có dữ liệu</TableCell>
+                    </TableRow>
+                  ) : (
+                    transactions.map((transaction, index) => (
+                      <TableRow key={`${transaction.MAPM}-${transaction.MACS}-${index}`}>
+                        <TableCell className="font-medium">{transaction.MAPM}</TableCell>
+                        <TableCell>{transaction.MADG}</TableCell>
+                        <TableCell>{transaction.TENDG}</TableCell>
+                        <TableCell>{transaction.MACS}</TableCell>
+                        <TableCell>{transaction.NGAYMUON?.split('T')[0]}</TableCell>
+                        <TableCell>{transaction.HANTRA?.split('T')[0]}</TableCell>
+                        <TableCell>{transaction.NGAYTRA?.split('T')[0] || 'Chưa trả'}</TableCell>
+                        <TableCell>{transaction.TINHTRANG}</TableCell>
+                        <TableCell>{transaction.TINHTRANGTRA}</TableCell>
+                        <TableCell>
+                          <div className="flex gap-2">
+                            <Button size="icon" variant="outline" onClick={() => handleEdit(transaction)}>
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button size="icon" variant="destructive">
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Bạn có chắc chắn muốn xoá?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Hành động này không thể hoàn tác. Giao dịch này sẽ bị xoá vĩnh viễn khỏi hệ thống.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Hủy</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => handleDelete(transaction.MAPM, transaction.MACS)}>Xác nhận</AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
+          </div>
+          <DataTablePagination page={page} totalPages={totalPages} onPageChange={setPage} />
+          </CardContent>
+        </Card>
+      </div>
 
-        <TabsContent value="fine-slips">
-          <Card>
-            <CardHeader><CardTitle>Danh sách Phiếu Phạt</CardTitle></CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Mã PP</TableHead>
-                    <TableHead>Mã PM</TableHead>
-                    <TableHead>Mã ĐG</TableHead>
-                    <TableHead>Tên ĐG</TableHead>
-                    <TableHead>Lý do</TableHead>
-                    <TableHead>Số tiền</TableHead>
-                    <TableHead>Đã thanh toán</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {fineSlips.map((row, i) => (
-                    <TableRow key={i}>
-                      <TableCell>{row.mapp}</TableCell>
-                      <TableCell>{row.mapm}</TableCell>
-                      <TableCell>{row.madg}</TableCell>
-                      <TableCell>{row.tendg}</TableCell>
-                      <TableCell>{row.lyDo}</TableCell>
-                      <TableCell>{row.soTienThu}</TableCell>
-                      <TableCell>{row.dathanhtoan ? 'Rồi' : 'Chưa'}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+      <UpdateTransactionDialog 
+        transaction={selectedTransaction} 
+        open={isUpdateOpen} 
+        onOpenChange={setIsUpdateOpen} 
+        onSuccess={fetchTransactions} 
+      />
     </div>
   );
 }

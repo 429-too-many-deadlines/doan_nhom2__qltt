@@ -1,5 +1,5 @@
 import { apiClient } from '../lib/api';
-import type { BorrowRequest, BorrowSlip, FineSlip, MessageResponse, PayFineRequest, ReturnRequest } from '../types/api.types';
+import type { PagedResult, BorrowRequest, BorrowSlip, FineSlip, MessageResponse, PayFineRequest, ReturnRequest } from '../types/api.types';
 
 export const transactionsService = {
   borrowBook: async (data: BorrowRequest): Promise<MessageResponse> => {
@@ -17,13 +17,17 @@ export const transactionsService = {
     return response.data;
   },
 
-  getBorrowSlips: async (): Promise<BorrowSlip[]> => {
-    const response = await apiClient.get<BorrowSlip[]>('/api/transactions/borrows');
+  getBorrowSlips: async (page = 1, pageSize = 10): Promise<PagedResult<BorrowSlip>> => {
+    const response = await apiClient.get<PagedResult<BorrowSlip>>('/api/transactions/borrows', {
+      params: { page, pageSize },
+    });
     return response.data;
   },
 
-  getFineSlips: async (): Promise<FineSlip[]> => {
-    const response = await apiClient.get<FineSlip[]>('/api/transactions/fines');
+  getFineSlips: async (page = 1, pageSize = 10): Promise<PagedResult<FineSlip>> => {
+    const response = await apiClient.get<PagedResult<FineSlip>>('/api/transactions/fines', {
+      params: { page, pageSize },
+    });
     return response.data;
   },
 };

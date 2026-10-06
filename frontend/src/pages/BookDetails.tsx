@@ -1,3 +1,4 @@
+import { DataTablePagination } from '../components/ui/data-table-pagination';
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,9 +22,9 @@ export default function BookDetails() {
   const [loadingCopies, setLoadingCopies] = useState(false);
   const [loadingAuthors, setLoadingAuthors] = useState(false);
   
-  const [newCopy, setNewCopy] = useState({ maCS: '', viTri: '', tinhTrang: 'Có sẵn' });
+  const [newCopy, setNewCopy] = useState({ MACS: '', VITRI: '', TINHTRANG: 'Có sẵn' });
   const [editingCopyId, setEditingCopyId] = useState<string | null>(null);
-  const [editCopyData, setEditCopyData] = useState({ viTri: '', tinhTrang: '' });
+  const [editCopyData, setEditCopyData] = useState({ VITRI: '', TINHTRANG: '' });
 
   useEffect(() => {
     if (id) {
@@ -60,7 +61,9 @@ export default function BookDetails() {
 
   const fetchAllAuthors = async () => {
     try {
-      const data = await authorsService.getAuthors('');
+      const dataResult = await authorsService.getAuthors('', page);
+      const data = dataResult.items || [];
+      setTotalPages(dataResult.totalPages);
       setAllAuthors(data);
     } catch {
       console.error('Lỗi khi tải danh sách tác giả');
@@ -72,7 +75,7 @@ export default function BookDetails() {
     try {
       await booksService.createBookCopy(id!, newCopy);
       toast.success('Thêm cuốn sách thành công');
-      setNewCopy({ maCS: '', viTri: '', tinhTrang: 'Có sẵn' });
+      setNewCopy({ MACS: '', VITRI: '', TINHTRANG: 'Có sẵn' });
       fetchCopies();
     } catch (error) {
       const err = error as { response?: { data?: { message?: string } } };
@@ -80,10 +83,10 @@ export default function BookDetails() {
     }
   };
 
-  const handleDeleteCopy = async (maCs: string) => {
+  const handleDeleteCopy = async (MACS: string) => {
     if (!window.confirm('Xoá cuốn sách này?')) return;
     try {
-      await booksService.deleteBookCopy(maCs);
+      await booksService.deleteBookCopy(MACS);
       toast.success('Xoá thành công');
       fetchCopies();
     } catch (error) {
@@ -96,8 +99,8 @@ export default function BookDetails() {
     if (!editingCopyId) return;
     try {
       await booksService.updateBookCopy(editingCopyId, { 
-        viTri: editCopyData.viTri, 
-        tinhTrang: editCopyData.tinhTrang 
+        VITRI: editCopyData.VITRI, 
+        TINHTRANG: editCopyData.TINHTRANG 
       });
       toast.success('Cập nhật cuốn sách thành công');
       setEditingCopyId(null);
@@ -119,21 +122,21 @@ export default function BookDetails() {
     }
   };
 
-  const handleAddAuthorToBook = (maTG: string) => {
-    if (!maTG) return;
-    if (bookAuthors.find(a => a.maTG === maTG)) {
+  const handleAddAuthorToBook = (MATG: string) => {
+    if (!MATG) return;
+    if (bookAuthors.find(a => a.MATG === MATG)) {
       toast.warning('Tác giả này đã có trong danh sách');
       return;
     }
-    setBookAuthors([...bookAuthors, { maTG, vaiTro: 'Tác giả' }]);
+    setBookAuthors([...bookAuthors, { MATG, VAITRO: 'Tác giả' }]);
   };
 
-  const handleRemoveAuthorFromBook = (maTG: string) => {
-    setBookAuthors(bookAuthors.filter(a => a.maTG !== maTG));
+  const handleRemoveAuthorFromBook = (MATG: string) => {
+    setBookAuthors(bookAuthors.filter(a => a.MATG !== MATG));
   };
 
-  const handleAuthorRoleChange = (maTG: string, vaiTro: string) => {
-    setBookAuthors(bookAuthors.map(a => a.maTG === maTG ? { ...a, vaiTro } : a));
+  const handleAuthorRoleChange = (MATG: string, VAITRO: string) => {
+    setBookAuthors(bookAuthors.map(a => a.MATG === MATG ? { ...a, VAITRO } : a));
   };
 
   return (
@@ -160,7 +163,7 @@ export default function BookDetails() {
               >
                 <option value="">-- Chọn tác giả để thêm --</option>
                 {allAuthors.map(a => (
-                  <option key={a.maTG} value={a.maTG}>{a.tenTG}</option>
+                  <option key={a.MATG} value={a.MATG}>{a.TENTG}</option>
                 ))}
               </select>
               <Button onClick={() => {
@@ -185,13 +188,13 @@ export default function BookDetails() {
                     <TableRow><TableCell colSpan={3} className="text-center h-24">Chưa có tác giả</TableCell></TableRow>
                   ) : (
                     bookAuthors.map((item) => (
-                      <TableRow key={item.maTG}>
-                        <TableCell className="font-medium">{item.maTG}</TableCell>
+                      <TableRow key={item.MATG}>
+                        <TableCell className="font-medium">{item.MATG}</TableCell>
                         <TableCell>
                           <select 
                             className="h-8 rounded-md border border-input text-sm"
-                            value={item.vaiTro} 
-                            onChange={(e) => handleAuthorRoleChange(item.maTG, e.target.value)}
+                            value={item.VAITRO} 
+                            onChange={(e) => handleAuthorRoleChange(item.MATG, e.target.value)}
                           >
                             <option value="Tác giả">Tác giả</option>
                             <option value="Đồng tác giả">Đồng tác giả</option>
@@ -199,7 +202,7 @@ export default function BookDetails() {
                           </select>
                         </TableCell>
                         <TableCell>
-                          <Button size="icon" variant="destructive" onClick={() => handleRemoveAuthorFromBook(item.maTG)}>
+                          <Button size="icon" variant="destructive" onClick={() => handleRemoveAuthorFromBook(item.MATG)}>
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </TableCell>
@@ -208,7 +211,8 @@ export default function BookDetails() {
                   )}
                 </TableBody>
               </Table>
-            </div>
+          </div>
+          <DataTablePagination page={page} totalPages={totalPages} onPageChange={setPage} />
           </CardContent>
         </Card>
 
@@ -221,11 +225,11 @@ export default function BookDetails() {
             <form onSubmit={handleAddCopy} className="flex gap-2 items-end">
               <div className="space-y-2 flex-1">
                 <label className="text-xs">Mã Cuốn Sách</label>
-                <Input value={newCopy.maCS} onChange={(e) => setNewCopy({...newCopy, maCS: e.target.value})} required placeholder="CS001" />
+                <Input value={newCopy.MACS} onChange={(e) => setNewCopy({...newCopy, MACS: e.target.value})} required placeholder="CS001" />
               </div>
               <div className="space-y-2 flex-1">
                 <label className="text-xs">Vị trí</label>
-                <Input value={newCopy.viTri} onChange={(e) => setNewCopy({...newCopy, viTri: e.target.value})} placeholder="Kệ A1" />
+                <Input value={newCopy.VITRI} onChange={(e) => setNewCopy({...newCopy, VITRI: e.target.value})} placeholder="Kệ A1" />
               </div>
               <Button type="submit"><Plus className="w-4 h-4 mr-2"/>Thêm</Button>
             </form>
@@ -248,24 +252,24 @@ export default function BookDetails() {
                     <TableRow><TableCell colSpan={5} className="text-center h-24">Chưa có bản sao nào</TableCell></TableRow>
                   ) : (
                     copies.map((item) => (
-                      <TableRow key={item.maCS}>
-                        <TableCell className="font-medium">{item.maCS}</TableCell>
-                        <TableCell>{item.ngayNhap?.split('T')[0]}</TableCell>
+                      <TableRow key={item.MACS}>
+                        <TableCell className="font-medium">{item.MACS}</TableCell>
+                        <TableCell>{item.NGAYNHAP?.split('T')[0]}</TableCell>
                         
-                        {editingCopyId === item.maCS ? (
+                        {editingCopyId === item.MACS ? (
                           <>
                             <TableCell>
                               <Input 
                                 className="h-8 w-24"
-                                value={editCopyData.viTri} 
-                                onChange={(e) => setEditCopyData({...editCopyData, viTri: e.target.value})} 
+                                value={editCopyData.VITRI} 
+                                onChange={(e) => setEditCopyData({...editCopyData, VITRI: e.target.value})} 
                               />
                             </TableCell>
                             <TableCell>
                               <select 
                                 className="h-8 rounded-md border border-input text-sm"
-                                value={editCopyData.tinhTrang} 
-                                onChange={(e) => setEditCopyData({...editCopyData, tinhTrang: e.target.value})}
+                                value={editCopyData.TINHTRANG} 
+                                onChange={(e) => setEditCopyData({...editCopyData, TINHTRANG: e.target.value})}
                               >
                                 <option value="Có sẵn">Có sẵn</option>
                                 <option value="Đang mượn">Đang mượn</option>
@@ -284,21 +288,21 @@ export default function BookDetails() {
                           </>
                         ) : (
                           <>
-                            <TableCell>{item.viTri}</TableCell>
-                            <TableCell>{item.tinhTrang}</TableCell>
+                            <TableCell>{item.VITRI}</TableCell>
+                            <TableCell>{item.TINHTRANG}</TableCell>
                             <TableCell className="text-right">
                               <Button 
                                 size="icon" 
                                 variant="ghost" 
                                 onClick={() => {
-                                  setEditingCopyId(item.maCS);
-                                  setEditCopyData({ viTri: item.viTri, tinhTrang: item.tinhTrang });
+                                  setEditingCopyId(item.MACS);
+                                  setEditCopyData({ VITRI: item.VITRI, TINHTRANG: item.TINHTRANG });
                                 }} 
                                 className="mr-1 text-blue-600"
                               >
                                 <Edit2 className="w-4 h-4" />
                               </Button>
-                              <Button size="icon" variant="destructive" onClick={() => handleDeleteCopy(item.maCS)}>
+                              <Button size="icon" variant="destructive" onClick={() => handleDeleteCopy(item.MACS)}>
                                 <Trash2 className="w-4 h-4" />
                               </Button>
                             </TableCell>
@@ -309,7 +313,8 @@ export default function BookDetails() {
                   )}
                 </TableBody>
               </Table>
-            </div>
+          </div>
+          <DataTablePagination page={page} totalPages={totalPages} onPageChange={setPage} />
           </CardContent>
         </Card>
       </div>

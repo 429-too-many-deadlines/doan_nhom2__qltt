@@ -17,18 +17,18 @@ import { Home, BookOpen, Users, ArrowRightLeft, BarChart, Settings, Shield, Tags
 import { useAuth } from "@/contexts/AuthContext"
 
 const menuItems = [
-  { title: "Trang chủ", url: "/", icon: Home, roles: ["R_QUANLY", "R_THUTHU", "R_DOCGIA"] },
-  { title: "Quản lý Sách", url: "/books", icon: BookOpen, roles: ["R_QUANLY", "R_THUTHU", "R_DOCGIA"] },
-  { title: "Thể loại", url: "/categories", icon: Tags, roles: ["R_QUANLY", "R_THUTHU"] },
-  { title: "Tác giả", url: "/authors", icon: PenTool, roles: ["R_QUANLY", "R_THUTHU"] },
-  { title: "Nhà xuất bản", url: "/publishers", icon: Building, roles: ["R_QUANLY", "R_THUTHU"] },
-  { title: "Quản lý Độc giả", url: "/readers", icon: Users, roles: ["R_QUANLY", "R_THUTHU"] },
-  { title: "Loại Độc Giả", url: "/readertypes", icon: IdCard, roles: ["R_QUANLY", "R_THUTHU"] },
-  { title: "Quản lý Nhân viên", url: "/employees", icon: Contact, roles: ["R_QUANLY"] },
-  { title: "Quản lý Mượn trả", url: "/transactions", icon: ArrowRightLeft, roles: ["R_QUANLY", "R_THUTHU", "R_DOCGIA"] },
-  { title: "Báo cáo thống kê", url: "/reports", icon: BarChart, roles: ["R_QUANLY", "R_THUTHU"] },
-  { title: "Tài khoản", url: "/accounts", icon: Shield, roles: ["R_QUANLY"] },
-  { title: "Cài đặt", url: "/settings", icon: Settings, roles: ["R_QUANLY"] },
+  { title: "Trang chủ", url: "/", icon: Home, roles: ["Quản lý", "Thủ thư", "Độc giả"] },
+  { title: "Quản lý Sách", url: "/books", icon: BookOpen, roles: ["Quản lý", "Thủ thư", "Độc giả"] },
+  { title: "Thể loại", url: "/categories", icon: Tags, roles: ["Quản lý", "Thủ thư"] },
+  { title: "Tác giả", url: "/authors", icon: PenTool, roles: ["Quản lý", "Thủ thư"] },
+  { title: "Nhà xuất bản", url: "/publishers", icon: Building, roles: ["Quản lý", "Thủ thư"] },
+  { title: "Quản lý Độc giả", url: "/readers", icon: Users, roles: ["Quản lý", "Thủ thư"] },
+  { title: "Loại Độc Giả", url: "/readertypes", icon: IdCard, roles: ["Quản lý", "Thủ thư"] },
+  { title: "Quản lý Nhân viên", url: "/employees", icon: Contact, roles: ["Quản lý"] },
+  { title: "Quản lý Mượn trả", url: "/transactions", icon: ArrowRightLeft, roles: ["Quản lý", "Thủ thư", "Độc giả"] },
+  { title: "Báo cáo thống kê", url: "/reports", icon: BarChart, roles: ["Quản lý", "Thủ thư"] },
+  { title: "Tài khoản", url: "/accounts", icon: Shield, roles: ["Quản lý"] },
+  { title: "Cài đặt", url: "/settings", icon: Settings, roles: ["Quản lý"] },
 ]
 
 export function AppSidebar() {

@@ -1,9 +1,9 @@
-import type { CreateAuthorRequest, UpdateAuthorRequest } from '../types/api.types';
+import type { PagedResult,  CreateAuthorRequest, UpdateAuthorRequest  } from '../types/api.types';
 import { apiClient } from '../lib/api';
 
 export const authorsService = {
-  getAuthors: async (query?: string) => {
-    const response = await apiClient.get('/api/authors', { params: { query } });
+  getAuthors: async (query?: string, page = 1, pageSize = 10) => {
+    const response = await apiClient.get('/api/authors', { params: { query, page, pageSize } });
     return response.data;
   },
   createAuthor: async (data: CreateAuthorRequest) => {

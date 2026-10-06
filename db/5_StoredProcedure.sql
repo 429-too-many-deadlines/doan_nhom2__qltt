@@ -61,7 +61,9 @@ GO
    Tham so vao: TUKHOA. Tra ve danh sach dau sach va so cuon con san.
    --------------------------------------------------------------------- */
 CREATE PROCEDURE SP_TIMSACH
-@TUKHOA NVARCHAR (100)
+@TUKHOA NVARCHAR (100),
+@PageNumber INT = 1,
+@PageSize INT = 10
 AS
 BEGIN
 	SELECT		DS.MADS,
@@ -77,7 +79,8 @@ BEGIN
 					WHERE		DT.MADS = DS.MADS
 					FOR			XML PATH ('')), 1, 2, '') AS TACGIA,
 				DS.SOLUONG,
-				DS.SLCON
+				DS.SLCON,
+				COUNT(*) OVER() AS TotalRecord
 	FROM		DAUSACH AS DS
 				INNER JOIN
 				THELOAI AS TL
@@ -94,7 +97,9 @@ BEGIN
 								ON DT.MATG = TG.MATG
 						WHERE		DT.MADS = DS.MADS
 								AND TG.TENTG LIKE N'%' + @TUKHOA + N'%')
-	ORDER BY	DS.TENDS;
+	ORDER BY	DS.TENDS
+	OFFSET (@PageNumber - 1) * @PageSize ROWS
+	FETCH NEXT @PageSize ROWS ONLY;
 END
 
 
@@ -464,15 +469,20 @@ END
    Tra ve: Danh sach doc gia.
    --------------------------------------------------------------------- */
 CREATE PROCEDURE SP_TIMDOCGIA
-	@TUKHOA NVARCHAR(100)
+	@TUKHOA NVARCHAR(100),
+	@PageNumber INT = 1,
+	@PageSize INT = 10
 AS
 BEGIN
-	SELECT DG.MADG, DG.HOTEN, DG.NGSINH, DG.GIOITINH, DG.DIACHI, DG.SODT, DG.EMAIL, LDG.TENLDG AS LOAIDG, DG.NGAYLAPTHE, DG.NGAYHETHAN, DG.TONGNO
+	SELECT DG.MADG, DG.HOTEN, DG.NGSINH, DG.GIOITINH, DG.DIACHI, DG.SODT, DG.EMAIL, LDG.TENLDG AS LOAIDG, DG.NGAYLAPTHE, DG.NGAYHETHAN, DG.TONGNO,
+	       COUNT(*) OVER() AS TotalRecord
 	FROM DOCGIA DG
 	JOIN LOAIDOCGIA LDG ON DG.MALDG = LDG.MALDG
 	WHERE DG.MADG LIKE '%' + @TUKHOA + '%'
 	   OR DG.HOTEN LIKE N'%' + @TUKHOA + N'%'
 	ORDER BY DG.MADG
+	OFFSET (@PageNumber - 1) * @PageSize ROWS
+	FETCH NEXT @PageSize ROWS ONLY;
 END
 GO
 

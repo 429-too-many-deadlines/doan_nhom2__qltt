@@ -1,21 +1,21 @@
 import { apiClient } from '../lib/api';
-import type { Employee, CreateEmployeeRequest, MessageResponse } from '../types/api.types';
+import type { PagedResult,  Employee, CreateEmployeeRequest, MessageResponse  } from '../types/api.types';
 
 export const employeesService = {
-  getEmployees: async (): Promise<Employee[]> => {
-    const response = await apiClient.get<Employee[]>('/api/employees');
+  getEmployees: async (page = 1, pageSize = 10): Promise<PagedResult<Employee>> => {
+    const response = await apiClient.get<PagedResult<Employee>>('/api/employees', { params: { page, pageSize } });
     return response.data;
   },
   createEmployee: async (data: CreateEmployeeRequest): Promise<MessageResponse> => {
     const response = await apiClient.post<MessageResponse>('/api/employees', data);
     return response.data;
   },
-  updateEmployee: async (maNV: string, data: CreateEmployeeRequest): Promise<MessageResponse> => {
-    const response = await apiClient.put<MessageResponse>(`/api/employees/${maNV}`, data);
+  updateEmployee: async (MANV: string, data: CreateEmployeeRequest): Promise<MessageResponse> => {
+    const response = await apiClient.put<MessageResponse>(`/api/employees/${MANV}`, data);
     return response.data;
   },
-  deleteEmployee: async (maNV: string): Promise<MessageResponse> => {
-    const response = await apiClient.delete<MessageResponse>(`/api/employees/${maNV}`);
+  deleteEmployee: async (MANV: string): Promise<MessageResponse> => {
+    const response = await apiClient.delete<MessageResponse>(`/api/employees/${MANV}`);
     return response.data;
   },
 };

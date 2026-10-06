@@ -119,7 +119,7 @@ Khóa chính **in đậm**, khóa ngoại _in nghiêng_.
     Cuốn sách MACS được mượn theo phiếu MAPM. Khi trả thì ghi nhận ngày trả và tình trạng lúc trả (Bình thường, Hư hỏng, Mất). Chưa trả thì cả hai đều rỗng.
 12. **PHIEUPHAT**(**MAPP**, _MAPM_, _MACS_, NGAYLAP, LYDO, SOTIEN, DATHANHTOAN)
     Phiếu phạt lập ngày NGAYLAP cho cuốn sách MACS thuộc phiếu mượn MAPM, vì lý do trả trễ, làm hư hỏng hoặc làm mất sách, với số tiền SOTIEN, đã hoặc chưa thanh toán.
-13. **TAIKHOAN**(**TENDANGNHAP**, MATKHAU, MUOI, VAITRO, _MANV_, _MADG_, TRANGTHAI)
+13. **TAIKHOAN**(**TENDANGNHAP**, MATKHAU, VAITRO, _MANV_, _MADG_, TRANGTHAI)
     Tài khoản đăng nhập ứng dụng, thuộc về một nhân viên (vai trò Quản lý / Thủ thư) hoặc một độc giả. Mật khẩu lưu dạng băm SHA2-256 kèm chuỗi muối. TRANGTHAI = 0 là tài khoản bị khóa.
 
 Hai bảng kết quả của Cursor (tạo trong `06_Cursor.sql`): **DOCGIA_XEPLOAI**, **NHACNHO_QUAHAN**.

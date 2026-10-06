@@ -79,7 +79,7 @@ export default function Dashboard() {
               <CardTitle className="text-sm font-medium text-muted-foreground">Số Phiếu Mượn</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{stats.soPhieu || 0}</div>
+              <div className="text-3xl font-bold">{stats.SOPHIEU || 0}</div>
             </CardContent>
           </Card>
           
@@ -88,7 +88,7 @@ export default function Dashboard() {
               <CardTitle className="text-sm font-medium text-muted-foreground">Số Lượt Mượn Sách</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{stats.soLuotSach || 0}</div>
+              <div className="text-3xl font-bold">{stats.SOLUOTSACH || 0}</div>
             </CardContent>
           </Card>
 
@@ -97,7 +97,7 @@ export default function Dashboard() {
               <CardTitle className="text-sm font-medium text-muted-foreground">Tiền Phạt Thu Được</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{stats.tienPhat?.toLocaleString() || 0} đ</div>
+              <div className="text-3xl font-bold">{stats.TIENPHAT?.toLocaleString() || 0} đ</div>
             </CardContent>
           </Card>
 
@@ -115,7 +115,7 @@ export default function Dashboard() {
                         <p className="text-sm text-muted-foreground">Mã: {book.maSach}</p>
                       </div>
                       <div className="font-bold text-lg">
-                        {book.soLuotMuon} lượt
+                        {book.SOLUOTMUON} lượt
                       </div>
                     </li>
                   ))}

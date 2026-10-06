@@ -1,10 +1,23 @@
 
 
+export interface PagedResult<T> {
+  items: T[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
 export interface SearchBookResponse {
-  // TODO: Thêm các trường dựa trên kết quả SP_TIMSACH trả về
-  maSach?: string;
-  tenSach?: string;
-  tacGia?: string;}
+  MADS?: string;
+  TENDS?: string;
+  TENTL?: string;
+  TENNXB?: string;
+  NAMXB?: number;
+  TACGIA?: string;
+  SOLUONG?: number;
+  SLCON?: number;
+}
 
 
 
@@ -17,14 +30,14 @@ export interface SearchBookResponse {
 
 
 export interface TopBookResponse {
-  maSach?: string;
-  tenSach?: string;
-  soLuotMuon?: number;}
+  MADS?: string;
+  TENDS?: string;
+  SOLUOTMUON?: number;}
 
 export interface MonthlyStatsResponse {
-  soPhieu: number;
-  soLuotSach: number;
-  tienPhat: number;
+  SOPHIEU: number;
+  SOLUOTSACH: number;
+  TIENPHAT: number;
   top5Books: TopBookResponse[];
 }
 
@@ -32,16 +45,16 @@ export interface MonthlyStatsResponse {
 
 // --- Book Copies & Authors ---
 export interface BookCopy {
-  maCS: string;
-  maDS: string;
-  ngayNhap: string;
-  viTri: string;
-  tinhTrang: string;
+  MACS: string;
+  MADS: string;
+  NGAYNHAP: string;
+  VITRI: string;
+  TINHTRANG: string;
 }
 
 export interface BookAuthor {
-  maTG: string;
-  vaiTro: string;
+  MATG: string;
+  VAITRO: string;
 }
 
 
@@ -52,80 +65,80 @@ export interface BookAuthor {
 
 // --- Employees ---
 export interface Employee {
-  maNV: string;
-  hoTen: string;
-  ngSinh: string;
-  soDT: string;
-  chucVu: string;
-  ngvl: string;
+  MANV: string;
+  HOTEN: string;
+  NGSINH: string;
+  SODT: string;
+  CHUCVU: string;
+  NGVL: string;
 }
 
 
 
 // --- Reader Types ---
 export interface ReaderType {
-  maLDG: string;
-  tenLDG: string;
-  soSachToiDa: number;
-  soNgayMuon: number;
+  MALDG: string;
+  TENLDG: string;
+  SOSACHTOIDA: number;
+  SONGAYMUON: number;
 }
 
 
 
 
 export interface Author {
-    maTG: string;
-    tenTG: string;
-    namSinh?: number;
-    quocTich?: string;
+    MATG: string;
+    TENTG: string;
+    NAMSINH?: number;
+    QUOCTICH?: string;
 }
 
 export interface Category {
-    maTL: string;
-    tenTL: string;
+    MATL: string;
+    TENTL: string;
 }
 
 export interface Publisher {
-    maNXB: string;
-    tenNXB: string;
-    diaChi?: string;
-    soDT?: string;
+    MANXB: string;
+    TENNXB: string;
+    DIACHI?: string;
+    SODT?: string;
 }
 
 export interface Book {
-    maDS: string;
-    tenDS: string;
-    maTL: string;
-    maNXB: string;
-    namXB: number;
-    soTrang: number;
-    gia: number;
+    MADS: string;
+    TENDS: string;
+    MATL: string;
+    MANXB: string;
+    NAMXB: number;
+    SOTRANG: number;
+    GIA: number;
 }
 
 export interface Reader {
-    maDG: string;
-    hoTen: string;
+    MADG: string;
+    HOTEN: string;
     ngaySinh: string;
-    gioiTinh: string;
-    diaChi?: string;
-    soDT: string;
-    email?: string;
-    maLDG: string;
-    loaiDG?: string;
-    tongNo?: number;
+    GIOITINH: string;
+    DIACHI?: string;
+    SODT: string;
+    EMAIL?: string;
+    MALDG: string;
+    LOAIDG?: string;
+    TONGNO?: number;
 }
 
 export interface FineSlip {
     maPT: string;
-    maDG: string;
+    MADG: string;
     soTienThu: number;
     ngayThu: string;
-    lyDo?: string;
-    mapp?: string;
-    mapm?: string;
-    madg?: string;
-    tendg?: string;
-    dathanhtoan?: boolean;
+    LYDO?: string;
+    MAPP?: string;
+    MAPM?: string;
+    MADG?: string;
+    TENDG?: string;
+    DATHANHTOAN?: boolean;
 }
 
 export interface BackupHistory {
@@ -149,8 +162,8 @@ export interface CreateAccountRequest {
   username: string;
   password: string;
   role: string;
-  maNV: string | null;
-  maDG: string | null;
+  MANV: string | null;
+  MADG: string | null;
 }
 
 export interface LoginRequest {
@@ -159,37 +172,37 @@ export interface LoginRequest {
 }
 
 export interface CreateAuthorRequest {
-  maTG: string;
-  tenTG: string;
-  namSinh: number | null;
-  quocTich: string | null;
+  MATG: string;
+  TENTG: string;
+  NAMSINH: number | null;
+  QUOCTICH: string | null;
 }
 
 export interface UpdateAuthorRequest {
-  tenTG: string;
-  namSinh: number | null;
-  quocTich: string | null;
+  TENTG: string;
+  NAMSINH: number | null;
+  QUOCTICH: string | null;
 }
 
 export interface CreateBookCopyRequest {
-  maCS: string;
-  viTri: string;
-  tinhTrang: string;
+  MACS: string;
+  VITRI: string;
+  TINHTRANG: string;
 }
 
 export interface CreateBookRequest {
-  maDS: string;
-  tenDS: string;
-  maTL: string;
-  maNXB: string;
-  namXB: number;
-  soTrang: number;
-  gia: number;
+  MADS: string;
+  TENDS: string;
+  MATL: string;
+  MANXB: string;
+  NAMXB: number;
+  SOTRANG: number;
+  GIA: number;
 }
 
 export interface AuthorRoleRequest {
-  maTG: string;
-  vaiTro: string;
+  MATG: string;
+  VAITRO: string;
 }
 
 export interface UpdateBookAuthorsRequest {
@@ -197,91 +210,91 @@ export interface UpdateBookAuthorsRequest {
 }
 
 export interface UpdateBookCopyRequest {
-  viTri: string;
-  tinhTrang: string;
+  VITRI: string;
+  TINHTRANG: string;
 }
 
 export interface UpdateBookRequest {
-  tenDS: string;
-  maTL: string;
-  maNXB: string;
-  namXB: number;
-  soTrang: number;
-  gia: number;
+  TENDS: string;
+  MATL: string;
+  MANXB: string;
+  NAMXB: number;
+  SOTRANG: number;
+  GIA: number;
 }
 
 export interface CreateCategoryReq {
-  maTL: string;
-  tenTL: string;
+  MATL: string;
+  TENTL: string;
 }
 
 export interface UpdateCategoryRequest {
-  tenTL: string;
+  TENTL: string;
 }
 
 export interface CreateEmployeeRequest {
-  maNV: string;
-  hoTen: string;
-  ngSinh: string;
-  soDT: string;
-  chucVu: string;
-  ngVL: string;
+  MANV: string;
+  HOTEN: string;
+  NGSINH: string;
+  SODT: string;
+  CHUCVU: string;
+  NGVL: string;
 }
 
 export interface UpdateEmployeeRequest {
-  hoTen: string;
-  ngSinh: string;
-  soDT: string;
-  chucVu: string;
-  ngVL: string;
+  HOTEN: string;
+  NGSINH: string;
+  SODT: string;
+  CHUCVU: string;
+  NGVL: string;
 }
 
 export interface CreatePublisherRequest {
-  maNXB: string;
-  tenNXB: string;
-  diaChi: string | null;
-  soDT: string | null;
+  MANXB: string;
+  TENNXB: string;
+  DIACHI: string | null;
+  SODT: string | null;
 }
 
 export interface UpdatePublisherRequest {
-  tenNXB: string;
-  diaChi: string | null;
-  soDT: string | null;
+  TENNXB: string;
+  DIACHI: string | null;
+  SODT: string | null;
 }
 
 export interface CreateReaderRequest {
-  maDg: string;
-  hoTen: string;
-  ngSinh: string;
-  gioiTinh: string;
-  diaChi: string | null;
-  soDt: string;
-  email: string | null;
-  maLdg: string;
+  MADG: string;
+  HOTEN: string;
+  NGSINH: string;
+  GIOITINH: string;
+  DIACHI: string | null;
+  SODT: string;
+  EMAIL: string | null;
+  MALDG: string;
 }
 
 export interface UpdateReaderRequest {
-  maDg: string;
-  hoTen: string;
-  ngSinh: string;
-  gioiTinh: string;
-  diaChi: string | null;
-  soDt: string;
-  email: string | null;
-  maLdg: string;
+  MADG: string;
+  HOTEN: string;
+  NGSINH: string;
+  GIOITINH: string;
+  DIACHI: string | null;
+  SODT: string;
+  EMAIL: string | null;
+  MALDG: string;
 }
 
 export interface CreateReaderTypeRequest {
-  maLDG: string;
-  tenLDG: string;
-  soSachToiDa: number;
-  soNgayMuon: number;
+  MALDG: string;
+  TENLDG: string;
+  SOSACHTOIDA: number;
+  SONGAYMUON: number;
 }
 
 export interface UpdateReaderTypeRequest {
-  tenLDG: string;
-  soSachToiDa: number;
-  soNgayMuon: number;
+  TENLDG: string;
+  SOSACHTOIDA: number;
+  SONGAYMUON: number;
 }
 
 export interface BackupResponse {
@@ -294,37 +307,37 @@ export interface MessageResponse {
 }
 
 export interface BorrowRequest {
-  maDg: string;
-  maNv: string;
-  dsMaCs: string[];
+  MADG: string;
+  MANV: string;
+  DSMACs: string[];
 }
 
 export interface BorrowResponse {
   message: string;
-  maPm: string;
+  MAPM: string;
 }
 
 export interface BorrowSlip {
-  mapm: string;
-  madg: string;
-  tendg: string;
-  manv: string;
-  ngaymuon: string;
-  hantra: string;
-  tinhtrang: string;
-  macs: string;
-  ngaytra: string | null;
-  tinhtrangtra: string;
+  MAPM: string;
+  MADG: string;
+  TENDG: string;
+  MANV: string;
+  NGAYMUON: string;
+  HANTRA: string;
+  TINHTRANG: string;
+  MACS: string;
+  NGAYTRA: string | null;
+  TINHTRANGTRA: string;
 }
 
 export interface PayFineRequest {
-  maDg: string;
+  MADG: string;
 }
 
 export interface ReturnRequest {
-  maPm: string;
-  maCs: string;
-  tinhTrangTra: string | null;
+  MAPM: string;
+  MACS: string;
+  TINHTRANGTRA: string | null;
 }
 
 export type GenericApiResponse = Record<string, unknown>;

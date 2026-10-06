@@ -1,5 +1,5 @@
 import { apiClient } from '../lib/api';
-import type { AuthorRoleRequest, BookAuthor, BookCopy, CreateBookCopyRequest, CreateBookRequest, MessageResponse, SearchBookResponse, UpdateBookCopyRequest, UpdateBookRequest } from '../types/api.types';
+import type { PagedResult, AuthorRoleRequest, BookAuthor, BookCopy, CreateBookCopyRequest, CreateBookRequest, MessageResponse, SearchBookResponse, UpdateBookCopyRequest, UpdateBookRequest } from '../types/api.types';
 
 export const booksService = {
   // --- Copies ---
@@ -11,12 +11,12 @@ export const booksService = {
     const response = await apiClient.post<MessageResponse>(`/api/books/${maDs}/copies`, data);
     return response.data;
   },
-  updateBookCopy: async (maCs: string, data: UpdateBookCopyRequest): Promise<MessageResponse> => {
-    const response = await apiClient.put<MessageResponse>(`/api/books/copies/${maCs}`, data);
+  updateBookCopy: async (MACS: string, data: UpdateBookCopyRequest): Promise<MessageResponse> => {
+    const response = await apiClient.put<MessageResponse>(`/api/books/copies/${MACS}`, data);
     return response.data;
   },
-  deleteBookCopy: async (maCs: string): Promise<MessageResponse> => {
-    const response = await apiClient.delete<MessageResponse>(`/api/books/copies/${maCs}`);
+  deleteBookCopy: async (MACS: string): Promise<MessageResponse> => {
+    const response = await apiClient.delete<MessageResponse>(`/api/books/copies/${MACS}`);
     return response.data;
   },
   // --- Authors ---
@@ -29,9 +29,9 @@ export const booksService = {
     return response.data;
   },
 
-  searchBooks: async (query: string): Promise<SearchBookResponse[]> => {
-    const response = await apiClient.get<SearchBookResponse[]>('/api/books/search', {
-      params: { query },
+  searchBooks: async (query: string, page = 1, pageSize = 10): Promise<PagedResult<SearchBookResponse>> => {
+    const response = await apiClient.get<PagedResult<SearchBookResponse>>('/api/books/search', {
+      params: { query, page, pageSize },
     });
     return response.data;
   },

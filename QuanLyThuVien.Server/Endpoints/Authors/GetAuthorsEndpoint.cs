@@ -12,20 +12,32 @@ public class GetAuthorsEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("api/authors", async (IDbConnection db, string? query) =>
+        app.MapGet("api/authors", async (IDbConnection db, string? query, int page = 1, int pageSize = 10) =>
         {
-            var sql = "SELECT * FROM TACGIA";
+            var offset = (page - 1) * pageSize;
+            var sqlCount = "SELECT COUNT(*) FROM TACGIA";
+            var sqlData = "SELECT * FROM TACGIA";
+            
             if (!string.IsNullOrEmpty(query))
             {
-                sql += " WHERE TENTG LIKE @Query OR MATG LIKE @Query";
-                var authors = await db.QueryAsync(sql, new { Query = $"%{query}%" });
-                return Results.Ok(authors);
+                sqlCount += " WHERE TENTG LIKE @Query OR MATG LIKE @Query";
+                sqlData += " WHERE TENTG LIKE @Query OR MATG LIKE @Query";
             }
-            else
+
+            sqlData += " ORDER BY MATG OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY";
+
+            var parameters = new { Query = $"%{query}%", Offset = offset, PageSize = pageSize };
+            
+            var totalCount = await db.ExecuteScalarAsync<int>(sqlCount, parameters);
+            var authors = await db.QueryAsync<dynamic>(sqlData, parameters);
+
+            return Results.Ok(new PagedResult<dynamic>
             {
-                var authors = await db.QueryAsync(sql);
-                return Results.Ok(authors);
-            }
+                Items = authors,
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize
+            });
         })
         .WithName("GetAuthors")
         .RequireAuthorization("QuanLyHoacThuThu")
