@@ -34,13 +34,10 @@ GO
    TRIGGER 2. Dieu kien lap phieu muon:
      - The doc gia phai con han vao ngay muon.
      - Doc gia khong con no tien phat.
-     - So ngay muon (HANTRA - NGAYMUON) khong vuot qua so ngay toi da
-       cua loai doc gia.
    Bang tam anh huong:
      | Bang       | Them | Xoa | Sua                        |
      | PHIEUMUON  |  +   |  -  | + (MADG, NGAYMUON, HANTRA) |
-     | DOCGIA     |  -   |  -  | + (NGAYHETHAN, TONGNO, MALDG) (*) |
-     | LOAIDOCGIA |  -   |  -  | + (SONGAYMUON) (*)         |
+     | DOCGIA     |  -   |  -  | + (NGAYHETHAN, TONGNO) (*) |
      (*) chi kiem tra tai thoi diem lap phieu, khong ap dung hoi to.
    --------------------------------------------------------------------- */
 CREATE TRIGGER TRG_PHIEUMUON_KIEMTRA
@@ -70,15 +67,7 @@ BEGIN
 		RETURN
 	END
 
-	IF EXISTS (SELECT * FROM inserted I
-					JOIN DOCGIA DG ON I.MADG = DG.MADG
-					JOIN LOAIDOCGIA LDG ON DG.MALDG = LDG.MALDG
-			   WHERE DATEDIFF(DAY, I.NGAYMUON, I.HANTRA) > LDG.SONGAYMUON)
-	BEGIN
-		RAISERROR (N'Hạn trả vượt quá số ngày mượn tối đa của loại độc giả.', 16, 1)
-		ROLLBACK TRANSACTION
-		RETURN
-	END
+
 END
 GO
 
@@ -86,14 +75,11 @@ GO
    TRIGGER 3. Muon sach (them chi tiet phieu muon):
      - Cuon sach phai dang o tinh trang 'Có sẵn'.
      - Phieu muon phai o tinh trang 'Đang mượn'.
-     - Tong so sach dang muon cua doc gia khong vuot qua SOSACHTOIDA
-       cua loai doc gia.
      - Sau khi muon: cap nhat tinh trang cuon sach thanh 'Đang mượn'.
    Bang tam anh huong:
      | Bang        | Them | Xoa | Sua             |
      | CTPHIEUMUON |  +   |  -  | + (MAPM, MACS)  |
      | CUONSACH    |  -   |  -  | + (TINHTRANG)   |
-     | LOAIDOCGIA  |  -   |  -  | + (SOSACHTOIDA) (*) |
    --------------------------------------------------------------------- */
 CREATE TRIGGER TRG_CTPM_MUONSACH
 ON CTPHIEUMUON
@@ -128,14 +114,7 @@ BEGIN
 		RETURN
 	END
 
-	IF EXISTS (SELECT * FROM DOCGIA DG JOIN LOAIDOCGIA LDG ON DG.MALDG = LDG.MALDG
-			   WHERE DG.MADG IN (SELECT PM.MADG FROM inserted I JOIN PHIEUMUON PM ON I.MAPM = PM.MAPM)
-				 AND dbo.FN_SOSACHDANGMUON(DG.MADG) > LDG.SOSACHTOIDA)
-	BEGIN
-		RAISERROR (N'Độc giả đã mượn vượt quá số sách tối đa cho phép.', 16, 1)
-		ROLLBACK TRANSACTION
-		RETURN
-	END
+
 
 	UPDATE CUONSACH
 	SET TINHTRANG = N'Đang mượn'

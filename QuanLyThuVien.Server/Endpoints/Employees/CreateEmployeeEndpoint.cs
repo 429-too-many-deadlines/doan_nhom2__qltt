@@ -18,6 +18,11 @@ public class CreateEmployeeEndpoint : IEndpoint
     {
         app.MapPost("api/employees", async (IDbConnection db, [FromBody] CreateEmployeeRequest req) =>
         {
+            if (req.NgVL < req.NgSinh.AddYears(18))
+            {
+                return Results.BadRequest(new MessageResponse("Ngày vào làm không hợp lệ: Nhân viên phải đủ 18 tuổi."));
+            }
+
             try
             {
                 var sql = "INSERT INTO NHANVIEN(MANV, HOTEN, NGSINH, SODT, CHUCVU, NGVL) VALUES(@MaNV, @HoTen, @NgSinh, @SoDT, @ChucVu, @NgVL)";
@@ -30,7 +35,7 @@ public class CreateEmployeeEndpoint : IEndpoint
             }
         })
         .WithName("CreateEmployee")
-        .RequireAuthorization("QuanLy")
+        .RequireAuthorization("QuanLyOnly")
         .WithTags("Employees")
         .WithSummary("Thêm nhân viên");
     }

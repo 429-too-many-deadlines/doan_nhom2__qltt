@@ -27,7 +27,7 @@ public class DeleteEmployeeEndpoint : IEndpoint
             return Results.Ok(new MessageResponse("Xoá nhân viên thành công"));
         })
         .WithName("DeleteEmployee")
-        .RequireAuthorization("QuanLy")
+        .RequireAuthorization("QuanLyOnly")
         .WithTags("Employees")
         .WithSummary("Xóa nhân viên");
     }

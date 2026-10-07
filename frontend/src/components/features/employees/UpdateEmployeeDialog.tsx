@@ -3,7 +3,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { employeesService } from '@/services/employees.service';
-import { toast } from 'sonner';
 import type { Employee } from '@/types/api.types';
 
 interface Props {
@@ -37,11 +36,11 @@ export function UpdateEmployeeDialog({ employee, open, onOpenChange, onSuccess }
     setLoading(true);
     try {
       await employeesService.updateEmployee(formData.MANV, formData);
-      toast.success('Cập nhật thành công');
+      // toast.success('Cập nhật thành công');
       onOpenChange(false);
       onSuccess();
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Lỗi khi cập nhật');
+    } catch (_error: any) {
+      // toast.error(error.response?.data?.message || 'Lỗi khi cập nhật');
     } finally {
       setLoading(false);
     }

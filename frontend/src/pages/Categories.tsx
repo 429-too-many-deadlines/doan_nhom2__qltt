@@ -1,10 +1,9 @@
 import { DataTablePagination } from '../components/ui/data-table-pagination';
 import { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { toast } from 'sonner';
 import { categoriesService } from '@/services/categories.service';
 import { Trash2, Edit } from 'lucide-react';
 import type { Category } from '@/types/api.types';
@@ -33,12 +32,12 @@ export default function Categories() {
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const dataResult = await categoriesService.getCategories(undefined, 1, 100);
+      const dataResult = await categoriesService.getCategories(page, 10);
       const data = dataResult.items || [];
       setTotalPages(dataResult.totalPages);
       setCategories(data);
     } catch {
-      toast.error('Lỗi khi tải danh sách thể loại');
+      // toast.error('Lỗi khi tải danh sách thể loại');
     } finally {
       setLoading(false);
     }
@@ -51,10 +50,10 @@ export default function Categories() {
   const handleDelete = async (maTl: string) => {
     try {
       await categoriesService.deleteCategory(maTl);
-      toast.success('Xoá thành công');
+      // toast.success('Xoá thành công');
       fetchCategories();
     } catch {
-      toast.error('Lỗi khi xoá. Có thể thể loại này đã có sách.');
+      // toast.error('Lỗi khi xoá. Có thể thể loại này đã có sách.');
     }
   };
 
@@ -64,21 +63,21 @@ export default function Categories() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight">Quản lý Thể loại</h1>
       </div>
 
       <div className="grid grid-cols-1 gap-6">
-        <Card className="col-span-1">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Danh sách Thể loại</CardTitle>
+        <div className="col-span-1">
+          <div className="flex flex-row items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold">Danh sách Thể loại</h2>
             <div className="flex items-center space-x-2">
               <Input placeholder="Tìm kiếm..." className="w-64" />
               <CreateCategoryDialog onSuccess={fetchCategories} />
             </div>
-          </CardHeader>
-          <CardContent>
+          </div>
+          <div>
             <div className="rounded-md border">
               <Table>
                 <TableHeader>
@@ -135,8 +134,8 @@ export default function Categories() {
               </Table>
           </div>
           <DataTablePagination page={page} totalPages={totalPages} onPageChange={setPage} />
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
       <UpdateCategoryDialog 

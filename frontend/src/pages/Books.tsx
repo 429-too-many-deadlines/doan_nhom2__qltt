@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { booksService } from '../services/books.service';
 import type { Category, Publisher, SearchBookResponse } from '../types/api.types';
-import { toast } from 'sonner';
 import {
   Table,
   TableBody,
@@ -12,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from '../components/ui/table';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import { Search, Edit, Trash2, Info } from 'lucide-react';
@@ -46,16 +45,16 @@ export default function Books() {
   const [selectedBook, setSelectedBook] = useState<SearchBookResponse | null>(null);
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
 
-  const fetchBooks = async (searchQuery: string = '') => {
+  const fetchBooks = async (searchQuery: string = query, currentPage: number = page) => {
     try {
       setLoading(true);
-      const dataResult = await booksService.searchBooks(searchQuery, page);
+      const dataResult = await booksService.searchBooks(searchQuery, currentPage);
       const data = dataResult.items || [];
       setTotalPages(dataResult.totalPages);
       setBooks(data || []);
-    } catch (error) {
+    } catch (_error) {
       console.error(error);
-      toast.error('Lỗi khi tải danh sách sách');
+      // toast.error('Lỗi khi tải danh sách sách');
     } finally {
       setLoading(false);
     }
@@ -85,16 +84,16 @@ export default function Books() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setPage(1);
-    fetchBooks(query);
+    fetchBooks(query, 1);
   };
 
   const handleDeleteBook = async (maDs: string) => {
     try {
       await booksService.deleteBook(maDs);
-      toast.success('Xóa sách thành công');
+      // toast.success('Xóa sách thành công');
       fetchBooks(query);
-    } catch (err) {
-      toast.error('Lỗi khi xóa sách (có thể sách đang có cuốn sách con)');
+    } catch (_err) {
+      // toast.error('Lỗi khi xóa sách (có thể sách đang có cuốn sách con)');
       console.error(err);
     }
   };
@@ -105,15 +104,15 @@ export default function Books() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight">Quản lý Sách</h1>
       </div>
 
       <div className="grid grid-cols-1 gap-6">
-        <Card className="col-span-1">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Danh sách Đầu Sách</CardTitle>
+        <div className="col-span-1">
+          <div className="flex flex-row items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold">Danh sách Đầu Sách</h2>
             <div className="flex items-center space-x-2">
               <form onSubmit={handleSearch} className="flex gap-2">
                 <Input 
@@ -132,8 +131,8 @@ export default function Books() {
                 publishers={publishers} 
               />
             </div>
-          </CardHeader>
-          <CardContent>
+          </div>
+          <div>
             <div className="rounded-md border">
               <Table>
                 <TableHeader>
@@ -211,8 +210,8 @@ export default function Books() {
               </Table>
             </div>
             <DataTablePagination page={page} totalPages={totalPages} onPageChange={setPage} />
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
       <UpdateBookDialog 

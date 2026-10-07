@@ -3,7 +3,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { readersService } from '@/services/readers.service';
-import { toast } from 'sonner';
 import type { Reader } from '@/types/api.types';
 
 interface Props {
@@ -22,7 +21,6 @@ export function UpdateReaderDialog({ reader, open, onOpenChange, onSuccess }: Pr
     DIACHI: '',
     SODT: '',
     EMAIL: '',
-    MALDG: '',
   });
   const [loading, setLoading] = useState(false);
 
@@ -37,7 +35,6 @@ export function UpdateReaderDialog({ reader, open, onOpenChange, onSuccess }: Pr
         DIACHI: reader.DIACHI || '',
         SODT: reader.SODT || '',
         EMAIL: reader.EMAIL || '',
-        MALDG: reader.MALDG || '',
       });
     }
   }, [reader, open]);
@@ -53,11 +50,11 @@ export function UpdateReaderDialog({ reader, open, onOpenChange, onSuccess }: Pr
         DIACHI: formData.DIACHI || null,
         EMAIL: formData.EMAIL || null,
       });
-      toast.success('Cập nhật độc giả thành công');
+      // toast.success('Cập nhật độc giả thành công');
       onOpenChange(false);
       onSuccess();
     } catch {
-      toast.error('Lỗi khi cập nhật độc giả');
+      // toast.error('Lỗi khi cập nhật độc giả');
     } finally {
       setLoading(false);
     }
@@ -110,15 +107,6 @@ export function UpdateReaderDialog({ reader, open, onOpenChange, onSuccess }: Pr
               value={formData.SODT}
               onChange={(e) => setFormData({ ...formData, SODT: e.target.value })}
               placeholder="090..." 
-              required 
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Mã Loại ĐG</label>
-            <Input 
-              value={formData.MALDG}
-              onChange={(e) => setFormData({ ...formData, MALDG: e.target.value })}
-              placeholder="SV/GV/KH" 
               required 
             />
           </div>

@@ -1,10 +1,9 @@
 import { DataTablePagination } from '../components/ui/data-table-pagination';
 import { useEffect, useState, useCallback } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { toast } from 'sonner';
 import { authorsService } from '@/services/authors.service';
 import { Trash2, Edit } from 'lucide-react';
 import type { Author } from '@/types/api.types';
@@ -40,7 +39,7 @@ export default function Authors() {
       setTotalPages(dataResult.totalPages);
       setItems(data);
     } catch {
-      toast.error('Lỗi khi tải danh sách');
+      // toast.error('Lỗi khi tải danh sách');
     } finally {
       setLoading(false);
     }
@@ -59,10 +58,10 @@ export default function Authors() {
   const handleDelete = async (id: string) => {
     try {
       await authorsService.deleteAuthor(id);
-      toast.success('Xoá thành công');
+      // toast.success('Xoá thành công');
       fetchItems(query, page);
     } catch {
-      toast.error('Lỗi khi xoá. Có thể đang được sử dụng.');
+      // toast.error('Lỗi khi xoá. Có thể đang được sử dụng.');
     }
   };
 
@@ -72,15 +71,15 @@ export default function Authors() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight">Quản lý Tác giả</h1>
       </div>
 
       <div className="grid grid-cols-1 gap-6">
-        <Card className="col-span-1">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Danh sách Tác giả</CardTitle>
+        <div className="col-span-1">
+          <div className="flex flex-row items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold">Danh sách Tác giả</h2>
             <div className="flex items-center space-x-2">
               <form onSubmit={handleSearch} className="flex items-center space-x-2">
                 <Input 
@@ -92,8 +91,8 @@ export default function Authors() {
               </form>
               <CreateAuthorDialog onSuccess={() => fetchItems(query, page)} />
             </div>
-          </CardHeader>
-          <CardContent>
+          </div>
+          <div>
             <div className="rounded-md border overflow-x-auto">
               <Table>
                 <TableHeader>
@@ -154,8 +153,8 @@ export default function Authors() {
               </Table>
           </div>
           <DataTablePagination page={page} totalPages={totalPages} onPageChange={setPage} />
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
       <UpdateAuthorDialog 

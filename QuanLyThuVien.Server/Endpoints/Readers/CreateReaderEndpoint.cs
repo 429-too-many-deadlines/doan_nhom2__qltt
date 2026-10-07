@@ -23,7 +23,6 @@ public class CreateReaderEndpoint : IEndpoint
             parameters.Add("@DIACHI", req.DiaChi);
             parameters.Add("@SODT", req.SoDt);
             parameters.Add("@EMAIL", req.Email);
-            parameters.Add("@MALDG", req.MaLdg);
             parameters.Add("@ReturnValue", dbType: DbType.Int32, direction: ParameterDirection.ReturnValue);
 
             await db.ExecuteAsync("SP_THEMDOCGIA", parameters, commandType: CommandType.StoredProcedure);
@@ -52,6 +51,5 @@ public record CreateReaderRequest(
     string GioiTinh, 
     string? DiaChi, 
     string SoDt, 
-    string? Email, 
-    string MaLdg
+    string? Email
 );

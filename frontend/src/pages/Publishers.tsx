@@ -1,10 +1,9 @@
 import { DataTablePagination } from '../components/ui/data-table-pagination';
 import { useEffect, useState, useCallback } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { toast } from 'sonner';
 import { publishersService } from '@/services/publishers.service';
 import { Trash2, Edit, Search } from 'lucide-react';
 import type { Publisher } from '@/types/api.types';
@@ -40,7 +39,7 @@ export default function Publishers() {
       setTotalPages(dataResult.totalPages);
       setItems(data);
     } catch {
-      toast.error('Lỗi khi tải danh sách');
+      // toast.error('Lỗi khi tải danh sách');
     } finally {
       setLoading(false);
     }
@@ -56,10 +55,10 @@ export default function Publishers() {
   const handleDelete = async (id: string) => {
     try {
       await publishersService.deletePublisher(id);
-      toast.success('Xoá thành công');
+      // toast.success('Xoá thành công');
       fetchItems();
     } catch {
-      toast.error('Lỗi khi xoá. Có thể NXB này đã có sách.');
+      // toast.error('Lỗi khi xoá. Có thể NXB này đã có sách.');
     }
   };
 
@@ -69,15 +68,15 @@ export default function Publishers() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight">Quản lý Nhà xuất bản</h1>
       </div>
 
       <div className="grid grid-cols-1 gap-6">
-        <Card className="col-span-1">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Danh sách Nhà xuất bản</CardTitle>
+        <div className="col-span-1">
+          <div className="flex flex-row items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold">Danh sách Nhà xuất bản</h2>
             <div className="flex items-center space-x-2">
               <div className="relative">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -93,8 +92,8 @@ export default function Publishers() {
               </div>
               <CreatePublisherDialog onSuccess={fetchItems} />
             </div>
-          </CardHeader>
-          <CardContent>
+          </div>
+          <div>
             <div className="rounded-md border">
               <Table>
                 <TableHeader>
@@ -155,8 +154,8 @@ export default function Publishers() {
               </Table>
           </div>
           <DataTablePagination page={page} totalPages={totalPages} onPageChange={setPage} />
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
       <UpdatePublisherDialog 

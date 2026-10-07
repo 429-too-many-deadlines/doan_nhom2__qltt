@@ -1,10 +1,9 @@
 import { DataTablePagination } from '../components/ui/data-table-pagination';
 import { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { toast } from 'sonner';
 import { employeesService } from '@/services/employees.service';
 import { Trash2, Edit } from 'lucide-react';
 import type { Employee } from '@/types/api.types';
@@ -33,12 +32,12 @@ export default function Employees() {
   const fetchItems = async () => {
     setLoading(true);
     try {
-      const dataResult = await employeesService.getEmployees(undefined, page);
+      const dataResult = await employeesService.getEmployees(page, 10);
       const data = dataResult.items || [];
       setTotalPages(dataResult.totalPages);
       setItems(data);
     } catch {
-      toast.error('Lỗi khi tải danh sách nhân viên');
+      // toast.error('Lỗi khi tải danh sách nhân viên');
     } finally {
       setLoading(false);
     }
@@ -51,10 +50,10 @@ export default function Employees() {
   const handleDelete = async (MANV: string) => {
     try {
       await employeesService.deleteEmployee(MANV);
-      toast.success('Xoá thành công');
+      // toast.success('Xoá thành công');
       fetchItems();
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Lỗi khi xoá nhân viên');
+    } catch (_error: any) {
+      // toast.error(error.response?.data?.message || 'Lỗi khi xoá nhân viên');
     }
   };
 
@@ -64,21 +63,21 @@ export default function Employees() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight">Quản lý Nhân viên</h1>
       </div>
 
       <div className="grid grid-cols-1 gap-6">
-        <Card className="col-span-1">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Danh sách Nhân viên</CardTitle>
+        <div className="col-span-1">
+          <div className="flex flex-row items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold">Danh sách Nhân viên</h2>
             <div className="flex items-center space-x-2">
               <Input placeholder="Tìm kiếm..." className="w-64" />
               <CreateEmployeeDialog onSuccess={fetchItems} />
             </div>
-          </CardHeader>
-          <CardContent>
+          </div>
+          <div>
             <div className="rounded-md border overflow-x-auto">
               <Table>
                 <TableHeader>
@@ -139,8 +138,8 @@ export default function Employees() {
               </Table>
           </div>
           <DataTablePagination page={page} totalPages={totalPages} onPageChange={setPage} />
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
       <UpdateEmployeeDialog 

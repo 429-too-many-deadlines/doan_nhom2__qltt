@@ -1,4 +1,4 @@
-import { DataTablePagination } from '../components/ui/data-table-pagination';
+
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -41,7 +41,7 @@ export default function BookDetails() {
       const data = await booksService.getBookCopies(id!);
       setCopies(data);
     } catch {
-      toast.error('Lỗi khi tải bản sao');
+      // toast.error('Lỗi khi tải bản sao');
     } finally {
       setLoadingCopies(false);
     }
@@ -53,7 +53,7 @@ export default function BookDetails() {
       const data = await booksService.getBookAuthors(id!);
       setBookAuthors(data);
     } catch {
-      toast.error('Lỗi khi tải tác giả của sách');
+      // toast.error('Lỗi khi tải tác giả của sách');
     } finally {
       setLoadingAuthors(false);
     }
@@ -61,9 +61,8 @@ export default function BookDetails() {
 
   const fetchAllAuthors = async () => {
     try {
-      const dataResult = await authorsService.getAuthors('', page);
+      const dataResult = await authorsService.getAuthors('', 1, 1000);
       const data = dataResult.items || [];
-      setTotalPages(dataResult.totalPages);
       setAllAuthors(data);
     } catch {
       console.error('Lỗi khi tải danh sách tác giả');
@@ -74,12 +73,12 @@ export default function BookDetails() {
     e.preventDefault();
     try {
       await booksService.createBookCopy(id!, newCopy);
-      toast.success('Thêm cuốn sách thành công');
+      // toast.success('Thêm cuốn sách thành công');
       setNewCopy({ MACS: '', VITRI: '', TINHTRANG: 'Có sẵn' });
       fetchCopies();
-    } catch (error) {
+    } catch (_error) {
       const err = error as { response?: { data?: { message?: string } } };
-      toast.error(err.response?.data?.message || 'Lỗi khi thêm cuốn sách');
+      // toast.error(err.response?.data?.message || 'Lỗi khi thêm cuốn sách');
     }
   };
 
@@ -87,11 +86,11 @@ export default function BookDetails() {
     if (!window.confirm('Xoá cuốn sách này?')) return;
     try {
       await booksService.deleteBookCopy(MACS);
-      toast.success('Xoá thành công');
+      // toast.success('Xoá thành công');
       fetchCopies();
-    } catch (error) {
+    } catch (_error) {
       const err = error as { response?: { data?: { message?: string } } };
-      toast.error(err.response?.data?.message || 'Lỗi khi xoá cuốn sách');
+      // toast.error(err.response?.data?.message || 'Lỗi khi xoá cuốn sách');
     }
   };
 
@@ -102,23 +101,23 @@ export default function BookDetails() {
         VITRI: editCopyData.VITRI, 
         TINHTRANG: editCopyData.TINHTRANG 
       });
-      toast.success('Cập nhật cuốn sách thành công');
+      // toast.success('Cập nhật cuốn sách thành công');
       setEditingCopyId(null);
       fetchCopies();
-    } catch (error) {
+    } catch (_error) {
       const err = error as { response?: { data?: { message?: string } } };
-      toast.error(err.response?.data?.message || 'Lỗi khi cập nhật cuốn sách');
+      // toast.error(err.response?.data?.message || 'Lỗi khi cập nhật cuốn sách');
     }
   };
 
   const handleSaveAuthors = async () => {
     try {
       await booksService.updateBookAuthors(id!, bookAuthors);
-      toast.success('Lưu danh sách tác giả thành công');
+      // toast.success('Lưu danh sách tác giả thành công');
       fetchBookAuthors();
-    } catch (error) {
+    } catch (_error) {
       const err = error as { response?: { data?: { message?: string } } };
-      toast.error(err.response?.data?.message || 'Lỗi khi lưu tác giả');
+      // toast.error(err.response?.data?.message || 'Lỗi khi lưu tác giả');
     }
   };
 
@@ -140,7 +139,7 @@ export default function BookDetails() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
       <div className="flex items-center gap-4">
         <Button variant="outline" size="icon" onClick={() => navigate('/books')}>
           <ArrowLeft className="h-4 w-4" />
@@ -212,7 +211,7 @@ export default function BookDetails() {
                 </TableBody>
               </Table>
           </div>
-          <DataTablePagination page={page} totalPages={totalPages} onPageChange={setPage} />
+
           </CardContent>
         </Card>
 
@@ -314,7 +313,7 @@ export default function BookDetails() {
                 </TableBody>
               </Table>
           </div>
-          <DataTablePagination page={page} totalPages={totalPages} onPageChange={setPage} />
+
           </CardContent>
         </Card>
       </div>

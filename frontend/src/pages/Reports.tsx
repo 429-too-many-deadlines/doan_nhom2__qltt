@@ -1,9 +1,8 @@
 import { DataTablePagination } from '../components/ui/data-table-pagination';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { reportsService } from '../services/reports.service';
 import type { MonthlyStatsResponse, TopBookResponse, GenericApiResponse } from '../types/api.types';
-import { toast } from 'sonner';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import {
@@ -33,10 +32,10 @@ export default function Reports() {
       setMonthlyStats(null);
       const data = await fetchFn();
       setReportData(data || []);
-      toast.success(`Tải báo cáo ${reportType} thành công`);
-    } catch (error) {
+      // toast.success(`Tải báo cáo ${reportType} thành công`);
+    } catch (_error) {
       console.error(error);
-      toast.error('Lỗi khi tải báo cáo');
+      // toast.error('Lỗi khi tải báo cáo');
       setReportData([]);
     } finally {
       setLoading(false);
@@ -50,10 +49,10 @@ export default function Reports() {
       setReportData([]);
       const data = await reportsService.getMonthlyStats(month, year);
       setMonthlyStats(data);
-      toast.success('Tải thống kê tháng thành công');
-    } catch (error) {
+      // toast.success('Tải thống kê tháng thành công');
+    } catch (_error) {
       console.error(error);
-      toast.error('Lỗi khi tải thống kê tháng');
+      // toast.error('Lỗi khi tải thống kê tháng');
       setMonthlyStats(null);
     } finally {
       setLoading(false);
@@ -66,16 +65,24 @@ export default function Reports() {
   };
 
   const columns = getColumns();
+  const pageSize = 10;
+  const computedTotalPages = Math.ceil(reportData.length / pageSize) || 1;
+  const paginatedReportData = reportData.slice((page - 1) * pageSize, page * pageSize);
+
+  // Update totalPages state if computed changes
+  useEffect(() => {
+    setTotalPages(computedTotalPages);
+  }, [computedTotalPages]);
 
   return (
     <div className="p-6 space-y-6">
       <h1 className="text-2xl font-bold">Báo Cáo Thống Kê</h1>
       
-      <Card>
-        <CardHeader>
-          <CardTitle>Chọn Loại Báo Cáo</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-wrap gap-4">
+      <div className="space-y-4">
+        <div className="mb-4">
+          <h2 className="text-xl font-semibold">Chọn Loại Báo Cáo</h2>
+        </div>
+        <div className="flex flex-wrap gap-4">
           <Button 
             variant={activeReport === 'Lượt mượn theo tháng' ? 'default' : 'outline'}
             onClick={() => fetchReport('Lượt mượn theo tháng', reportsService.getBorrowsByMonth)}
@@ -124,14 +131,14 @@ export default function Reports() {
           >
             Nhắc nhở quá hạn
           </Button>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Thống kê tháng</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <div className="space-y-4">
+        <div className="mb-4">
+          <h2 className="text-xl font-semibold">Thống kê tháng</h2>
+        </div>
+        <div>
           <div className="flex gap-4 items-end mb-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">Tháng</label>
@@ -182,18 +189,17 @@ export default function Reports() {
                   </TableBody>
                 </Table>
           </div>
-          <DataTablePagination page={page} totalPages={totalPages} onPageChange={setPage} />
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {(activeReport && activeReport !== 'Thống kê tháng') && (
-        <Card>
-          <CardHeader>
-            <CardTitle>{`Kết quả: ${activeReport}`}</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <div className="space-y-4">
+          <div className="mb-4">
+            <h2 className="text-xl font-semibold">{`Kết quả: ${activeReport}`}</h2>
+          </div>
+          <div>
             <div className="rounded-md border overflow-auto">
               <Table>
                 <TableHeader>
@@ -217,7 +223,7 @@ export default function Reports() {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    reportData.map((row, idx) => (
+                    paginatedReportData.map((row, idx) => (
                       <TableRow key={idx}>
                         {columns.map(col => (
                           <TableCell key={col}>{String(row[col])}</TableCell>
@@ -229,9 +235,10 @@ export default function Reports() {
               </Table>
           </div>
           <DataTablePagination page={page} totalPages={totalPages} onPageChange={setPage} />
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
     </div>
   );
 }
+

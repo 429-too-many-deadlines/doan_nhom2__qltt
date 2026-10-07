@@ -3,7 +3,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { publishersService } from '@/services/publishers.service';
-import { toast } from 'sonner';
 import type { Publisher } from '@/types/api.types';
 
 interface Props {
@@ -39,11 +38,11 @@ export function UpdatePublisherDialog({ publisher, open, onOpenChange, onSuccess
         DIACHI: formData.DIACHI,
         SODT: formData.SODT
       });
-      toast.success('Cập nhật thành công');
+      // toast.success('Cập nhật thành công');
       onOpenChange(false);
       onSuccess();
     } catch {
-      toast.error('Lỗi khi cập nhật');
+      // toast.error('Lỗi khi cập nhật');
     } finally {
       setLoading(false);
     }

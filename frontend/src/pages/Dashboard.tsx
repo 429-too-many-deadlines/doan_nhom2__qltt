@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { reportsService } from '../services/reports.service';
 import type { MonthlyStatsResponse } from '../types/api.types';
-import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
@@ -19,9 +18,9 @@ export default function Dashboard() {
       setLoading(true);
       const data = await reportsService.getMonthlyStats(month, year);
       setStats(data);
-    } catch (error) {
+    } catch (_error) {
       console.error(error);
-      toast.error('Lỗi khi tải thống kê tổng quan');
+      // toast.error('Lỗi khi tải thống kê tổng quan');
     } finally {
       setLoading(false);
     }

@@ -3,7 +3,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { authorsService } from '@/services/authors.service';
-import { toast } from 'sonner';
 import type { Author } from '@/types/api.types';
 
 interface Props {
@@ -40,11 +39,11 @@ export function UpdateAuthorDialog({ author, open, onOpenChange, onSuccess }: Pr
         QUOCTICH: formData.QUOCTICH || null,
       };
       await authorsService.updateAuthor(formData.MATG, payload);
-      toast.success('Cập nhật thành công');
+      // toast.success('Cập nhật thành công');
       onOpenChange(false);
       onSuccess();
     } catch {
-      toast.error('Lỗi khi cập nhật');
+      // toast.error('Lỗi khi cập nhật');
     } finally {
       setLoading(false);
     }

@@ -40,11 +40,11 @@ export function CreateBookDialog({ onSuccess, categories, publishers }: Props) {
 
     try {
       await booksService.createBook(data);
-      toast.success('Thêm đầu sách thành công');
+      // toast.success('Thêm đầu sách thành công');
       setOpen(false);
       onSuccess();
     } catch {
-      toast.error('Lỗi khi thêm đầu sách');
+      // toast.error('Lỗi khi thêm đầu sách');
     } finally {
       setLoading(false);
     }

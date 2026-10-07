@@ -2,6 +2,7 @@ import { RouterProvider, createBrowserRouter, Navigate, Outlet } from 'react-rou
 import { lazy, Suspense } from 'react';
 import { MainLayout } from '@/components/layout/main-layout';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { Toaster } from '@/components/ui/sonner';
 
 const Dashboard = lazy(() => import("@/pages/Dashboard"));
 const Books = lazy(() => import("@/pages/Books"));
@@ -15,7 +16,6 @@ const Categories = lazy(() => import("@/pages/Categories"));
 const Authors = lazy(() => import("@/pages/Authors"));
 const Publishers = lazy(() => import("@/pages/Publishers"));
 const Employees = lazy(() => import("@/pages/Employees"));
-const ReaderTypes = lazy(() => import("@/pages/ReaderTypes"));
 const BookDetails = lazy(() => import("@/pages/BookDetails"));
 
 const ProtectedRoute = () => {
@@ -49,7 +49,6 @@ const router = createBrowserRouter([
           { path: "/authors", element: <Authors /> },
           { path: "/publishers", element: <Publishers /> },
           { path: "/employees", element: <Employees /> },
-          { path: "/readertypes", element: <ReaderTypes /> },
         ],
       },
     ],
@@ -62,6 +61,7 @@ const App = () => {
       <Suspense fallback={<div>Loading...</div>}>
         <RouterProvider router={router} />
       </Suspense>
+      <Toaster />
     </AuthProvider>
   );
 };

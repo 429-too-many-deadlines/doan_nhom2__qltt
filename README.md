@@ -70,7 +70,7 @@ Script SQL Server cho đồ án IE103, chia file theo đúng các mục yêu c�
 | #   | File                     | Nội dung                                                     | Số lượng                                         |
 | --- | ------------------------ | ------------------------------------------------------------ | ------------------------------------------------ |
 | 1   | `01_TaoBang.sql`         | Tạo CSDL, bảng, khóa chính, khóa ngoại, CHECK/DEFAULT/UNIQUE | 13 bảng                                          |
-| 2   | `02_DuLieuMau.sql`       | Dữ liệu mẫu, mốc thời gian 26/09/2026                        | 10–31 dòng/bảng (riêng LOAIDOCGIA chỉ có 4 loại) |
+| 2   | `02_DuLieuMau.sql`       | Dữ liệu mẫu, mốc thời gian 26/09/2026                        | 10–31 dòng/bảng |
 | 3   | `03_Function.sql`        | Function                                                     | 3                                                |
 | 4   | `04_Trigger.sql`         | Trigger (kèm bảng tầm ảnh hưởng)                             | 5                                                |
 | 5   | `05_StoredProcedure.sql` | Stored Procedure: tham số vào; tham số vào + ra              | 6                                                |
@@ -107,19 +107,17 @@ Khóa chính **in đậm**, khóa ngoại _in nghiêng_.
    Tác giả MATG tham gia viết đầu sách MADS với vai trò tác giả chính, đồng tác giả hoặc dịch giả.
 6. **CUONSACH**(**MACS**, _MADS_, NGAYNHAP, VITRI, TINHTRANG)
    Mỗi cuốn sách vật lý có mã riêng, thuộc một đầu sách, được nhập kho ngày NGAYNHAP, đặt tại vị trí VITRI, và đang ở một trong các tình trạng: Có sẵn, Đang mượn, Hư hỏng, Mất.
-7. **LOAIDOCGIA**(**MALDG**, TENLDG, SOSACHTOIDA, SONGAYMUON)
-   Mỗi loại độc giả (sinh viên, học viên cao học, giảng viên, khách ngoài) được mượn tối đa SOSACHTOIDA cuốn cùng lúc, mỗi lần mượn tối đa SONGAYMUON ngày.
-8. **DOCGIA**(**MADG**, HOTEN, NGSINH, GIOITINH, DIACHI, SODT, EMAIL, _MALDG_, NGAYLAPTHE, NGAYHETHAN, TONGNO)
-   Mỗi độc giả có mã thẻ duy nhất, thông tin cá nhân, thuộc một loại độc giả. Thẻ được lập ngày NGAYLAPTHE và hết hạn ngày NGAYHETHAN. TONGNO là tổng tiền phạt chưa thanh toán (thuộc tính dẫn xuất).
-9. **NHANVIEN**(**MANV**, HOTEN, NGSINH, SODT, CHUCVU, NGVL)
+7. **DOCGIA**(**MADG**, HOTEN, NGSINH, GIOITINH, DIACHI, SODT, EMAIL, NGAYLAPTHE, NGAYHETHAN, TONGNO)
+   Mỗi độc giả có mã thẻ duy nhất, thông tin cá nhân. Thẻ được lập ngày NGAYLAPTHE và hết hạn ngày NGAYHETHAN. TONGNO là tổng tiền phạt chưa thanh toán (thuộc tính dẫn xuất).
+8. **NHANVIEN**(**MANV**, HOTEN, NGSINH, SODT, CHUCVU, NGVL)
    Mỗi nhân viên thư viện có mã duy nhất, họ tên, ngày sinh, số điện thoại, chức vụ và ngày vào làm.
-10. **PHIEUMUON**(**MAPM**, _MADG_, _MANV_, NGAYMUON, HANTRA, TINHTRANG)
+9. **PHIEUMUON**(**MAPM**, _MADG_, _MANV_, NGAYMUON, HANTRA, TINHTRANG)
     Độc giả MADG mượn sách vào ngày NGAYMUON, do nhân viên MANV lập phiếu, phải trả trước ngày HANTRA. Phiếu ở tình trạng "Đang mượn" cho đến khi trả hết sách thì chuyển sang "Đã trả".
-11. **CTPHIEUMUON**(**_MAPM_**, **_MACS_**, NGAYTRA, TINHTRANGTRA)
+10. **CTPHIEUMUON**(**_MAPM_**, **_MACS_**, NGAYTRA, TINHTRANGTRA)
     Cuốn sách MACS được mượn theo phiếu MAPM. Khi trả thì ghi nhận ngày trả và tình trạng lúc trả (Bình thường, Hư hỏng, Mất). Chưa trả thì cả hai đều rỗng.
-12. **PHIEUPHAT**(**MAPP**, _MAPM_, _MACS_, NGAYLAP, LYDO, SOTIEN, DATHANHTOAN)
+11. **PHIEUPHAT**(**MAPP**, _MAPM_, _MACS_, NGAYLAP, LYDO, SOTIEN, DATHANHTOAN)
     Phiếu phạt lập ngày NGAYLAP cho cuốn sách MACS thuộc phiếu mượn MAPM, vì lý do trả trễ, làm hư hỏng hoặc làm mất sách, với số tiền SOTIEN, đã hoặc chưa thanh toán.
-13. **TAIKHOAN**(**TENDANGNHAP**, MATKHAU, VAITRO, _MANV_, _MADG_, TRANGTHAI)
+12. **TAIKHOAN**(**TENDANGNHAP**, MATKHAU, VAITRO, _MANV_, _MADG_, TRANGTHAI)
     Tài khoản đăng nhập ứng dụng, thuộc về một nhân viên (vai trò Quản lý / Thủ thư) hoặc một độc giả. Mật khẩu lưu dạng băm SHA2-256 kèm chuỗi muối. TRANGTHAI = 0 là tài khoản bị khóa.
 
 Hai bảng kết quả của Cursor (tạo trong `06_Cursor.sql`): **DOCGIA_XEPLOAI**, **NHACNHO_QUAHAN**.
@@ -133,7 +131,6 @@ erDiagram
     DAUSACH ||--o{ DAUSACH_TACGIA : ""
     TACGIA ||--o{ DAUSACH_TACGIA : "viết"
     DAUSACH ||--o{ CUONSACH : "gồm"
-    LOAIDOCGIA ||--o{ DOCGIA : "thuộc"
     DOCGIA ||--o{ PHIEUMUON : "mượn"
     NHANVIEN ||--o{ PHIEUMUON : "lập"
     PHIEUMUON ||--|{ CTPHIEUMUON : "gồm"
@@ -154,8 +151,8 @@ erDiagram
 | R5  | Chi tiết phiếu mượn: đã trả thì phải có tình trạng trả, chưa trả thì không có           | CHECK                    |
 | R6  | Tài khoản độc giả gắn với MADG, tài khoản nhân viên gắn với MANV                        | CHECK                    |
 | R7  | SOLUONG, SLCON của đầu sách khớp với số cuốn / số cuốn có sẵn                           | `TRG_CUONSACH_CAPNHATSL` |
-| R8  | Lập phiếu mượn: thẻ còn hạn, không nợ phạt, số ngày mượn ≤ quy định của loại độc giả    | `TRG_PHIEUMUON_KIEMTRA`  |
-| R9  | Chỉ cho mượn cuốn "Có sẵn"; số sách đang mượn ≤ SOSACHTOIDA                             | `TRG_CTPM_MUONSACH`      |
+| R8  | Lập phiếu mượn: thẻ còn hạn, không nợ phạt,     | `TRG_PHIEUMUON_KIEMTRA`  |
+| R9  | Chỉ cho mượn cuốn "Có sẵn"                             | `TRG_CTPM_MUONSACH`      |
 | R10 | Trả sách: cập nhật tình trạng cuốn sách, tự lập phiếu phạt, đóng phiếu mượn khi trả hết | `TRG_CTPM_TRASACH`       |
 | R11 | TONGNO của độc giả = tổng phạt chưa thanh toán                                          | `TRG_PHIEUPHAT_TONGNO`   |
 

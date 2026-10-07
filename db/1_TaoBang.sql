@@ -100,20 +100,7 @@ CREATE TABLE CUONSACH
 )
 
 /* ---------------------------------------------------------------------
-   7. LOAIDOCGIA(MALDG, TENLDG, SOSACHTOIDA, SONGAYMUON)
-   --------------------------------------------------------------------- */
-CREATE TABLE LOAIDOCGIA
-(
-	MALDG		CHAR(2)			PRIMARY KEY,
-	TENLDG		NVARCHAR(30)	NOT NULL UNIQUE,
-	SOSACHTOIDA	INT				NOT NULL,
-	SONGAYMUON	INT				NOT NULL,
-	CONSTRAINT CK_LDG_SOSACH	CHECK (SOSACHTOIDA > 0),
-	CONSTRAINT CK_LDG_SONGAY	CHECK (SONGAYMUON > 0)
-)
-
-/* ---------------------------------------------------------------------
-   8. DOCGIA(MADG, HOTEN, NGSINH, GIOITINH, DIACHI, SODT, EMAIL, MALDG,
+   8. DOCGIA(MADG, HOTEN, NGSINH, GIOITINH, DIACHI, SODT, EMAIL
              NGAYLAPTHE, NGAYHETHAN, TONGNO)
       TONGNO la thuoc tinh dan xuat (tong tien phat chua thanh toan)
    --------------------------------------------------------------------- */
@@ -126,7 +113,7 @@ CREATE TABLE DOCGIA
 	DIACHI		NVARCHAR(100)	NULL,
 	SODT		VARCHAR(15)		NOT NULL,
 	EMAIL		VARCHAR(50)		NULL,
-	MALDG		CHAR(2)			NOT NULL FOREIGN KEY REFERENCES LOAIDOCGIA (MALDG),
+	
 	NGAYLAPTHE	DATE			NOT NULL DEFAULT GETDATE(),
 	NGAYHETHAN	DATE			NOT NULL,
 	TONGNO		MONEY			NOT NULL DEFAULT 0,

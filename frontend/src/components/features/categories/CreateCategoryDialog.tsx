@@ -4,7 +4,6 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Plus } from 'lucide-react';
 import { categoriesService } from '@/services/categories.service';
-import { toast } from 'sonner';
 
 interface Props {
   onSuccess: () => void;
@@ -20,12 +19,12 @@ export function CreateCategoryDialog({ onSuccess }: Props) {
     setLoading(true);
     try {
       await categoriesService.createCategory({ MATL: formData.maTl, TENTL: formData.tenTl });
-      toast.success('Thêm thành công');
+      // toast.success('Thêm thành công');
       setFormData({ maTl: '', tenTl: '' });
       setOpen(false);
       onSuccess();
     } catch {
-      toast.error('Lỗi khi thêm mới');
+      // toast.error('Lỗi khi thêm mới');
     } finally {
       setLoading(false);
     }

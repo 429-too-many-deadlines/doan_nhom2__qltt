@@ -1,11 +1,10 @@
 import { DataTablePagination } from '../components/ui/data-table-pagination';
 import { useState, useEffect } from 'react';
 import { authService } from '../services/auth.service';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
-import { toast } from 'sonner';
 
 
 export interface Account {
@@ -20,17 +19,22 @@ export default function Accounts() {
   const [createData, setCreateData] = useState({ username: '', password: '', role: 'Thủ thư', MANV: '', MADG: '' });
   const [changePwdData, setChangePwdData] = useState({ oldPassword: '', newPassword: '' });
   const [accounts, setAccounts] = useState<Account[]>([]);
+  const [page, setPage] = useState(1);
+  
+  const pageSize = 10;
+  const totalPages = Math.ceil(accounts.length / pageSize) || 1;
+  const paginatedAccounts = accounts.slice((page - 1) * pageSize, page * pageSize);
 
   useEffect(() => {
     fetchAccounts();
-  }, [page]);
+  }, []);
 
   const fetchAccounts = async () => {
     try {
       const data = await authService.getAccounts();
       setAccounts(data);
     } catch {
-      toast.error('Lỗi khi tải danh sách tài khoản');
+      // toast.error('Lỗi khi tải danh sách tài khoản');
     }
   };
 
@@ -38,12 +42,12 @@ export default function Accounts() {
     e.preventDefault();
     try {
       await authService.createAccount(createData);
-      toast.success('Tạo tài khoản thành công');
+      // toast.success('Tạo tài khoản thành công');
       setCreateData({ username: '', password: '', role: 'Thủ thư', MANV: '', MADG: '' });
       fetchAccounts();
-    } catch (error) {
+    } catch (_error) {
       const err = error as { response?: { data?: { message?: string } } };
-      toast.error(err.response?.data?.message || 'Lỗi khi tạo tài khoản');
+      // toast.error(err.response?.data?.message || 'Lỗi khi tạo tài khoản');
     }
   };
 
@@ -51,22 +55,22 @@ export default function Accounts() {
     e.preventDefault();
     try {
       await authService.changePassword(changePwdData);
-      toast.success('Đổi mật khẩu thành công');
+      // toast.success('Đổi mật khẩu thành công');
       setChangePwdData({ oldPassword: '', newPassword: '' });
-    } catch (error) {
+    } catch (_error) {
       const err = error as { response?: { data?: { message?: string } } };
-      toast.error(err.response?.data?.message || 'Lỗi khi đổi mật khẩu');
+      // toast.error(err.response?.data?.message || 'Lỗi khi đổi mật khẩu');
     }
   };
 
   const handleToggleStatus = async (username: string, currentStatus: boolean) => {
     try {
       await authService.updateAccountStatus(username, !currentStatus);
-      toast.success(`Đã ${!currentStatus ? 'mở khóa' : 'khóa'} tài khoản ${username}`);
+      // toast.success(`Đã ${!currentStatus ? 'mở khóa' : 'khóa'} tài khoản ${username}`);
       fetchAccounts();
-    } catch (error) {
+    } catch (_error) {
       const err = error as { response?: { data?: { message?: string } } };
-      toast.error(err.response?.data?.message || 'Lỗi khi cập nhật trạng thái');
+      // toast.error(err.response?.data?.message || 'Lỗi khi cập nhật trạng thái');
     }
   };
 
@@ -75,11 +79,11 @@ export default function Accounts() {
       <h1 className="text-2xl font-bold">Tài khoản & Bảo mật</h1>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Tạo Tài Khoản (Quản lý)</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <div className="space-y-4">
+          <div className="mb-4">
+            <h2 className="text-xl font-semibold">Tạo Tài Khoản (Quản lý)</h2>
+          </div>
+          <div>
             <form onSubmit={handleCreate} className="space-y-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium">Tên đăng nhập</label>
@@ -108,14 +112,14 @@ export default function Accounts() {
               </div>
               <Button type="submit" className="w-full">Xác nhận tạo</Button>
             </form>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Đổi Mật Khẩu</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <div className="space-y-4">
+          <div className="mb-4">
+            <h2 className="text-xl font-semibold">Đổi Mật Khẩu</h2>
+          </div>
+          <div>
             <form onSubmit={handleChangePassword} className="space-y-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium">Mật khẩu cũ</label>
@@ -127,15 +131,15 @@ export default function Accounts() {
               </div>
               <Button type="submit" className="w-full">Xác nhận đổi</Button>
             </form>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Danh Sách Tài Khoản</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <div className="space-y-4">
+        <div className="mb-4">
+          <h2 className="text-xl font-semibold">Danh Sách Tài Khoản</h2>
+        </div>
+        <div>
           <div className="rounded-md border overflow-x-auto">
             <Table>
               <TableHeader>
@@ -149,7 +153,7 @@ export default function Accounts() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {accounts.map((acc) => (
+                {paginatedAccounts.map((acc) => (
                   <TableRow key={acc.tendangnhap}>
                     <TableCell className="font-medium">{acc.tendangnhap}</TableCell>
                     <TableCell>{acc.vaitro}</TableCell>
@@ -184,8 +188,8 @@ export default function Accounts() {
             </Table>
           </div>
           <DataTablePagination page={page} totalPages={totalPages} onPageChange={setPage} />
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

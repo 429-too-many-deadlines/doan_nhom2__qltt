@@ -3,7 +3,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { transactionsService } from '@/services/transactions.service';
-import { toast } from 'sonner';
 import type { BorrowSlip } from '@/types/api.types';
 
 interface Props {
@@ -38,11 +37,11 @@ export function UpdateTransactionDialog({ transaction, open, onOpenChange, onSuc
         MACS: formData.MACS,
         TINHTRANGTRA: formData.TINHTRANGTRA
       });
-      toast.success('Trả sách thành công');
+      // toast.success('Trả sách thành công');
       onOpenChange(false);
       onSuccess();
     } catch {
-      toast.error('Lỗi khi trả sách');
+      // toast.error('Lỗi khi trả sách');
     } finally {
       setLoading(false);
     }

@@ -4,7 +4,6 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Plus } from 'lucide-react';
 import { transactionsService } from '@/services/transactions.service';
-import { toast } from 'sonner';
 
 interface Props {
   onSuccess: () => void;
@@ -21,12 +20,12 @@ export function CreateTransactionDialog({ onSuccess }: Props) {
     try {
       const DSMACs = formData.DSMACs.split(',').map(s => s.trim()).filter(Boolean);
       await transactionsService.borrowBook({ MADG: formData.MADG, MANV: formData.MANV, DSMACs });
-      toast.success('Mượn sách thành công');
+      // toast.success('Mượn sách thành công');
       setFormData({ MADG: '', MANV: '', DSMACs: '' });
       setOpen(false);
       onSuccess();
     } catch {
-      toast.error('Lỗi khi mượn sách');
+      // toast.error('Lỗi khi mượn sách');
     } finally {
       setLoading(false);
     }

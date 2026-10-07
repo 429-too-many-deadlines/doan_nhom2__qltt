@@ -1,6 +1,6 @@
 import { DataTablePagination } from '../components/ui/data-table-pagination';
 import { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -40,7 +40,7 @@ export default function Transactions() {
       setTotalPages(total);
       setTransactions(data);
     } catch {
-      toast.error('Lỗi khi tải danh sách giao dịch');
+      // toast.error('Lỗi khi tải danh sách giao dịch');
     } finally {
       setLoading(false);
     }
@@ -56,7 +56,7 @@ export default function Transactions() {
       toast.error('Chức năng xoá chưa được hỗ trợ bởi API');
       console.log('Delete clicked for', MAPM, MACS);
     } catch {
-      toast.error('Lỗi khi xoá.');
+      // toast.error('Lỗi khi xoá.');
     }
   };
 
@@ -72,15 +72,15 @@ export default function Transactions() {
       </div>
 
       <div className="grid grid-cols-1 gap-6">
-        <Card className="col-span-1">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Danh sách Giao dịch</CardTitle>
+        <div className="col-span-1">
+          <div className="flex flex-row items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold">Danh sách Giao dịch</h2>
             <div className="flex items-center space-x-2">
               <Input placeholder="Tìm kiếm..." className="w-64" />
               <CreateTransactionDialog onSuccess={fetchTransactions} />
             </div>
-          </CardHeader>
-          <CardContent>
+          </div>
+          <div>
             <div className="rounded-md border">
               <Table>
                 <TableHeader>
@@ -151,8 +151,8 @@ export default function Transactions() {
               </Table>
           </div>
           <DataTablePagination page={page} totalPages={totalPages} onPageChange={setPage} />
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
       <UpdateTransactionDialog 

@@ -3,7 +3,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { booksService } from '@/services/books.service';
-import { toast } from 'sonner';
 import type { Category, Publisher, SearchBookResponse } from '@/types/api.types';
 
 interface Props {
@@ -58,11 +57,11 @@ export function UpdateBookDialog({ book, open, onOpenChange, onSuccess, categori
 
     try {
       await booksService.updateBook(formData.MADS, data);
-      toast.success('Cập nhật thành công');
+      // toast.success('Cập nhật thành công');
       onOpenChange(false);
       onSuccess();
     } catch {
-      toast.error('Lỗi khi cập nhật đầu sách');
+      // toast.error('Lỗi khi cập nhật đầu sách');
     } finally {
       setLoading(false);
     }

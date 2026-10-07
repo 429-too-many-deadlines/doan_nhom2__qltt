@@ -4,7 +4,6 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Plus } from 'lucide-react';
 import { employeesService } from '@/services/employees.service';
-import { toast } from 'sonner';
 
 interface Props {
   onSuccess: () => void;
@@ -20,12 +19,12 @@ export function CreateEmployeeDialog({ onSuccess }: Props) {
     setLoading(true);
     try {
       await employeesService.createEmployee(formData);
-      toast.success('Thêm thành công');
+      // toast.success('Thêm thành công');
       setFormData({ MANV: '', HOTEN: '', NGSINH: '', SODT: '', CHUCVU: 'Thủ thư', NGVL: '' });
       setOpen(false);
       onSuccess();
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Lỗi khi thêm mới');
+    } catch (_error: any) {
+      // toast.error(error.response?.data?.message || 'Lỗi khi thêm mới');
     } finally {
       setLoading(false);
     }

@@ -32,9 +32,9 @@ public class GetBorrowSlipsEndpoint : IEndpoint
                 ORDER BY PM.NGAYMUON DESC, PM.MAPM DESC
                 OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY";
             
-            var items = await db.QueryAsync<BorrowSlip>(query, new { Offset = offset, PageSize = pageSize });
+            var items = await db.QueryAsync<dynamic>(query, new { Offset = offset, PageSize = pageSize });
             
-            return Results.Ok(new PagedResult<BorrowSlip>
+            return Results.Ok(new PagedResult<dynamic>
             {
                 Items = items,
                 TotalCount = totalCount,
@@ -49,16 +49,3 @@ public class GetBorrowSlipsEndpoint : IEndpoint
         .WithSummary("Lấy danh sách phiếu mượn");
     }
 }
-
-public record BorrowSlip(
-    string MAPM, 
-    string MADG, 
-    string TENDG, 
-    string MANV, 
-    System.DateTime NGAYMUON, 
-    System.DateTime HANTRA, 
-    string TINHTRANG, 
-    string MACS, 
-    System.DateTime? NGAYTRA, 
-    string TINHTRANGTRA
-);

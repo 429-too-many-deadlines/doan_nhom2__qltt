@@ -4,7 +4,6 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Plus } from 'lucide-react';
 import { authorsService } from '@/services/authors.service';
-import { toast } from 'sonner';
 
 interface Props {
   onSuccess: () => void;
@@ -24,12 +23,12 @@ export function CreateAuthorDialog({ onSuccess }: Props) {
         NAMSINH: formData.NAMSINH ? parseInt(formData.NAMSINH) : null,
       };
       await authorsService.createAuthor(payload);
-      toast.success('Thêm thành công');
+      // toast.success('Thêm thành công');
       setFormData({ MATG: '', TENTG: '', NAMSINH: '', QUOCTICH: '' });
       setOpen(false);
       onSuccess();
     } catch {
-      toast.error('Lỗi khi thêm mới');
+      // toast.error('Lỗi khi thêm mới');
     } finally {
       setLoading(false);
     }

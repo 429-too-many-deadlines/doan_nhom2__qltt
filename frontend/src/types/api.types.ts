@@ -76,12 +76,6 @@ export interface Employee {
 
 
 // --- Reader Types ---
-export interface ReaderType {
-  MALDG: string;
-  TENLDG: string;
-  SOSACHTOIDA: number;
-  SONGAYMUON: number;
-}
 
 
 
@@ -123,8 +117,6 @@ export interface Reader {
     DIACHI?: string;
     SODT: string;
     EMAIL?: string;
-    MALDG: string;
-    LOAIDG?: string;
     TONGNO?: number;
 }
 
@@ -136,7 +128,6 @@ export interface FineSlip {
     LYDO?: string;
     MAPP?: string;
     MAPM?: string;
-    MADG?: string;
     TENDG?: string;
     DATHANHTOAN?: boolean;
 }
@@ -270,7 +261,6 @@ export interface CreateReaderRequest {
   DIACHI: string | null;
   SODT: string;
   EMAIL: string | null;
-  MALDG: string;
 }
 
 export interface UpdateReaderRequest {
@@ -281,21 +271,9 @@ export interface UpdateReaderRequest {
   DIACHI: string | null;
   SODT: string;
   EMAIL: string | null;
-  MALDG: string;
 }
 
-export interface CreateReaderTypeRequest {
-  MALDG: string;
-  TENLDG: string;
-  SOSACHTOIDA: number;
-  SONGAYMUON: number;
-}
 
-export interface UpdateReaderTypeRequest {
-  TENLDG: string;
-  SOSACHTOIDA: number;
-  SONGAYMUON: number;
-}
 
 export interface BackupResponse {
   message: string;

@@ -2,7 +2,6 @@ import { DataTablePagination } from '../components/ui/data-table-pagination';
 import { useState, useEffect } from 'react';
 import { readersService } from '../services/readers.service';
 import type { Reader } from '../types/api.types';
-import { toast } from 'sonner';
 import {
   Table,
   TableBody,
@@ -11,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from '../components/ui/table';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import { Trash2, Edit } from 'lucide-react';
@@ -46,9 +45,9 @@ export default function Readers() {
       const data = dataResult.items || [];
       setTotalPages(dataResult.totalPages || 1);
       setReaders(data || []);
-    } catch (error) {
+    } catch (_error) {
       console.error(error);
-      toast.error('Lỗi khi tải danh sách độc giả');
+      // toast.error('Lỗi khi tải danh sách độc giả');
     } finally {
       setLoadingReaders(false);
     }
@@ -70,10 +69,10 @@ export default function Readers() {
   const handleDeleteReader = async (MADG: string) => {
     try {
       await readersService.deleteReader(MADG);
-      toast.success('Xóa độc giả thành công');
+      // toast.success('Xóa độc giả thành công');
       fetchReaders();
-    } catch (err) {
-      toast.error('Lỗi khi xóa độc giả (có thể độc giả đã mượn sách)');
+    } catch (_err) {
+      // toast.error('Lỗi khi xóa độc giả (có thể độc giả đã mượn sách)');
       console.error(err);
     }
   };
@@ -84,15 +83,15 @@ export default function Readers() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight">Quản lý Độc giả</h1>
       </div>
 
       <div className="grid grid-cols-1 gap-6">
-        <Card className="col-span-1">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Danh sách độc giả</CardTitle>
+        <div className="col-span-1">
+          <div className="flex flex-row items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold">Danh sách độc giả</h2>
             <div className="flex items-center space-x-2">
               <form onSubmit={handleSearchReaders} className="flex items-center space-x-2">
                 <Input 
@@ -107,8 +106,8 @@ export default function Readers() {
               </form>
               <CreateReaderDialog onSuccess={fetchReaders} />
             </div>
-          </CardHeader>
-          <CardContent>
+          </div>
+          <div>
             <div className="rounded-md border">
               <Table>
                 <TableHeader>
@@ -116,23 +115,21 @@ export default function Readers() {
                     <TableHead>Mã ĐG</TableHead>
                     <TableHead>Họ Tên</TableHead>
                     <TableHead>Giới Tính</TableHead>
-                    <TableHead>Loại ĐG</TableHead>
                     <TableHead>Tổng Nợ</TableHead>
                     <TableHead className="w-[150px]">Hành Động</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {loadingReaders ? (
-                    <TableRow><TableCell colSpan={6} className="text-center h-24">Đang tải...</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={5} className="text-center h-24">Đang tải...</TableCell></TableRow>
                   ) : readers.length === 0 ? (
-                    <TableRow><TableCell colSpan={6} className="text-center h-24">Không có dữ liệu.</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={5} className="text-center h-24">Không có dữ liệu.</TableCell></TableRow>
                   ) : (
                     readers.map((r, i) => (
                       <TableRow key={r.MADG || i}>
                         <TableCell className="font-medium">{r.MADG}</TableCell>
                         <TableCell>{r.HOTEN}</TableCell>
                         <TableCell>{r.GIOITINH}</TableCell>
-                        <TableCell>{r.LOAIDG}</TableCell>
                         <TableCell>{r.TONGNO}</TableCell>
                         <TableCell>
                           <div className="flex gap-2">
@@ -167,8 +164,8 @@ export default function Readers() {
               </Table>
             </div>
             <DataTablePagination page={page} totalPages={totalPages} onPageChange={setPage} />
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
       <UpdateReaderDialog 

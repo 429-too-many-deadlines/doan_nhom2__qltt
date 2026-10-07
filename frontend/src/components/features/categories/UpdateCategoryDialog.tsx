@@ -3,7 +3,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { categoriesService } from '@/services/categories.service';
-import { toast } from 'sonner';
 import type { Category } from '@/types/api.types';
 
 interface Props {
@@ -30,11 +29,11 @@ export function UpdateCategoryDialog({ category, open, onOpenChange, onSuccess }
     setLoading(true);
     try {
       await categoriesService.updateCategory(formData.maTl, { TENTL: formData.tenTl });
-      toast.success('Cập nhật thành công');
+      // toast.success('Cập nhật thành công');
       onOpenChange(false);
       onSuccess();
     } catch {
-      toast.error('Lỗi khi cập nhật');
+      // toast.error('Lỗi khi cập nhật');
     } finally {
       setLoading(false);
     }

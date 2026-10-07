@@ -11,14 +11,14 @@ USE QUANLYTHUVIEN;
 GO
 /* ---------------------------------------------------------------------
    SP 1. Them doc gia moi.
-   Tham so vao: MADG, HOTEN, NGSINH, GIOITINH, DIACHI, SODT, EMAIL, MALDG.
+   Tham so vao: MADG, HOTEN, NGSINH, GIOITINH, DIACHI, SODT, EMAIL.
    - MADG da ton tai          -> tra ve 0
-   - MALDG khong ton tai      -> tra ve 1
+   
    - Nguoc lai insert, ngay lap the = hom nay, han the: khach ngoai 6 thang,
      cac loai khac 2 nam      -> tra ve 2
    --------------------------------------------------------------------- */
 CREATE PROCEDURE SP_THEMDOCGIA
-@MADG CHAR (5), @HOTEN NVARCHAR (40), @NGSINH DATE, @GIOITINH NVARCHAR (3), @DIACHI NVARCHAR (100), @SODT VARCHAR (15), @EMAIL VARCHAR (50), @MALDG CHAR (2)
+@MADG CHAR (5), @HOTEN NVARCHAR (40), @NGSINH DATE, @GIOITINH NVARCHAR (3), @DIACHI NVARCHAR (100), @SODT VARCHAR (15), @EMAIL VARCHAR (50)
 AS
 BEGIN
 	IF EXISTS (SELECT	*
@@ -28,15 +28,8 @@ BEGIN
 			PRINT N'Mã độc giả đã tồn tại.';
 			RETURN 0;
 		END
-	IF NOT EXISTS (SELECT	*
-					FROM		LOAIDOCGIA
-					WHERE	MALDG = @MALDG)
-		BEGIN
-			PRINT N'Loại độc giả không tồn tại.';
-			RETURN 1;
-		END
 	DECLARE @NGAYLAP AS DATE = GETDATE();
-	DECLARE @HETHAN AS DATE = CASE WHEN @MALDG = 'KH' THEN DATEADD(MONTH, 6, @NGAYLAP) ELSE DATEADD(YEAR, 2, @NGAYLAP) END;
+	DECLARE @HETHAN AS DATE = DATEADD(YEAR, 2, @NGAYLAP);
 	INSERT	INTO DOCGIA (
 		MADG,
 		HOTEN,
@@ -45,11 +38,10 @@ BEGIN
 		DIACHI,
 		SODT,
 		EMAIL,
-		MALDG,
 		NGAYLAPTHE,
 		NGAYHETHAN
 	)
-	VALUES              (@MADG, @HOTEN, @NGSINH, @GIOITINH, @DIACHI, @SODT, @EMAIL, @MALDG, @NGAYLAP, @HETHAN);
+	VALUES              (@MADG, @HOTEN, @NGSINH, @GIOITINH, @DIACHI, @SODT, @EMAIL, @NGAYLAP, @HETHAN);
 	PRINT N'Thêm độc giả thành công.';
 	RETURN 2;
 END
@@ -135,13 +127,7 @@ BEGIN
 			PRINT N'Phiếu mượn phải có ít nhất một cuốn sách.';
 			RETURN 0;
 		END
-	DECLARE @SONGAY AS INT;
-	SELECT	@SONGAY = LDG.SONGAYMUON
-	FROM	DOCGIA AS DG
-			INNER JOIN
-			LOAIDOCGIA AS LDG
-			ON DG.MALDG = LDG.MALDG
-	WHERE	DG.MADG = @MADG;
+	DECLARE @SONGAY AS INT = 14; -- Mặc định 14 ngày
 	BEGIN TRY
 		BEGIN TRANSACTION;
 		DECLARE @MAX AS INT;
@@ -347,13 +333,13 @@ SELECT @SP AS SOPHIEU, @SL AS SOLUOTSACH, @TP AS TIENPHAT
 --------------------------------------------------------------------- */
 /* ---------------------------------------------------------------------
    SP 7. Sua doc gia.
-   Tham so vao: MADG, HOTEN, NGSINH, GIOITINH, DIACHI, SODT, EMAIL, MALDG.
+   Tham so vao: MADG, HOTEN, NGSINH, GIOITINH, DIACHI, SODT, EMAIL.
    - MADG khong ton tai       -> tra ve 0
-   - MALDG khong ton tai      -> tra ve 1
+   
    - Nguoc lai cap nhat      -> tra ve 2
    --------------------------------------------------------------------- */
 CREATE PROCEDURE SP_SUADOCGIA
-@MADG CHAR (5), @HOTEN NVARCHAR (40), @NGSINH DATE, @GIOITINH NVARCHAR (3), @DIACHI NVARCHAR (100), @SODT VARCHAR (15), @EMAIL VARCHAR (50), @MALDG CHAR (2)
+@MADG CHAR (5), @HOTEN NVARCHAR (40), @NGSINH DATE, @GIOITINH NVARCHAR (3), @DIACHI NVARCHAR (100), @SODT VARCHAR (15), @EMAIL VARCHAR (50)
 AS
 BEGIN
 	IF NOT EXISTS (SELECT	*
@@ -363,21 +349,13 @@ BEGIN
 			PRINT N'Mã độc giả không tồn tại.';
 			RETURN 0;
 		END
-	IF NOT EXISTS (SELECT	*
-					FROM		LOAIDOCGIA
-					WHERE	MALDG = @MALDG)
-		BEGIN
-			PRINT N'Loại độc giả không tồn tại.';
-			RETURN 1;
-		END
 	UPDATE	DOCGIA
 	SET		HOTEN		= @HOTEN,
 			NGSINH		= @NGSINH,
 			GIOITINH		= @GIOITINH,
 			DIACHI		= @DIACHI,
 			SODT			= @SODT,
-			EMAIL		= @EMAIL,
-			MALDG		= @MALDG
+			EMAIL		= @EMAIL
 	WHERE	MADG = @MADG;
 	PRINT N'Cập nhật độc giả thành công.';
 	RETURN 2;
@@ -474,10 +452,9 @@ CREATE PROCEDURE SP_TIMDOCGIA
 	@PageSize INT = 10
 AS
 BEGIN
-	SELECT DG.MADG, DG.HOTEN, DG.NGSINH, DG.GIOITINH, DG.DIACHI, DG.SODT, DG.EMAIL, LDG.TENLDG AS LOAIDG, DG.NGAYLAPTHE, DG.NGAYHETHAN, DG.TONGNO,
+	SELECT DG.MADG, DG.HOTEN, DG.NGSINH, DG.GIOITINH, DG.DIACHI, DG.SODT, DG.EMAIL, DG.NGAYLAPTHE, DG.NGAYHETHAN, DG.TONGNO,
 	       COUNT(*) OVER() AS TotalRecord
 	FROM DOCGIA DG
-	JOIN LOAIDOCGIA LDG ON DG.MALDG = LDG.MALDG
 	WHERE DG.MADG LIKE '%' + @TUKHOA + '%'
 	   OR DG.HOTEN LIKE N'%' + @TUKHOA + N'%'
 	ORDER BY DG.MADG
