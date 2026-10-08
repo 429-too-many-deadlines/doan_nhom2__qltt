@@ -24,7 +24,7 @@ export function UpdateEmployeeDialog({ employee, open, onOpenChange, onSuccess }
         NGSINH: employee.NGSINH?.split('T')[0] || '', 
         SODT: employee.SODT || '',
         CHUCVU: employee.CHUCVU || 'Thủ thư',
-        NGVL: (employee as any).NGVL?.split('T')[0] || (employee as any).NGVL?.split('T')[0] || ''
+        NGVL: employee.NGVL?.split('T')[0] || ''
       });
     }
   }, [employee, open]);
