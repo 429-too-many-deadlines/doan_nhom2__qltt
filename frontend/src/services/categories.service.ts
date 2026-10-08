@@ -2,8 +2,8 @@ import type { PagedResult,  CreateCategoryReq, UpdateCategoryRequest  } from '..
 import { apiClient } from '../lib/api';
 
 export const categoriesService = {
-  getCategories: async (page = 1, pageSize = 10) => {
-    const response = await apiClient.get('/api/categories', { params: { page, pageSize } });
+  getCategories: async (query?: string, page = 1, pageSize = 10) => {
+    const response = await apiClient.get('/api/categories', { params: { query, page, pageSize } });
     return response.data;
   },
   createCategory: async (data: CreateCategoryReq) => {

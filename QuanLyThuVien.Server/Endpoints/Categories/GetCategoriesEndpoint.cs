@@ -12,11 +12,24 @@ public class GetCategoriesEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("api/categories", async (IDbConnection db, int page = 1, int pageSize = 10) =>
+        app.MapGet("api/categories", async (IDbConnection db, string? query, int page = 1, int pageSize = 10) =>
         {
             var offset = (page - 1) * pageSize;
-            var totalCount = await db.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM THELOAI");
-            var items = await db.QueryAsync<dynamic>("SELECT * FROM THELOAI ORDER BY MATL OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY", new { Offset = offset, PageSize = pageSize });
+            var sqlCount = "SELECT COUNT(*) FROM THELOAI";
+            var sqlData = "SELECT * FROM THELOAI";
+
+            if (!string.IsNullOrEmpty(query))
+            {
+                sqlCount += " WHERE TENTL LIKE @Query OR MATL LIKE @Query";
+                sqlData += " WHERE TENTL LIKE @Query OR MATL LIKE @Query";
+            }
+
+            sqlData += " ORDER BY MATL OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY";
+
+            var parameters = new { Query = $"%{query}%", Offset = offset, PageSize = pageSize };
+
+            var totalCount = await db.ExecuteScalarAsync<int>(sqlCount, parameters);
+            var items = await db.QueryAsync<dynamic>(sqlData, parameters);
             return Results.Ok(new PagedResult<dynamic>
             {
                 Items = items,
