@@ -4,6 +4,9 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { booksService } from '@/services/books.service';
 import type { Category, Publisher, SearchBookResponse } from '@/types/api.types';
+import { AsyncCombobox } from '@/components/ui/async-combobox';
+import { categoriesService } from '@/services/categories.service';
+import { publishersService } from '@/services/publishers.service';
 
 interface Props {
   book: SearchBookResponse | null;
@@ -31,11 +34,11 @@ export function UpdateBookDialog({ book, open, onOpenChange, onSuccess, categori
       setFormData({
         MADS: book.MADS || '',
         TENDS: book.TENDS || '',
-        MATL: '',
-        MANXB: '',
-        NAMXB: '',
-        SOTRANG: '',
-        GIA: ''
+        MATL: book.MATL || '',
+        MANXB: book.MANXB || '',
+        NAMXB: book.NAMXB?.toString() || '',
+        SOTRANG: book.SOTRANG?.toString() || '',
+        GIA: book.GIA?.toString() || ''
       });
     }
   }, [book, open]);
@@ -72,6 +75,16 @@ export function UpdateBookDialog({ book, open, onOpenChange, onSuccess, categori
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const fetchCategories = async (query: string) => {
+    const res = await categoriesService.getCategories(query);
+    return res.Items.map((c: any) => ({ value: c.MATL, label: c.TENTL }));
+  };
+
+  const fetchPublishers = async (query: string) => {
+    const res = await publishersService.getPublishers(query);
+    return res.Items.map((p: any) => ({ value: p.MANXB, label: p.TENNXB }));
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
@@ -99,33 +112,23 @@ export function UpdateBookDialog({ book, open, onOpenChange, onSuccess, categori
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium">Thể Loại</label>
-            <select 
-              name="MATL"
+            <AsyncCombobox
               value={formData.MATL}
-              onChange={handleChange}
-              required 
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <option value="">-- Chọn thể loại --</option>
-              {categories.map((c) => (
-                <option key={c.MATL} value={c.MATL}>{c.TENTL}</option>
-              ))}
-            </select>
+              onChange={(val) => setFormData(prev => ({ ...prev, MATL: val }))}
+              fetcher={fetchCategories}
+              defaultOptions={categories.map(c => ({ value: c.MATL, label: c.TENTL }))}
+              placeholder="-- Chọn thể loại --"
+            />
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium">Nhà Xuất Bản</label>
-            <select 
-              name="MANXB"
+            <AsyncCombobox
               value={formData.MANXB}
-              onChange={handleChange}
-              required 
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <option value="">-- Chọn NXB --</option>
-              {publishers.map((p) => (
-                <option key={p.MANXB} value={p.MANXB}>{p.TENNXB}</option>
-              ))}
-            </select>
+              onChange={(val) => setFormData(prev => ({ ...prev, MANXB: val }))}
+              fetcher={fetchPublishers}
+              defaultOptions={publishers.map(p => ({ value: p.MANXB, label: p.TENNXB }))}
+              placeholder="-- Chọn NXB --"
+            />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
