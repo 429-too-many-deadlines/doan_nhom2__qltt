@@ -30,7 +30,7 @@ export function UpdateReaderDialog({ reader, open, onOpenChange, onSuccess }: Pr
         MADG: reader.MADG || '',
         HOTEN: reader.HOTEN || '',
         // Xử lý chuỗi ngày tháng để dùng với input type="date"
-        NGSINH: reader.ngaySinh ? new Date(reader.ngaySinh).toISOString().split('T')[0] : '',
+        NGSINH: (reader.NGSINH || reader.ngaySinh) ? new Date(reader.NGSINH || reader.ngaySinh!).toISOString().split('T')[0] : '',
         GIOITINH: reader.GIOITINH || '',
         DIACHI: reader.DIACHI || '',
         SODT: reader.SODT || '',

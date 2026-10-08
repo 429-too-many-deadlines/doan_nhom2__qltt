@@ -122,7 +122,8 @@ export interface Book {
 export interface Reader {
     MADG: string;
     HOTEN: string;
-    ngaySinh: string;
+    NGSINH?: string;
+    ngaySinh?: string;
     GIOITINH: string;
     DIACHI?: string;
     SODT: string;
