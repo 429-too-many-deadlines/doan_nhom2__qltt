@@ -1,4 +1,4 @@
-import type { PagedResult,  CreatePublisherRequest, UpdatePublisherRequest  } from '../types/api.types';
+import type { CreatePublisherRequest, UpdatePublisherRequest } from '../types/api.types';
 import { apiClient } from '../lib/api';
 
 export const publishersService = {

@@ -45,9 +45,8 @@ export default function Accounts() {
       // toast.success('Tạo tài khoản thành công');
       setCreateData({ username: '', password: '', role: 'Thủ thư', MANV: '', MADG: '' });
       fetchAccounts();
-    } catch (_error) {
-      const err = error as { response?: { data?: { message?: string } } };
-      // toast.error(err.response?.data?.message || 'Lỗi khi tạo tài khoản');
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -57,9 +56,8 @@ export default function Accounts() {
       await authService.changePassword(changePwdData);
       // toast.success('Đổi mật khẩu thành công');
       setChangePwdData({ oldPassword: '', newPassword: '' });
-    } catch (_error) {
-      const err = error as { response?: { data?: { message?: string } } };
-      // toast.error(err.response?.data?.message || 'Lỗi khi đổi mật khẩu');
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -68,9 +66,8 @@ export default function Accounts() {
       await authService.updateAccountStatus(username, !currentStatus);
       // toast.success(`Đã ${!currentStatus ? 'mở khóa' : 'khóa'} tài khoản ${username}`);
       fetchAccounts();
-    } catch (_error) {
-      const err = error as { response?: { data?: { message?: string } } };
-      // toast.error(err.response?.data?.message || 'Lỗi khi cập nhật trạng thái');
+    } catch (error) {
+      console.error(error);
     }
   };
 

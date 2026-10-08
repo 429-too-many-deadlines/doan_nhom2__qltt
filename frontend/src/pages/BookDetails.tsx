@@ -76,9 +76,8 @@ export default function BookDetails() {
       // toast.success('Thêm cuốn sách thành công');
       setNewCopy({ MACS: '', VITRI: '', TINHTRANG: 'Có sẵn' });
       fetchCopies();
-    } catch (_error) {
-      const err = error as { response?: { data?: { message?: string } } };
-      // toast.error(err.response?.data?.message || 'Lỗi khi thêm cuốn sách');
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -88,9 +87,8 @@ export default function BookDetails() {
       await booksService.deleteBookCopy(MACS);
       // toast.success('Xoá thành công');
       fetchCopies();
-    } catch (_error) {
-      const err = error as { response?: { data?: { message?: string } } };
-      // toast.error(err.response?.data?.message || 'Lỗi khi xoá cuốn sách');
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -104,9 +102,8 @@ export default function BookDetails() {
       // toast.success('Cập nhật cuốn sách thành công');
       setEditingCopyId(null);
       fetchCopies();
-    } catch (_error) {
-      const err = error as { response?: { data?: { message?: string } } };
-      // toast.error(err.response?.data?.message || 'Lỗi khi cập nhật cuốn sách');
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -115,9 +112,8 @@ export default function BookDetails() {
       await booksService.updateBookAuthors(id!, bookAuthors);
       // toast.success('Lưu danh sách tác giả thành công');
       fetchBookAuthors();
-    } catch (_error) {
-      const err = error as { response?: { data?: { message?: string } } };
-      // toast.error(err.response?.data?.message || 'Lỗi khi lưu tác giả');
+    } catch (error) {
+      console.error(error);
     }
   };
 

@@ -52,7 +52,7 @@ export default function Books() {
       const data = dataResult.items || [];
       setTotalPages(dataResult.totalPages);
       setBooks(data || []);
-    } catch (_error) {
+    } catch (error) {
       console.error(error);
       // toast.error('Lỗi khi tải danh sách sách');
     } finally {
@@ -92,7 +92,7 @@ export default function Books() {
       await booksService.deleteBook(maDs);
       // toast.success('Xóa sách thành công');
       fetchBooks(query);
-    } catch (_err) {
+    } catch (err) {
       // toast.error('Lỗi khi xóa sách (có thể sách đang có cuốn sách con)');
       console.error(err);
     }

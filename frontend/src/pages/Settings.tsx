@@ -28,7 +28,7 @@ export default function Settings() {
       const res = await apiClient.post('/api/auth/create-account', { username, password, role, MANV, MADG });
       setCreateMsg(res.data.message);
       // toast.success(res.data.message);
-    } catch (_error) {
+    } catch (error) {
       const err = error as { response?: { data?: { message?: string } } };
       setCreateMsg(err.response?.data?.message || 'Lỗi tạo tài khoản');
       // toast.error(err.response?.data?.message || 'Lỗi tạo tài khoản');
@@ -41,7 +41,7 @@ export default function Settings() {
       const res = await apiClient.post('/api/settings/backup', { type: backupType });
       setBackupMsg(res.data.message);
       // toast.success(res.data.message);
-    } catch (_error) {
+    } catch (error) {
       const err = error as { response?: { data?: { message?: string } } };
       setBackupMsg(err.response?.data?.message || 'Lỗi sao lưu');
       // toast.error(err.response?.data?.message || 'Lỗi sao lưu');
@@ -57,7 +57,7 @@ export default function Settings() {
       // toast.success(res.data.message);
       setOldPassword('');
       setNewPassword('');
-    } catch (_error) {
+    } catch (error) {
       const err = error as { response?: { data?: { message?: string } } };
       setChangePwdMsg(err.response?.data?.message || 'Lỗi đổi mật khẩu');
       // toast.error(err.response?.data?.message || 'Lỗi đổi mật khẩu');

@@ -36,12 +36,18 @@ export interface SearchBookResponse {
 export interface TopBookResponse {
   MADS?: string;
   TENDS?: string;
-  SOLUOTMUON?: number;}
+  maSach?: string;
+  tenSach?: string;
+  SOLUOTMUON?: number;
+}
 
 export interface MonthlyStatsResponse {
-  SOPHIEU: number;
-  SOLUOTSACH: number;
-  TIENPHAT: number;
+  soPhieu?: number;
+  soLuotSach?: number;
+  tienPhat?: number;
+  SOPHIEU?: number;
+  SOLUOTSACH?: number;
+  TIENPHAT?: number;
   top5Books: TopBookResponse[];
 }
 

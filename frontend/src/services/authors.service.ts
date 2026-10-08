@@ -1,4 +1,4 @@
-import type { PagedResult,  CreateAuthorRequest, UpdateAuthorRequest  } from '../types/api.types';
+import type { CreateAuthorRequest, UpdateAuthorRequest } from '../types/api.types';
 import { apiClient } from '../lib/api';
 
 export const authorsService = {

@@ -45,7 +45,7 @@ export default function Readers() {
       const data = dataResult.items || [];
       setTotalPages(dataResult.totalPages || 1);
       setReaders(data || []);
-    } catch (_error) {
+    } catch (error) {
       console.error(error);
       // toast.error('Lỗi khi tải danh sách độc giả');
     } finally {
@@ -71,7 +71,7 @@ export default function Readers() {
       await readersService.deleteReader(MADG);
       // toast.success('Xóa độc giả thành công');
       fetchReaders();
-    } catch (_err) {
+    } catch (err) {
       // toast.error('Lỗi khi xóa độc giả (có thể độc giả đã mượn sách)');
       console.error(err);
     }

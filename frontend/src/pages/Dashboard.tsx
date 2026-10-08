@@ -18,7 +18,7 @@ export default function Dashboard() {
       setLoading(true);
       const data = await reportsService.getMonthlyStats(month, year);
       setStats(data);
-    } catch (_error) {
+    } catch (error) {
       console.error(error);
       // toast.error('Lỗi khi tải thống kê tổng quan');
     } finally {
@@ -78,7 +78,7 @@ export default function Dashboard() {
               <CardTitle className="text-sm font-medium text-muted-foreground">Số Phiếu Mượn</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{stats.SOPHIEU || 0}</div>
+              <div className="text-3xl font-bold">{stats.soPhieu ?? stats.SOPHIEU ?? 0}</div>
             </CardContent>
           </Card>
           
@@ -87,7 +87,7 @@ export default function Dashboard() {
               <CardTitle className="text-sm font-medium text-muted-foreground">Số Lượt Mượn Sách</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{stats.SOLUOTSACH || 0}</div>
+              <div className="text-3xl font-bold">{stats.soLuotSach ?? stats.SOLUOTSACH ?? 0}</div>
             </CardContent>
           </Card>
 
@@ -96,7 +96,7 @@ export default function Dashboard() {
               <CardTitle className="text-sm font-medium text-muted-foreground">Tiền Phạt Thu Được</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{stats.TIENPHAT?.toLocaleString() || 0} đ</div>
+              <div className="text-3xl font-bold">{(stats.tienPhat ?? stats.TIENPHAT ?? 0).toLocaleString()} đ</div>
             </CardContent>
           </Card>
 
@@ -108,10 +108,10 @@ export default function Dashboard() {
               {stats.top5Books && stats.top5Books.length > 0 ? (
                 <ul className="space-y-4">
                   {stats.top5Books.map((book, idx) => (
-                    <li key={book.maSach || idx} className="flex justify-between items-center p-4 border rounded-lg">
+                    <li key={book.maSach || book.MADS || idx} className="flex justify-between items-center p-4 border rounded-lg">
                       <div>
-                        <p className="font-medium">{book.tenSach}</p>
-                        <p className="text-sm text-muted-foreground">Mã: {book.maSach}</p>
+                        <p className="font-medium">{book.tenSach || book.TENDS || 'Chưa rõ tên'}</p>
+                        <p className="text-sm text-muted-foreground">Mã: {book.maSach || book.MADS}</p>
                       </div>
                       <div className="font-bold text-lg">
                         {book.SOLUOTMUON} lượt

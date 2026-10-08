@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState } from 'react';
 import type { ReactNode } from 'react';
 
 export type User = {
@@ -7,6 +7,8 @@ export type User = {
   fullName: string;
   MANV?: string;
   MADG?: string;
+  manv?: string;
+  madg?: string;
 };
 
 interface AuthContextType {

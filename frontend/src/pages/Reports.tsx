@@ -33,7 +33,7 @@ export default function Reports() {
       const data = await fetchFn();
       setReportData(data || []);
       // toast.success(`Tải báo cáo ${reportType} thành công`);
-    } catch (_error) {
+    } catch (error) {
       console.error(error);
       // toast.error('Lỗi khi tải báo cáo');
       setReportData([]);
@@ -50,7 +50,7 @@ export default function Reports() {
       const data = await reportsService.getMonthlyStats(month, year);
       setMonthlyStats(data);
       // toast.success('Tải thống kê tháng thành công');
-    } catch (_error) {
+    } catch (error) {
       console.error(error);
       // toast.error('Lỗi khi tải thống kê tháng');
       setMonthlyStats(null);
@@ -157,15 +157,15 @@ export default function Reports() {
               <div className="grid grid-cols-3 gap-4">
                 <div className="p-4 border rounded shadow-sm text-center">
                   <div className="text-sm text-gray-500">Số Phiếu Mượn</div>
-                  <div className="text-xl font-bold">{monthlyStats.SOPHIEU}</div>
+                  <div className="text-xl font-bold">{monthlyStats.soPhieu ?? monthlyStats.SOPHIEU ?? 0}</div>
                 </div>
                 <div className="p-4 border rounded shadow-sm text-center">
                   <div className="text-sm text-gray-500">Số Lượt Sách</div>
-                  <div className="text-xl font-bold">{monthlyStats.SOLUOTSACH}</div>
+                  <div className="text-xl font-bold">{monthlyStats.soLuotSach ?? monthlyStats.SOLUOTSACH ?? 0}</div>
                 </div>
                 <div className="p-4 border rounded shadow-sm text-center">
                   <div className="text-sm text-gray-500">Tiền Phạt</div>
-                  <div className="text-xl font-bold">{monthlyStats.TIENPHAT?.toLocaleString()} VNĐ</div>
+                  <div className="text-xl font-bold">{(monthlyStats.tienPhat ?? monthlyStats.TIENPHAT ?? 0).toLocaleString()} VNĐ</div>
                 </div>
               </div>
               <h3 className="font-bold mt-4">Top 5 Sách Mượn Nhiều Nhất</h3>
