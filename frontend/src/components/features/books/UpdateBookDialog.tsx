@@ -77,12 +77,14 @@ export function UpdateBookDialog({ book, open, onOpenChange, onSuccess, categori
 
   const fetchCategories = async (query: string) => {
     const res = await categoriesService.getCategories(query);
-    return res.Items.map((c: any) => ({ value: c.MATL, label: c.TENTL }));
+    const items = res.items || (res as any).Items || [];
+    return items.map((c: any) => ({ value: c.MATL, label: c.TENTL }));
   };
 
   const fetchPublishers = async (query: string) => {
     const res = await publishersService.getPublishers(query);
-    return res.Items.map((p: any) => ({ value: p.MANXB, label: p.TENNXB }));
+    const items = res.items || (res as any).Items || [];
+    return items.map((p: any) => ({ value: p.MANXB, label: p.TENNXB }));
   };
 
   return (
