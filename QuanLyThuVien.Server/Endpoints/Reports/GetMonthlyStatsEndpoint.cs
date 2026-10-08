@@ -24,18 +24,19 @@ public class GetMonthlyStatsEndpoint : IEndpoint
 
             var topBooks = await db.QueryAsync("SP_THONGKETHANG", parameters, commandType: CommandType.StoredProcedure);
             
-            return Results.Ok(new
-            {
-                SoPhieu = parameters.Get<int>("@SOPHIEU"),
-                SoLuotSach = parameters.Get<int>("@SOLUOTSACH"),
-                TienPhat = parameters.Get<decimal?>("@TIENPHAT") ?? 0,
-                Top5Books = topBooks
-            });
+            return Results.Ok(new MonthlyStatsResponse(
+                parameters.Get<int>("@SOPHIEU"),
+                parameters.Get<int>("@SOLUOTSACH"),
+                parameters.Get<decimal?>("@TIENPHAT") ?? 0,
+                topBooks
+            ));
         })
         .WithName("GetMonthlyStats")
         .RequireAuthorization("QuanLyOnly")
-           .WithTags("Reports")
+        .WithTags("Reports")
         .WithGroupName("v1")
         .WithSummary("Thống kê hoạt động thư viện theo tháng");
     }
+
+    public record MonthlyStatsResponse(int SoPhieu, int SoLuotSach, decimal TienPhat, IEnumerable<dynamic> Top5Books);
 }
