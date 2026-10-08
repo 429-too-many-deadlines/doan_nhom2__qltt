@@ -1,4 +1,4 @@
-import type { PagedResult,  CreateCategoryReq, UpdateCategoryRequest  } from '../types/api.types';
+import type { CreateCategoryReq, UpdateCategoryRequest  } from '../types/api.types';
 import { apiClient } from '../lib/api';
 
 export const categoriesService = {

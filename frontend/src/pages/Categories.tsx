@@ -32,7 +32,7 @@ export default function Categories() {
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const dataResult = await categoriesService.getCategories(page, 10);
+      const dataResult = await categoriesService.getCategories('', page, 10);
       const data = dataResult.items || [];
       setTotalPages(dataResult.totalPages);
       setCategories(data);
