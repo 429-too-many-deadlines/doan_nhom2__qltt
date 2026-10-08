@@ -17,6 +17,10 @@ export interface SearchBookResponse {
   TACGIA?: string;
   SOLUONG?: number;
   SLCON?: number;
+  MATL?: string;
+  MANXB?: string;
+  SOTRANG?: number;
+  GIA?: number;
 }
 
 
