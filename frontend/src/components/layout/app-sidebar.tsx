@@ -12,7 +12,7 @@ import {
   SidebarFooter,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import { Home, BookOpen, Users, ArrowRightLeft, BarChart, Settings, Shield, Tags, PenTool, Building, Contact} from "lucide-react"
+import { Home, BookOpen, Users, ArrowRightLeft, BarChart, Settings, Shield, Tags, PenTool, Building} from "lucide-react"
 
 import { useEffect } from "react"
 import { useAuth } from "@/contexts/AuthContext"
@@ -34,10 +34,9 @@ const menuItems = [
   { title: "Tác giả", url: "/authors", icon: PenTool },
   { title: "Nhà xuất bản", url: "/publishers", icon: Building },
   { title: "Quản lý Độc giả", url: "/readers", icon: Users },
-  { title: "Quản lý Nhân viên", url: "/employees", icon: Contact },
   { title: "Quản lý Mượn trả", url: "/transactions", icon: ArrowRightLeft },
   { title: "Báo cáo thống kê", url: "/reports", icon: BarChart },
-  { title: "Tài khoản", url: "/accounts", icon: Shield },
+  { title: "Đổi mật khẩu", url: "/accounts", icon: Shield },
   { title: "Cài đặt", url: "/settings", icon: Settings },
 ]
 

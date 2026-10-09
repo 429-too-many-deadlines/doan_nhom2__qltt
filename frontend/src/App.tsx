@@ -15,7 +15,6 @@ const Login = lazy(() => import("@/pages/Login"));
 const Categories = lazy(() => import("@/pages/Categories"));
 const Authors = lazy(() => import("@/pages/Authors"));
 const Publishers = lazy(() => import("@/pages/Publishers"));
-const Employees = lazy(() => import("@/pages/Employees"));
 const BookDetails = lazy(() => import("@/pages/BookDetails"));
 
 const ProtectedRoute = () => {
@@ -48,8 +47,7 @@ const router = createBrowserRouter([
           { path: "/categories", element: <Categories /> },
           { path: "/authors", element: <Authors /> },
           { path: "/publishers", element: <Publishers /> },
-          { path: "/employees", element: <Employees /> },
-        ],
+                  ],
       },
     ],
   },
