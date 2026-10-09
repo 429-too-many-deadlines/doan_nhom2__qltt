@@ -17,7 +17,6 @@ public class BorrowBookEndpoint : IEndpoint
         {
             var parameters = new DynamicParameters();
             parameters.Add("@MADG", req.MaDg);
-            parameters.Add("@MANV", req.MaNv);
             parameters.Add("@DSMACS", string.Join(",", req.DsMaCs));
             parameters.Add("@MAPM", dbType: DbType.String, size: 6, direction: ParameterDirection.Output);
             parameters.Add("@ReturnValue", dbType: DbType.Int32, direction: ParameterDirection.ReturnValue);
@@ -48,5 +47,5 @@ public class BorrowBookEndpoint : IEndpoint
     }
 }
 
-public record BorrowRequest(string MaDg, string MaNv, string[] DsMaCs);
+public record BorrowRequest(string MaDg, string[] DsMaCs);
 public record BorrowResponse(string Message, string MaPm);
