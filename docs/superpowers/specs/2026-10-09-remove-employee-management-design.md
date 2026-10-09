@@ -38,3 +38,4 @@ Hệ thống quản lý thư viện sẽ được đơn giản hóa bằng cách
   - Sửa file `Accounts.tsx`: Thay vì hiển thị bảng danh sách, chuyển thành form Đổi mật khẩu cho Admin.
   - Sửa file `Transactions.tsx`: Xóa cột "Nhân viên lập" trên bảng dữ liệu, xóa trường chọn Nhân viên khi tạo/sửa phiếu mượn.
   - Sửa file `Reports.tsx`: Bỏ UI thống kê/biểu đồ liên quan đến hiệu suất nhân viên.
+

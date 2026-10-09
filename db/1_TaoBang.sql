@@ -125,21 +125,6 @@ CREATE TABLE DOCGIA
 )
 
 /* ---------------------------------------------------------------------
-   9. NHANVIEN(MANV, HOTEN, NGSINH, SODT, CHUCVU, NGVL)
-   --------------------------------------------------------------------- */
-CREATE TABLE NHANVIEN
-(
-	MANV	CHAR(4)			PRIMARY KEY,
-	HOTEN	NVARCHAR(40)	NOT NULL,
-	NGSINH	DATE			NOT NULL,
-	SODT	VARCHAR(15)		NOT NULL,
-	CHUCVU	NVARCHAR(20)	NOT NULL,
-	NGVL	DATE			NOT NULL,
-	CONSTRAINT CK_NHANVIEN_CHUCVU	CHECK (CHUCVU IN (N'Quản lý', N'Thủ thư', N'Kỹ thuật viên')),
-	CONSTRAINT CK_NHANVIEN_NGVL		CHECK (DATEADD(YEAR, 18, NGSINH) <= NGVL)
-)
-
-/* ---------------------------------------------------------------------
    10. PHIEUMUON(MAPM, MADG, MANV, NGAYMUON, HANTRA, TINHTRANG)
    --------------------------------------------------------------------- */
 CREATE TABLE PHIEUMUON
@@ -195,9 +180,6 @@ CREATE TABLE TAIKHOAN
 (
 	TENDANGNHAP	VARCHAR(30)			PRIMARY KEY,
 	MATKHAU		VARBINARY(32)		NOT NULL,
-	MANV		CHAR(4)				NULL FOREIGN KEY REFERENCES NHANVIEN (MANV),
-	MADG		CHAR(5)				NULL FOREIGN KEY REFERENCES DOCGIA (MADG),
-	TRANGTHAI	BIT					NOT NULL DEFAULT 1,
-	 OR (VAITRO <> N'Độc giả' AND MANV IS NOT NULL AND MADG IS NULL))
+	TRANGTHAI	BIT					NOT NULL DEFAULT 1
 )
 GO
