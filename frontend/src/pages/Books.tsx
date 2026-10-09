@@ -62,10 +62,18 @@ export default function Books() {
 
   const fetchMasterData = async () => {
     try {
-      const catsResult = await categoriesService.getCategories();
-      const cats = catsResult.items || [];
-      const pubsResult = await publishersService.getPublishers();
-      const pubs = pubsResult.items || [];
+      const catsResult = await categoriesService.getCategories('', 1, 1000);
+      const cats = (catsResult.items || []).map((c: Record<string, unknown>) => ({
+        ...c,
+        MATL: (c.MATL || c.matl) as string,
+        TENTL: (c.TENTL || c.tentl) as string
+      }));
+      const pubsResult = await publishersService.getPublishers('', 1, 1000);
+      const pubs = (pubsResult.items || []).map((p: Record<string, unknown>) => ({
+        ...p,
+        MANXB: (p.MANXB || p.manxb) as string,
+        TENNXB: (p.TENNXB || p.tennxb) as string
+      }));
       setCategories(cats);
       setPublishers(pubs);
     } catch {
@@ -75,6 +83,7 @@ export default function Books() {
 
   useEffect(() => {
     fetchBooks(query);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
   useEffect(() => {
@@ -159,13 +168,15 @@ export default function Books() {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    books.map((book) => (
-                      <TableRow key={book.MADS || Math.random().toString()}>
-                        <TableCell className="font-medium font-mono text-xs">{book.MADS || (book as any).mads || '-'}</TableCell>
-                        <TableCell className="font-medium">{book.TENDS || (book as any).tends || '-'}</TableCell>
-                        <TableCell>{book.TENTL || (book as any).tentl || '-'}</TableCell>
-                        <TableCell>{book.TACGIA || (book as any).tacgia || '-'}</TableCell>
-                        <TableCell>{(book.SLCON ?? (book as any).slcon ?? book.SOLUONG ?? '-')}</TableCell>
+                    books.map((book) => {
+                      const b = book as SearchBookResponse & Record<string, unknown>;
+                      return (
+                      <TableRow key={b.MADS || Math.random().toString()}>
+                        <TableCell className="font-medium font-mono text-xs">{b.MADS || (b.mads as string) || '-'}</TableCell>
+                        <TableCell className="font-medium">{b.TENDS || (b.tends as string) || '-'}</TableCell>
+                        <TableCell>{b.TENTL || (b.tentl as string) || '-'}</TableCell>
+                        <TableCell>{b.TACGIA || (b.tacgia as string) || '-'}</TableCell>
+                        <TableCell>{(b.SLCON ?? (b.slcon as number) ?? b.SOLUONG ?? '-')}</TableCell>
                         <TableCell>
                           <div className="flex gap-2">
                             <Button 
@@ -208,7 +219,8 @@ export default function Books() {
                           </div>
                         </TableCell>
                       </TableRow>
-                    ))
+                      );
+                    })
                   )}
                 </TableBody>
               </Table>

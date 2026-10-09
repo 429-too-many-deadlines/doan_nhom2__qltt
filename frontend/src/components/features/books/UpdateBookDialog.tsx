@@ -31,14 +31,15 @@ export function UpdateBookDialog({ book, open, onOpenChange, onSuccess, categori
 
   useEffect(() => {
     if (book && open) {
+      const b = book as SearchBookResponse & Record<string, unknown>;
       setFormData({
-        MADS: book.MADS || '',
-        TENDS: book.TENDS || '',
-        MATL: book.MATL || '',
-        MANXB: book.MANXB || '',
-        NAMXB: book.NAMXB?.toString() || '',
-        SOTRANG: book.SOTRANG?.toString() || '',
-        GIA: book.GIA?.toString() || ''
+        MADS: b.MADS || (b.mads as string) || '',
+        TENDS: b.TENDS || (b.tends as string) || '',
+        MATL: b.MATL || (b.matl as string) || '',
+        MANXB: b.MANXB || (b.manxb as string) || '',
+        NAMXB: b.NAMXB?.toString() || (b.namxb as number)?.toString() || '',
+        SOTRANG: b.SOTRANG?.toString() || (b.sotrang as number)?.toString() || '',
+        GIA: b.GIA?.toString() || (b.gia as number)?.toString() || ''
       });
     }
   }, [book, open]);
@@ -77,14 +78,14 @@ export function UpdateBookDialog({ book, open, onOpenChange, onSuccess, categori
 
   const fetchCategories = async (query: string) => {
     const res = await categoriesService.getCategories(query);
-    const items = res.items || (res as any).Items || [];
-    return items.map((c: any) => ({ value: c.MATL, label: c.TENTL }));
+    const items = res.items || (res as Record<string, unknown>).Items as Category[] || [];
+    return items.map((c: Category) => ({ value: c.MATL, label: c.TENTL }));
   };
 
   const fetchPublishers = async (query: string) => {
     const res = await publishersService.getPublishers(query);
-    const items = res.items || (res as any).Items || [];
-    return items.map((p: any) => ({ value: p.MANXB, label: p.TENNXB }));
+    const items = res.items || (res as Record<string, unknown>).Items as Publisher[] || [];
+    return items.map((p: Publisher) => ({ value: p.MANXB, label: p.TENNXB }));
   };
 
   return (

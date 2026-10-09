@@ -39,12 +39,12 @@ export default function BookDetails() {
     setLoadingCopies(true);
     try {
       const data = await booksService.getBookCopies(id!);
-      const normalized = (data || []).map((c: any) => ({
-        MACS: c.MACS || c.MaCS || c.macs || '',
-        MADS: c.MADS || c.MaDS || c.mads || id!,
-        NGAYNHAP: c.NGAYNHAP || c.NgayNhap || c.ngayNhap || '',
-        VITRI: c.VITRI ?? c.ViTri ?? c.viTri ?? '',
-        TINHTRANG: c.TINHTRANG || c.TinhTrang || c.tinhTrang || 'Có sẵn',
+      const normalized = (data || []).map((c: Record<string, unknown>) => ({
+        MACS: (c.MACS || c.MaCS || c.macs || '') as string,
+        MADS: (c.MADS || c.MaDS || c.mads || id!) as string,
+        NGAYNHAP: (c.NGAYNHAP || c.NgayNhap || c.ngayNhap || '') as string,
+        VITRI: (c.VITRI ?? c.ViTri ?? c.viTri ?? '') as string,
+        TINHTRANG: (c.TINHTRANG || c.TinhTrang || c.tinhTrang || 'Có sẵn') as string,
       }));
       setCopies(normalized);
     } catch {
@@ -58,9 +58,9 @@ export default function BookDetails() {
     setLoadingAuthors(true);
     try {
       const data = await booksService.getBookAuthors(id!);
-      const normalized = (data || []).map((a: any) => ({
-        MATG: a.MATG || a.MaTG || a.matg || '',
-        VAITRO: a.VAITRO || a.VaiTro || a.vaitro || 'Tác giả',
+      const normalized = (data || []).map((a: Record<string, unknown>) => ({
+        MATG: (a.MATG || a.MaTG || a.matg || '') as string,
+        VAITRO: (a.VAITRO || a.VaiTro || a.vaitro || 'Tác giả') as string,
       }));
       setBookAuthors(normalized);
     } catch {
@@ -195,7 +195,7 @@ export default function BookDetails() {
                     <TableRow><TableCell colSpan={4} className="text-center h-24">Chưa có tác giả</TableCell></TableRow>
                   ) : (
                     bookAuthors.map((item) => {
-                      const authorInfo = allAuthors.find(a => (a.MATG || (a as any).maTG) === item.MATG);
+                      const authorInfo = allAuthors.find(a => (a.MATG || (a as import('@/types/api.types').Author & Record<string, unknown>).maTG) === item.MATG);
                       return (
                         <TableRow key={item.MATG}>
                           <TableCell className="font-medium">{item.MATG}</TableCell>

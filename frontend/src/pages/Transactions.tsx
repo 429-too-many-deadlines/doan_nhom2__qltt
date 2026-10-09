@@ -168,15 +168,16 @@ export default function Transactions() {
                     </TableRow>
                   ) : (
                     transactions.map((transaction, index) => {
-                      const mapm = transaction.MAPM || (transaction as any).mapm || '-';
-                      const madg = transaction.MADG || (transaction as any).madg || '-';
-                      const tendg = transaction.TENDG || (transaction as any).tendg || '-';
-                      const macs = transaction.MACS || (transaction as any).macs || '-';
-                      const ngayMuon = (transaction.NGAYMUON || (transaction as any).ngaymuon)?.split('T')[0] || '-';
-                      const hanTra = (transaction.HANTRA || (transaction as any).hantra)?.split('T')[0] || '-';
-                      const ngayTra = (transaction.NGAYTRA || (transaction as any).ngaytra)?.split('T')[0] || 'Chưa trả';
-                      const tinhTrangPM = transaction.TINHTRANG || (transaction as any).tinhtrang || '-';
-                      const tinhTrangSach = transaction.TINHTRANGTRA || (transaction as any).tinhtrangtra || (transaction.NGAYTRA ? 'Bình thường' : 'Chưa trả');
+                      const t = transaction as typeof transaction & Record<string, unknown>;
+                      const mapm = t.MAPM || t.mapm || '-';
+                      const madg = t.MADG || t.madg || '-';
+                      const tendg = t.TENDG || t.tendg || '-';
+                      const macs = t.MACS || t.macs || '-';
+                      const ngayMuon = ((t.NGAYMUON || t.ngaymuon) as string | undefined)?.split('T')[0] || '-';
+                      const hanTra = ((t.HANTRA || t.hantra) as string | undefined)?.split('T')[0] || '-';
+                      const ngayTra = ((t.NGAYTRA || t.ngaytra) as string | undefined)?.split('T')[0] || 'Chưa trả';
+                      const tinhTrangPM = t.TINHTRANG || t.tinhtrang || '-';
+                      const tinhTrangSach = t.TINHTRANGTRA || t.tinhtrangtra || (t.NGAYTRA ? 'Bình thường' : 'Chưa trả');
 
                       return (
                         <TableRow key={`${mapm}-${macs}-${index}`}>
@@ -273,15 +274,16 @@ export default function Transactions() {
                     </TableRow>
                   ) : (
                     fineSlips.map((fine, idx) => {
-                      const mapp = fine.MAPP || fine.maPP || fine.maPT || '-';
-                      const mapm = fine.MAPM || (fine as any).mapm || '-';
-                      const madg = fine.MADG || (fine as any).madg || '-';
-                      const tendg = fine.TENDG || (fine as any).tendg || '-';
-                      const macs = fine.MACS || (fine as any).macs || '-';
-                      const ngayLap = (fine.NGAYLAP || fine.ngayThu || (fine as any).ngaylap)?.split('T')[0] || '-';
-                      const lydo = fine.LYDO || (fine as any).lydo || 'Vi phạm quy định';
-                      const sotien = Number(fine.SOTIEN ?? fine.soTienThu ?? (fine as any).sotien ?? 0);
-                      const isPaid = Boolean(fine.DATHANHTOAN ?? (fine as any).dathanhtoan);
+                      const f = fine as typeof fine & Record<string, unknown>;
+                      const mapp = f.MAPP || f.maPP || f.maPT || '-';
+                      const mapm = f.MAPM || f.mapm || '-';
+                      const madg = f.MADG || f.madg || '-';
+                      const tendg = f.TENDG || f.tendg || '-';
+                      const macs = f.MACS || f.macs || '-';
+                      const ngayLap = ((f.NGAYLAP || f.ngayThu || f.ngaylap) as string | undefined)?.split('T')[0] || '-';
+                      const lydo = f.LYDO || f.lydo || 'Vi phạm quy định';
+                      const sotien = Number(f.SOTIEN ?? f.soTienThu ?? f.sotien ?? 0);
+                      const isPaid = Boolean(f.DATHANHTOAN ?? f.dathanhtoan);
 
                       return (
                         <TableRow key={`${mapp}-${idx}`}>

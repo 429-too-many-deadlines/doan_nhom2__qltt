@@ -202,8 +202,8 @@ export const InventoryStatsTab = () => {
                       innerRadius={65}
                       outerRadius={95}
                       paddingAngle={4}
-                      label={({ name, percent }: any) =>
-                        `${name}: ${((percent || 0) * 100).toFixed(0)}%`
+                      label={({ name, percent }: { name: string; percent: number }) =>
+                        `${name}: ${(percent * 100).toFixed(0)}%`
                       }
                       labelLine={false}
                     >
@@ -212,7 +212,7 @@ export const InventoryStatsTab = () => {
                       ))}
                     </Pie>
                     <Tooltip
-                      formatter={(val: any) => [`${val} cuốn`, 'Số lượng']}
+                      formatter={(val: number | string) => [`${val} cuốn`, 'Số lượng']}
                       contentStyle={{
                         borderRadius: '8px',
                         backgroundColor: 'var(--background, #fff)',

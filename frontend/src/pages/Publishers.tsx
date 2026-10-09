@@ -115,12 +115,14 @@ export default function Publishers() {
                       <TableCell colSpan={5} className="text-center h-24">Không có dữ liệu</TableCell>
                     </TableRow>
                   ) : (
-                    items.map((item) => (
-                      <TableRow key={item.MANXB || (item as any).manxb}>
-                        <TableCell className="font-medium font-mono text-xs">{item.MANXB || (item as any).manxb || '-'}</TableCell>
-                        <TableCell className="font-medium">{item.TENNXB || (item as any).tennxb || '-'}</TableCell>
-                        <TableCell>{item.DIACHI || (item as any).diachi || '-'}</TableCell>
-                        <TableCell>{item.SODT || (item as any).sodt || '-'}</TableCell>
+                    items.map((item) => {
+                      const p = item as Publisher & Record<string, unknown>;
+                      return (
+                      <TableRow key={p.MANXB || (p.manxb as string)}>
+                        <TableCell className="font-medium font-mono text-xs">{p.MANXB || (p.manxb as string) || '-'}</TableCell>
+                        <TableCell className="font-medium">{p.TENNXB || (p.tennxb as string) || '-'}</TableCell>
+                        <TableCell>{p.DIACHI || (p.diachi as string) || '-'}</TableCell>
+                        <TableCell>{p.SODT || (p.sodt as string) || '-'}</TableCell>
                         <TableCell>
                           <div className="flex gap-2">
                             <Button size="icon" variant="outline" onClick={() => handleEdit(item)}>
@@ -148,7 +150,8 @@ export default function Publishers() {
                           </div>
                         </TableCell>
                       </TableRow>
-                    ))
+                      );
+                    })
                   )}
                 </TableBody>
               </Table>

@@ -45,6 +45,7 @@ export default function Categories() {
 
   useEffect(() => {
     fetchCategories();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
   const handleDelete = async (maTl: string) => {
@@ -97,10 +98,12 @@ export default function Categories() {
                       <TableCell colSpan={3} className="text-center h-24">Không có dữ liệu</TableCell>
                     </TableRow>
                   ) : (
-                    categories.map((cat) => (
-                      <TableRow key={cat.MATL || (cat as any).matl}>
-                        <TableCell className="font-medium font-mono text-xs">{cat.MATL || (cat as any).matl || '-'}</TableCell>
-                        <TableCell>{cat.TENTL || (cat as any).tentl || '-'}</TableCell>
+                    categories.map((cat) => {
+                      const c = cat as Category & Record<string, unknown>;
+                      return (
+                      <TableRow key={c.MATL || (c.matl as string)}>
+                        <TableCell className="font-medium font-mono text-xs">{c.MATL || (c.matl as string) || '-'}</TableCell>
+                        <TableCell>{c.TENTL || (c.tentl as string) || '-'}</TableCell>
                         <TableCell>
                           <div className="flex gap-2">
                             <Button size="icon" variant="outline" onClick={() => handleEdit(cat)}>
@@ -128,7 +131,8 @@ export default function Categories() {
                           </div>
                         </TableCell>
                       </TableRow>
-                    ))
+                      );
+                    })
                   )}
                 </TableBody>
               </Table>

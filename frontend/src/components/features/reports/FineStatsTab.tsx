@@ -59,8 +59,8 @@ export const FineStatsTab = () => {
           setOverdueReaders(overdueRes || []);
 
           const years = Array.from(new Set(list.map((r) => Number(r.NAM || r.nam)))).filter(Boolean);
-          if (years.length > 0 && !years.includes(selectedYear)) {
-            setSelectedYear(Math.max(...years));
+          if (years.length > 0) {
+            setSelectedYear(prev => years.includes(prev) ? prev : Math.max(...years));
           }
         }
       } catch (err) {
@@ -263,8 +263,8 @@ export const FineStatsTab = () => {
                       innerRadius={55}
                       outerRadius={90}
                       paddingAngle={3}
-                      label={({ name, percent }: any) =>
-                        `${name}: ${((percent || 0) * 100).toFixed(0)}%`
+                      label={({ name, percent }: { name: string; percent: number }) =>
+                        `${name}: ${(percent * 100).toFixed(0)}%`
                       }
                       labelLine={false}
                     >
@@ -273,7 +273,7 @@ export const FineStatsTab = () => {
                       ))}
                     </Pie>
                     <Tooltip
-                      formatter={(val: any) => [`${Number(val).toLocaleString('vi-VN')} đ`, 'Số tiền']}
+                      formatter={(val: number | string) => [`${Number(val).toLocaleString('vi-VN')} đ`, 'Số tiền']}
                       contentStyle={{
                         borderRadius: '8px',
                         backgroundColor: 'var(--background, #fff)',
@@ -310,7 +310,7 @@ export const FineStatsTab = () => {
                       tickFormatter={(v) => (v >= 1000000 ? `${v / 1000000}M` : v >= 1000 ? `${v / 1000}k` : v)}
                     />
                     <Tooltip
-                      formatter={(val: any) => [`${Number(val).toLocaleString('vi-VN')} đ`]}
+                      formatter={(val: number | string) => [`${Number(val).toLocaleString('vi-VN')} đ`]}
                       contentStyle={{
                         borderRadius: '8px',
                         backgroundColor: 'var(--background, #fff)',

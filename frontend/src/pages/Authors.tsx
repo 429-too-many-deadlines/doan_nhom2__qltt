@@ -47,7 +47,7 @@ export default function Authors() {
 
   useEffect(() => {
     fetchItems(query, page);
-  }, [fetchItems, page]); // Using page because fetchItems captures it, but to be safe
+  }, [fetchItems, query, page]); // Using page because fetchItems captures it, but to be safe
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -114,12 +114,14 @@ export default function Authors() {
                       <TableCell colSpan={5} className="text-center h-24">Không có dữ liệu</TableCell>
                     </TableRow>
                   ) : (
-                    items.map((item) => (
-                      <TableRow key={item.MATG || (item as any).matg}>
-                        <TableCell className="font-medium font-mono text-xs">{item.MATG || (item as any).matg || '-'}</TableCell>
-                        <TableCell className="font-medium">{item.TENTG || (item as any).tentg || '-'}</TableCell>
-                        <TableCell>{item.NAMSINH ?? (item as any).namSinh ?? '-'}</TableCell>
-                        <TableCell>{item.QUOCTICH || (item as any).quocTich || '-'}</TableCell>
+                    items.map((item) => {
+                      const i = item as Author & Record<string, unknown>;
+                      return (
+                      <TableRow key={i.MATG || (i.matg as string)}>
+                        <TableCell className="font-medium font-mono text-xs">{i.MATG || (i.matg as string) || '-'}</TableCell>
+                        <TableCell className="font-medium">{i.TENTG || (i.tentg as string) || '-'}</TableCell>
+                        <TableCell>{i.NAMSINH ?? (i.namSinh as number) ?? '-'}</TableCell>
+                        <TableCell>{i.QUOCTICH || (i.quocTich as string) || '-'}</TableCell>
                         <TableCell>
                           <div className="flex gap-2">
                             <Button size="icon" variant="outline" onClick={() => handleEdit(item)}>
@@ -147,7 +149,8 @@ export default function Authors() {
                           </div>
                         </TableCell>
                       </TableRow>
-                    ))
+                      );
+                    })
                   )}
                 </TableBody>
               </Table>

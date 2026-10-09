@@ -125,7 +125,7 @@ CREATE TABLE DOCGIA
 )
 
 /* ---------------------------------------------------------------------
-   10. PHIEUMUON(MAPM, MADG, MANV, NGAYMUON, HANTRA, TINHTRANG)
+   10. PHIEUMUON(MAPM, MADG, NGAYMUON, HANTRA, TINHTRANG)
    --------------------------------------------------------------------- */
 CREATE TABLE PHIEUMUON
 (
@@ -172,7 +172,7 @@ CREATE TABLE PHIEUPHAT
 )
 
 /* ---------------------------------------------------------------------
-   13. TAIKHOAN(TENDANGNHAP, MATKHAU, VAITRO, MANV, MADG, TRANGTHAI)
+   13. TAIKHOAN(TENDANGNHAP, MATKHAU, TRANGTHAI)
        Dung cho chuc nang xac thuc cua ung dung. Mat khau duoc bam SHA2_256
        khong luu mat khau goc.
    --------------------------------------------------------------------- */

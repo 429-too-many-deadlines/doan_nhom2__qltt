@@ -52,8 +52,8 @@ export const BorrowStatsTab = () => {
           setRawData(list);
           // If data has years, pick the max year or keep current
           const years = Array.from(new Set(list.map((r) => Number(r.NAM || r.nam)))).filter(Boolean);
-          if (years.length > 0 && !years.includes(selectedYear)) {
-            setSelectedYear(Math.max(...years));
+          if (years.length > 0) {
+            setSelectedYear(prev => years.includes(prev) ? prev : Math.max(...years));
           }
         }
       } catch (err) {
@@ -98,7 +98,7 @@ export const BorrowStatsTab = () => {
   const chartData = useMemo(() => {
     const months = Array.from({ length: 12 }, (_, i) => i + 1);
     return months.map((m) => {
-      const row: Record<string, any> = { thang: `Tháng ${m}`, thangNum: m };
+      const row: Record<string, string | number> = { thang: `Tháng ${m}`, thangNum: m };
       let totalMonth = 0;
       categories.forEach((cat) => {
         const item = dataForYear.find(

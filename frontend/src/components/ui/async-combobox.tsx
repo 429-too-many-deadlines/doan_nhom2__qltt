@@ -122,7 +122,7 @@ export function AsyncCombobox({
                 <CommandItem
                   key={option.value}
                   value={option.value}
-                  onSelect={(_currentValue) => {
+                  onSelect={() => {
                     // command component in shadcn converts value to lowercase internally.
                     // To be safe, we just use the option.value
                     onChange(option.value === value ? "" : option.value)

@@ -128,7 +128,7 @@ CREATE TABLE DOCGIA
 )
 
 /* ---------------------------------------------------------------------
-   10. PHIEUMUON(MAPM, MADG, MANV, NGAYMUON, HANTRA, TINHTRANG)
+   10. PHIEUMUON(MAPM, MADG, NGAYMUON, HANTRA, TINHTRANG)
    --------------------------------------------------------------------- */
 CREATE TABLE PHIEUMUON
 (
@@ -175,7 +175,7 @@ CREATE TABLE PHIEUPHAT
 )
 
 /* ---------------------------------------------------------------------
-   13. TAIKHOAN(TENDANGNHAP, MATKHAU, VAITRO, MANV, MADG, TRANGTHAI)
+   13. TAIKHOAN(TENDANGNHAP, MATKHAU, TRANGTHAI)
        Dung cho chuc nang xac thuc cua ung dung. Mat khau duoc bam SHA2_256
        khong luu mat khau goc.
    --------------------------------------------------------------------- */
@@ -328,26 +328,26 @@ INSERT INTO DOCGIA (MADG, HOTEN, NGSINH, GIOITINH, DIACHI, SODT, EMAIL, NGAYLAPT
 INSERT INTO DOCGIA (MADG, HOTEN, NGSINH, GIOITINH, DIACHI, SODT, EMAIL, NGAYLAPTHE, NGAYHETHAN) VALUES ('DG015', N'Phan Hoàng Vũ', '2003-06-06', N'Nam', NULL, '0901234575', NULL, '2025-09-15', '2027-09-15')
 
 /*NHAP DU LIEU PHIEUMUON*/
-INSERT INTO PHIEUMUON VALUES ('PM0001', 'DG001', '2026-06-01', '2026-06-15', N'Đã trả')
-INSERT INTO PHIEUMUON VALUES ('PM0002', 'DG002', '2026-06-05', '2026-06-19', N'Đã trả')
-INSERT INTO PHIEUMUON VALUES ('PM0003', 'DG007', '2026-06-10', '2026-07-10', N'Đã trả')
-INSERT INTO PHIEUMUON VALUES ('PM0004', 'DG003', '2026-06-20', '2026-07-04', N'Đã trả')
-INSERT INTO PHIEUMUON VALUES ('PM0005', 'DG009', '2026-07-01', '2026-07-15', N'Đã trả')
-INSERT INTO PHIEUMUON VALUES ('PM0006', 'DG005', '2026-07-10', '2026-07-31', N'Đã trả')
-INSERT INTO PHIEUMUON VALUES ('PM0007', 'DG008', '2026-07-15', '2026-08-14', N'Đã trả')
-INSERT INTO PHIEUMUON VALUES ('PM0008', 'DG010', '2026-08-01', '2026-08-15', N'Đã trả')
-INSERT INTO PHIEUMUON VALUES ('PM0009', 'DG006', '2026-08-05', '2026-08-19', N'Đã trả')
-INSERT INTO PHIEUMUON VALUES ('PM0010', 'DG011', '2026-08-20', '2026-09-10', N'Đã trả')
-INSERT INTO PHIEUMUON VALUES ('PM0011', 'DG001', '2026-09-01', '2026-09-15', N'Đang mượn')
-INSERT INTO PHIEUMUON VALUES ('PM0012', 'DG004', '2026-09-10', '2026-09-24', N'Đang mượn')
-INSERT INTO PHIEUMUON VALUES ('PM0013', 'DG007', '2026-09-15', '2026-10-15', N'Đang mượn')
-INSERT INTO PHIEUMUON VALUES ('PM0014', 'DG014', '2026-09-20', '2026-10-04', N'Đang mượn')
-INSERT INTO PHIEUMUON VALUES ('PM0015', 'DG013', '2026-09-22', '2026-09-29', N'Đang mượn')
-INSERT INTO PHIEUMUON VALUES ('PM0016', 'DG002', '2026-09-24', '2026-10-08', N'Đang mượn')
-INSERT INTO PHIEUMUON VALUES ('PM0017', 'DG003', '2026-07-10', '2026-07-24', N'Đã trả')
-INSERT INTO PHIEUMUON VALUES ('PM0018', 'DG010', '2026-07-01', '2026-07-15', N'Đã trả')
-INSERT INTO PHIEUMUON VALUES ('PM0019', 'DG015', '2026-08-10', '2026-08-24', N'Đã trả')
-INSERT INTO PHIEUMUON VALUES ('PM0020', 'DG011', '2026-06-15', '2026-07-06', N'Đã trả')
+INSERT INTO PHIEUMUON VALUES ('PM0001', 'DG001', '2026-06-15', N'Đã trả')
+INSERT INTO PHIEUMUON VALUES ('PM0002', 'DG002', '2026-06-19', N'Đã trả')
+INSERT INTO PHIEUMUON VALUES ('PM0003', 'DG007', '2026-07-10', N'Đã trả')
+INSERT INTO PHIEUMUON VALUES ('PM0004', 'DG003', '2026-07-04', N'Đã trả')
+INSERT INTO PHIEUMUON VALUES ('PM0005', 'DG009', '2026-07-15', N'Đã trả')
+INSERT INTO PHIEUMUON VALUES ('PM0006', 'DG005', '2026-07-31', N'Đã trả')
+INSERT INTO PHIEUMUON VALUES ('PM0007', 'DG008', '2026-08-14', N'Đã trả')
+INSERT INTO PHIEUMUON VALUES ('PM0008', 'DG010', '2026-08-15', N'Đã trả')
+INSERT INTO PHIEUMUON VALUES ('PM0009', 'DG006', '2026-08-19', N'Đã trả')
+INSERT INTO PHIEUMUON VALUES ('PM0010', 'DG011', '2026-09-10', N'Đã trả')
+INSERT INTO PHIEUMUON VALUES ('PM0011', 'DG001', '2026-09-15', N'Đang mượn')
+INSERT INTO PHIEUMUON VALUES ('PM0012', 'DG004', '2026-09-24', N'Đang mượn')
+INSERT INTO PHIEUMUON VALUES ('PM0013', 'DG007', '2026-10-15', N'Đang mượn')
+INSERT INTO PHIEUMUON VALUES ('PM0014', 'DG014', '2026-10-04', N'Đang mượn')
+INSERT INTO PHIEUMUON VALUES ('PM0015', 'DG013', '2026-09-29', N'Đang mượn')
+INSERT INTO PHIEUMUON VALUES ('PM0016', 'DG002', '2026-10-08', N'Đang mượn')
+INSERT INTO PHIEUMUON VALUES ('PM0017', 'DG003', '2026-07-24', N'Đã trả')
+INSERT INTO PHIEUMUON VALUES ('PM0018', 'DG010', '2026-07-15', N'Đã trả')
+INSERT INTO PHIEUMUON VALUES ('PM0019', 'DG015', '2026-08-24', N'Đã trả')
+INSERT INTO PHIEUMUON VALUES ('PM0020', 'DG011', '2026-07-06', N'Đã trả')
 
 /*NHAP DU LIEU CTPHIEUMUON*/
 INSERT INTO CTPHIEUMUON VALUES ('PM0001', 'CS001', '2026-06-10', N'Bình thường')
@@ -858,7 +858,7 @@ END
 GO
 /* ---------------------------------------------------------------------
    SP 3. Lap phieu muon.
-   Tham so vao : MADG, MANV, danh sach ma cuon sach cach nhau boi dau phay
+   Tham so vao : MADG, danh sach ma cuon sach cach nhau boi dau phay
                  (VD: 'CS001,CS010').
    Tham so ra  : MAPM vua tao.
    - Ma phieu tu tang, han tra = ngay muon + so ngay muon cua loai doc gia.
@@ -1403,12 +1403,8 @@ END
 GO
 
 /* ---------------------------------------------------------------------
-   SP 17. Them nhan vien.
-   Tham so vao: MANV, HOTEN, NGSINH, SODT, CHUCVU, NGVL.
-   - MANV da ton tai       -> tra ve 0
-   - Chuc vu khong hop le  -> tra ve 1
-   - Khong du 18 tuoi      -> tra ve 2
-   - Nguoc lai insert      -> tra ve 3
+   SP 36. Lay danh sach phieu muon kem thong tin (phan trang).
+   Tham so vao: PageNumber, PageSize.
    --------------------------------------------------------------------- */
 CREATE OR ALTER PROCEDURE SP_LAYDANHSACHPHIEUMUON
 	@PageNumber INT = 1,
@@ -1449,6 +1445,275 @@ BEGIN
 	FETCH NEXT @PageSize ROWS ONLY;
 END
 GO
+/* ---------------------------------------------------------------------
+   SP 38. Lay danh sach nha xuat ban (phan trang).
+   Tham so vao: TUKHOA, PageNumber, PageSize.
+   --------------------------------------------------------------------- */
+CREATE OR ALTER PROCEDURE SP_LAYDANHSACHNHAXUATBAN
+	@TUKHOA NVARCHAR(100) = NULL,
+	@PageNumber INT = 1,
+	@PageSize INT = 10
+AS
+BEGIN
+	SET NOCOUNT ON;
+	SELECT MANXB, TENNXB, DIACHI, SODT, COUNT(*) OVER() AS TotalRecord
+	FROM NHAXUATBAN
+	WHERE @TUKHOA IS NULL OR @TUKHOA = ''
+	   OR MANXB LIKE '%' + @TUKHOA + '%'
+	   OR TENNXB LIKE N'%' + @TUKHOA + N'%'
+	ORDER BY MANXB
+	OFFSET (@PageNumber - 1) * @PageSize ROWS
+	FETCH NEXT @PageSize ROWS ONLY;
+END
+GO
+
+/* ---------------------------------------------------------------------
+   SP 39. Lay danh sach tac gia (phan trang).
+   Tham so vao: TUKHOA, PageNumber, PageSize.
+   --------------------------------------------------------------------- */
+CREATE OR ALTER PROCEDURE SP_LAYDANHSACHTACGIA
+	@TUKHOA NVARCHAR(100) = NULL,
+	@PageNumber INT = 1,
+	@PageSize INT = 10
+AS
+BEGIN
+	SET NOCOUNT ON;
+	SELECT MATG, TENTG, NAMSINH, QUOCTICH, COUNT(*) OVER() AS TotalRecord
+	FROM TACGIA
+	WHERE @TUKHOA IS NULL OR @TUKHOA = ''
+	   OR MATG LIKE '%' + @TUKHOA + '%'
+	   OR TENTG LIKE N'%' + @TUKHOA + N'%'
+	ORDER BY MATG
+	OFFSET (@PageNumber - 1) * @PageSize ROWS
+	FETCH NEXT @PageSize ROWS ONLY;
+END
+GO
+
+/* ---------------------------------------------------------------------
+   SP 40. Them nha xuat ban.
+   Tham so vao: MANXB, TENNXB, DIACHI, SODT.
+   - MANXB da ton tai       -> tra ve 0
+   - TENNXB da ton tai      -> tra ve 1
+   - Nguoc lai insert       -> tra ve 2
+   --------------------------------------------------------------------- */
+CREATE OR ALTER PROCEDURE SP_THEMNHAXUATBAN
+	@MANXB CHAR(5),
+	@TENNXB NVARCHAR(100),
+	@DIACHI NVARCHAR(200) = NULL,
+	@SODT VARCHAR(15) = NULL
+AS
+BEGIN
+	SET NOCOUNT ON;
+	IF EXISTS (SELECT 1 FROM NHAXUATBAN WHERE MANXB = @MANXB)
+	BEGIN
+		PRINT N'Mã nhà xuất bản đã tồn tại.';
+		RETURN 0;
+	END
+	IF EXISTS (SELECT 1 FROM NHAXUATBAN WHERE TENNXB = @TENNXB)
+	BEGIN
+		PRINT N'Tên nhà xuất bản đã tồn tại.';
+		RETURN 1;
+	END
+
+	INSERT INTO NHAXUATBAN (MANXB, TENNXB, DIACHI, SODT) 
+	VALUES (@MANXB, @TENNXB, @DIACHI, @SODT);
+
+	PRINT N'Thêm nhà xuất bản thành công.';
+	RETURN 2;
+END
+GO
+
+
+/* ---------------------------------------------------------------------
+   SP 41. Sua nha xuat ban.
+   Tham so vao: MANXB, TENNXB, DIACHI, SODT.
+   - MANXB khong ton tai                -> tra ve 0
+   - TENNXB bi trung voi nxb khac       -> tra ve 1
+   - Nguoc lai update                   -> tra ve 2
+   --------------------------------------------------------------------- */
+CREATE OR ALTER PROCEDURE SP_SUANHAXUATBAN
+	@MANXB CHAR(5),
+	@TENNXB NVARCHAR(100),
+	@DIACHI NVARCHAR(200) = NULL,
+	@SODT VARCHAR(15) = NULL
+AS
+BEGIN
+	SET NOCOUNT ON;
+	IF NOT EXISTS (SELECT 1 FROM NHAXUATBAN WHERE MANXB = @MANXB)
+	BEGIN
+		PRINT N'Mã nhà xuất bản không tồn tại.';
+		RETURN 0;
+	END
+	IF EXISTS (SELECT 1 FROM NHAXUATBAN WHERE TENNXB = @TENNXB AND MANXB != @MANXB)
+	BEGIN
+		PRINT N'Tên nhà xuất bản đã tồn tại.';
+		RETURN 1;
+	END
+
+	UPDATE NHAXUATBAN
+	SET TENNXB = @TENNXB,
+	    DIACHI = @DIACHI,
+	    SODT = @SODT
+	WHERE MANXB = @MANXB;
+
+	PRINT N'Sửa nhà xuất bản thành công.';
+	RETURN 2;
+END
+GO
+
+/* ---------------------------------------------------------------------
+   SP 42. Xoa nha xuat ban.
+   Tham so vao: MANXB.
+   - MANXB khong ton tai                -> tra ve 0
+   - MANXB da co DAUSACH                -> tra ve 1
+   - Nguoc lai xoa                      -> tra ve 2
+   --------------------------------------------------------------------- */
+CREATE OR ALTER PROCEDURE SP_XOANHAXUATBAN
+	@MANXB CHAR(5)
+AS
+BEGIN
+	SET NOCOUNT ON;
+	IF NOT EXISTS (SELECT 1 FROM NHAXUATBAN WHERE MANXB = @MANXB)
+	BEGIN
+		PRINT N'Mã nhà xuất bản không tồn tại.';
+		RETURN 0;
+	END
+	IF EXISTS (SELECT 1 FROM DAUSACH WHERE MANXB = @MANXB)
+	BEGIN
+		PRINT N'Nhà xuất bản đã có đầu sách, không thể xoá.';
+		RETURN 1;
+	END
+
+	DELETE FROM NHAXUATBAN WHERE MANXB = @MANXB;
+
+	PRINT N'Xoá nhà xuất bản thành công.';
+	RETURN 2;
+END
+GO
+
+CREATE OR ALTER PROCEDURE SP_THEMTACGIA
+	@MATG CHAR(5),
+	@TENTG NVARCHAR(50),
+	@NAMSINH INT,
+	@QUOCTICH NVARCHAR(30)
+AS
+BEGIN
+	IF EXISTS (SELECT 1 FROM TACGIA WHERE MATG = @MATG)
+		RETURN 0
+	IF @NAMSINH IS NOT NULL AND @NAMSINH > YEAR(GETDATE())
+		RETURN 1
+	INSERT INTO TACGIA (MATG, TENTG, NAMSINH, QUOCTICH) VALUES (@MATG, @TENTG, @NAMSINH, @QUOCTICH)
+	RETURN 2
+END
+GO
+
+CREATE OR ALTER PROCEDURE SP_SUATACGIA
+	@MATG CHAR(5),
+	@TENTG NVARCHAR(50),
+	@NAMSINH INT,
+	@QUOCTICH NVARCHAR(30)
+AS
+BEGIN
+	IF NOT EXISTS (SELECT 1 FROM TACGIA WHERE MATG = @MATG)
+		RETURN 0
+	IF @NAMSINH IS NOT NULL AND @NAMSINH > YEAR(GETDATE())
+		RETURN 1
+	UPDATE TACGIA SET TENTG = @TENTG, NAMSINH = @NAMSINH, QUOCTICH = @QUOCTICH WHERE MATG = @MATG
+	RETURN 2
+END
+GO
+
+CREATE OR ALTER PROCEDURE SP_XOATACGIA
+	@MATG CHAR(5)
+AS
+BEGIN
+	IF NOT EXISTS (SELECT 1 FROM TACGIA WHERE MATG = @MATG)
+		RETURN 0
+	IF EXISTS (SELECT 1 FROM DAUSACH_TACGIA WHERE MATG = @MATG)
+		RETURN 1
+	DELETE FROM TACGIA WHERE MATG = @MATG
+	RETURN 2
+END
+GO
+
+CREATE OR ALTER PROCEDURE SP_THEMCUONSACH
+	@MACS CHAR(5),
+	@MADS CHAR(5),
+	@VITRI NVARCHAR(20),
+	@TINHTRANG NVARCHAR(20)
+AS
+BEGIN
+	IF EXISTS (SELECT 1 FROM CUONSACH WHERE MACS = @MACS)
+		RETURN 0
+	IF NOT EXISTS (SELECT 1 FROM DAUSACH WHERE MADS = @MADS)
+		RETURN 1
+	INSERT INTO CUONSACH (MACS, MADS, VITRI, TINHTRANG, NGAYNHAP) VALUES (@MACS, @MADS, @VITRI, @TINHTRANG, GETDATE())
+	RETURN 3
+END
+GO
+
+CREATE OR ALTER PROCEDURE SP_SUACUONSACH
+	@MACS CHAR(5),
+	@VITRI NVARCHAR(20),
+	@TINHTRANG NVARCHAR(20)
+AS
+BEGIN
+	IF NOT EXISTS (SELECT 1 FROM CUONSACH WHERE MACS = @MACS)
+		RETURN 0
+	UPDATE CUONSACH SET VITRI = @VITRI, TINHTRANG = @TINHTRANG WHERE MACS = @MACS
+	RETURN 2
+END
+GO
+
+CREATE OR ALTER PROCEDURE SP_XOACUONSACH
+	@MACS CHAR(5)
+AS
+BEGIN
+	IF NOT EXISTS (SELECT 1 FROM CUONSACH WHERE MACS = @MACS)
+		RETURN 0
+	IF EXISTS (SELECT 1 FROM CTPHIEUMUON WHERE MACS = @MACS)
+		RETURN 1
+	DELETE FROM CUONSACH WHERE MACS = @MACS
+	RETURN 2
+END
+GO
+
+CREATE OR ALTER PROCEDURE SP_LAYCUONSACHTHEODAUSACH
+	@MADS CHAR(5)
+AS
+BEGIN
+	SET NOCOUNT ON
+	SELECT MACS, MADS, NGAYNHAP, VITRI, TINHTRANG FROM CUONSACH WHERE MADS = @MADS ORDER BY MACS
+END
+GO
+
+CREATE OR ALTER PROCEDURE SP_LAYTACGIATHEODAUSACH
+	@MADS CHAR(5)
+AS
+BEGIN
+	SET NOCOUNT ON
+	SELECT DT.MATG, T.TENTG, DT.VAITRO FROM DAUSACH_TACGIA DT JOIN TACGIA T ON DT.MATG = T.MATG WHERE DT.MADS = @MADS
+END
+GO
+
+CREATE OR ALTER PROCEDURE SP_THEMTACGIADAUSACH
+	@MADS CHAR(5),
+	@MATG CHAR(5),
+	@VAITRO NVARCHAR(20)
+AS
+BEGIN
+	INSERT INTO DAUSACH_TACGIA (MADS, MATG, VAITRO) VALUES (@MADS, @MATG, @VAITRO)
+END
+GO
+
+CREATE OR ALTER PROCEDURE SP_XOATACGIADAUSACH
+	@MADS CHAR(5)
+AS
+BEGIN
+	DELETE FROM DAUSACH_TACGIA WHERE MADS = @MADS
+END
+GO
+
 GO
 
 /* ==================== CONTENT OF 6_Cursor.sql ==================== */
@@ -1670,25 +1935,6 @@ GO
    Mat khau khong luu dang ro: MATKHAU = SHA2_256(mat khau)
    ===================================================================== */
 
-/* SP tao tai khoan. Tra ve 0: trung ten dang nhap, 1: thanh cong */
-CREATE OR ALTER PROCEDURE SP_TAOTAIKHOAN
-	@TENDANGNHAP	VARCHAR(30),
-	@MATKHAU		NVARCHAR(100)
-AS
-BEGIN
-	SET NOCOUNT ON
-	IF EXISTS (SELECT * FROM TAIKHOAN WHERE TENDANGNHAP = @TENDANGNHAP)
-	BEGIN
-		PRINT N'Tên đăng nhập đã tồn tại.'
-		RETURN 0
-	END
-
-	INSERT INTO TAIKHOAN (TENDANGNHAP, MATKHAU)
-	VALUES (@TENDANGNHAP,
-			HASHBYTES('SHA2_256', @MATKHAU))
-	RETURN 1
-END
-GO
 
 /* SP dang nhap. Tra ve thong tin tai khoan neu dung, nguoc lai bang rong.
    Tham so ra @KETQUA: 0 sai ten/mat khau, 1 tai khoan bi khoa, 2 thanh cong */
@@ -1744,26 +1990,8 @@ END
 GO
 
 
-/* SP cap nhat trang thai tai khoan. Tra ve 0: khong ton tai, 1: thanh cong */
-CREATE OR ALTER PROCEDURE SP_CAPNHATTRANGTHAITAIKHOAN
-	@TENDANGNHAP VARCHAR(30),
-	@TRANGTHAI BIT
-AS
-BEGIN
-	SET NOCOUNT ON;
-	IF NOT EXISTS (SELECT 1 FROM TAIKHOAN WHERE TENDANGNHAP = @TENDANGNHAP)
-	BEGIN
-		PRINT N'Tài khoản không tồn tại.';
-		RETURN 0;
-	END
-	UPDATE TAIKHOAN SET TRANGTHAI = @TRANGTHAI WHERE TENDANGNHAP = @TENDANGNHAP;
-	PRINT N'Cập nhật trạng thái tài khoản thành công.';
-	RETURN 1;
-END
-GO
 
-/*NHAP DU LIEU TAIKHOAN (mat khau mau: 123456)*/
-EXEC SP_TAOTAIKHOAN 'admin', N'123456'
+INSERT INTO TAIKHOAN (TENDANGNHAP, MATKHAU) VALUES ('admin', HASHBYTES('SHA2_256', '123456'))
 
 
 

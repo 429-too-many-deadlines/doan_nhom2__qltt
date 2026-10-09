@@ -16,25 +16,6 @@ GO
    Mat khau khong luu dang ro: MATKHAU = SHA2_256(mat khau)
    ===================================================================== */
 
-/* SP tao tai khoan. Tra ve 0: trung ten dang nhap, 1: thanh cong */
-CREATE OR ALTER PROCEDURE SP_TAOTAIKHOAN
-	@TENDANGNHAP	VARCHAR(30),
-	@MATKHAU		NVARCHAR(100)
-AS
-BEGIN
-	SET NOCOUNT ON
-	IF EXISTS (SELECT * FROM TAIKHOAN WHERE TENDANGNHAP = @TENDANGNHAP)
-	BEGIN
-		PRINT N'Tên đăng nhập đã tồn tại.'
-		RETURN 0
-	END
-
-	INSERT INTO TAIKHOAN (TENDANGNHAP, MATKHAU)
-	VALUES (@TENDANGNHAP,
-			HASHBYTES('SHA2_256', @MATKHAU))
-	RETURN 1
-END
-GO
 
 /* SP dang nhap. Tra ve thong tin tai khoan neu dung, nguoc lai bang rong.
    Tham so ra @KETQUA: 0 sai ten/mat khau, 1 tai khoan bi khoa, 2 thanh cong */
@@ -90,26 +71,8 @@ END
 GO
 
 
-/* SP cap nhat trang thai tai khoan. Tra ve 0: khong ton tai, 1: thanh cong */
-CREATE OR ALTER PROCEDURE SP_CAPNHATTRANGTHAITAIKHOAN
-	@TENDANGNHAP VARCHAR(30),
-	@TRANGTHAI BIT
-AS
-BEGIN
-	SET NOCOUNT ON;
-	IF NOT EXISTS (SELECT 1 FROM TAIKHOAN WHERE TENDANGNHAP = @TENDANGNHAP)
-	BEGIN
-		PRINT N'Tài khoản không tồn tại.';
-		RETURN 0;
-	END
-	UPDATE TAIKHOAN SET TRANGTHAI = @TRANGTHAI WHERE TENDANGNHAP = @TENDANGNHAP;
-	PRINT N'Cập nhật trạng thái tài khoản thành công.';
-	RETURN 1;
-END
-GO
 
-/*NHAP DU LIEU TAIKHOAN (mat khau mau: 123456)*/
-EXEC SP_TAOTAIKHOAN 'admin', N'123456'
+INSERT INTO TAIKHOAN (TENDANGNHAP, MATKHAU) VALUES ('admin', HASHBYTES('SHA2_256', '123456'))
 
 
 

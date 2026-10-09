@@ -22,8 +22,8 @@ export default function Accounts() {
       await authService.changePassword(changePwdData.oldPassword, changePwdData.newPassword);
       toast.success('Đổi mật khẩu thành công!');
       setChangePwdData({ oldPassword: '', newPassword: '', confirmPassword: '' });
-    } catch (err: any) {
-      toast.error(err.message || 'Đổi mật khẩu thất bại.');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Đổi mật khẩu thất bại.');
     } finally {
       setLoading(false);
     }

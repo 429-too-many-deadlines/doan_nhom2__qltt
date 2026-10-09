@@ -20,9 +20,9 @@ export default function Login() {
       const response = await apiClient.post('/api/auth/login', { username, password });
       login(response.data.token, response.data.user);
       navigate('/');
-    } catch (_error) {
-      const err = error as { response?: { data?: { message?: string } } };
-      setError(err.response?.data?.message || 'Login failed');
+    } catch (err) {
+      const e = err as { response?: { data?: { message?: string } } };
+      setError(e.response?.data?.message || 'Login failed');
     }
   };
 
