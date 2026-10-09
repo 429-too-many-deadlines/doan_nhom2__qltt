@@ -5,10 +5,6 @@ export type User = {
   username: string;
   role: string;
   fullName: string;
-  MANV?: string;
-  MADG?: string;
-  manv?: string;
-  madg?: string;
 };
 
 interface AuthContextType {

@@ -23,16 +23,12 @@ const InventoryStatsTab = lazy(() =>
 const FineStatsTab = lazy(() =>
   import('../components/features/reports/FineStatsTab').then((m) => ({ default: m.FineStatsTab }))
 );
-const StaffStatsTab = lazy(() =>
-  import('../components/features/reports/StaffStatsTab').then((m) => ({ default: m.StaffStatsTab }))
-);
 
 const tabPreloaders: Record<string, () => void> = {
   borrows: () => { import('../components/features/reports/BorrowStatsTab'); },
   inventory: () => { import('../components/features/reports/InventoryStatsTab'); },
   fines: () => { import('../components/features/reports/FineStatsTab'); },
-  staff: () => { import('../components/features/reports/StaffStatsTab'); },
-};
+  };
 
 export default function Reports() {
   const currentDate = new Date();
@@ -183,14 +179,7 @@ export default function Reports() {
           </TabsContent>
         )}
 
-        {/* Tab 5: Staff Performance & Cursors */}
-        {visitedTabs.staff && (
-          <TabsContent value="staff" className="outline-none data-[state=inactive]:hidden" forceMount>
-            <Suspense fallback={<ReportTabSkeleton />}>
-              <StaffStatsTab month={month} year={year} />
-            </Suspense>
-          </TabsContent>
-        )}
+        
       </Tabs>
     </div>
   );

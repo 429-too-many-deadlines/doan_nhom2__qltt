@@ -11,7 +11,7 @@ interface Props {
 
 export function CreateTransactionDialog({ onSuccess }: Props) {
   const [open, setOpen] = useState(false);
-  const [formData, setFormData] = useState({ MADG: '', MANV: '', DSMACs: '' });
+  const [formData, setFormData] = useState({ MADG: '', DSMACs: '' });
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -19,9 +19,9 @@ export function CreateTransactionDialog({ onSuccess }: Props) {
     setLoading(true);
     try {
       const DSMACs = formData.DSMACs.split(',').map(s => s.trim()).filter(Boolean);
-      await transactionsService.borrowBook({ MADG: formData.MADG, MANV: formData.MANV, DSMACs });
+      await transactionsService.borrowBook({ MADG: formData.MADG, DSMACs });
       // toast.success('Mượn sách thành công');
-      setFormData({ MADG: '', MANV: '', DSMACs: '' });
+      setFormData({ MADG: '', DSMACs: '' });
       setOpen(false);
       onSuccess();
     } catch {
@@ -50,15 +50,6 @@ export function CreateTransactionDialog({ onSuccess }: Props) {
               value={formData.MADG}
               onChange={(e) => setFormData({ ...formData, MADG: e.target.value })}
               placeholder="VD: DG01" 
-              required 
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Mã Nhân Viên</label>
-            <Input 
-              value={formData.MANV}
-              onChange={(e) => setFormData({ ...formData, MANV: e.target.value })}
-              placeholder="VD: NV01" 
               required 
             />
           </div>

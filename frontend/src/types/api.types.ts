@@ -57,14 +57,12 @@ export interface MonthlyStatsResponse {
 export interface Account {
   username: string;
   role: string;
-  maNV?: string | null;
   maDG?: string | null;
   ownerName?: string;
   status: boolean;
   // Fallback aliases
   tendangnhap?: string;
   vaitro?: string;
-  MANV?: string;
   MADG?: string;
   trangthai?: boolean;
 }
@@ -100,7 +98,6 @@ export interface BookAuthor {
 
 // --- Employees ---
 export interface Employee {
-  MANV: string;
   HOTEN: string;
   NGSINH: string;
   SODT: string;
@@ -194,7 +191,6 @@ export interface CreateAccountRequest {
   username: string;
   password: string;
   role: string;
-  MANV: string | null;
   MADG: string | null;
 }
 
@@ -265,7 +261,6 @@ export interface UpdateCategoryRequest {
 }
 
 export interface CreateEmployeeRequest {
-  MANV: string;
   HOTEN: string;
   NGSINH: string;
   SODT: string;
@@ -327,7 +322,6 @@ export interface MessageResponse {
 
 export interface BorrowRequest {
   MADG: string;
-  MANV: string;
   DSMACs: string[];
 }
 
@@ -340,7 +334,6 @@ export interface BorrowSlip {
   MAPM: string;
   MADG: string;
   TENDG: string;
-  MANV: string;
   NGAYMUON: string;
   HANTRA: string;
   TINHTRANG: string;
