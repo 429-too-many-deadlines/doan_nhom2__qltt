@@ -12,6 +12,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace QuanLyThuVien.Server.Endpoints.Auth;
 
@@ -60,14 +61,9 @@ public class LoginEndpoint : IEndpoint
                 var claims = new List<Claim>
                 {
                     new Claim(ClaimTypes.Name, user.TENDANGNHAP),
-                    new Claim(ClaimTypes.Role, user.VAITRO),
-                    new Claim("FullName", user.HOTEN ?? "")
+                    new Claim(ClaimTypes.Role, "Admin"),
+                    new Claim("FullName", user.HOTEN ?? "Admin")
                 };
-
-                if (!string.IsNullOrEmpty(user.MANV))
-                    claims.Add(new Claim("MaNV", user.MANV));
-                if (!string.IsNullOrEmpty(user.MADG))
-                    claims.Add(new Claim("MaDG", user.MADG));
 
                 var tokenDescriptor = new SecurityTokenDescriptor
                 {
@@ -89,10 +85,8 @@ public class LoginEndpoint : IEndpoint
                     user = new
                     {
                         username = user.TENDANGNHAP,
-                        role = user.VAITRO,
-                        fullName = user.HOTEN,
-                        manv = user.MANV,
-                        madg = user.MADG
+                        role = "Admin",
+                        fullName = user.HOTEN
                     }
                 });
             }
@@ -111,8 +105,5 @@ public record LoginRequest(string Username, string Password);
 public class UserResult
 {
     public string TENDANGNHAP { get; set; } = null!;
-    public string VAITRO { get; set; } = null!;
-    public string? MANV { get; set; }
-    public string? MADG { get; set; }
     public string? HOTEN { get; set; }
 }
