@@ -17,7 +17,7 @@ public class GetTopBorrowedBooksEndpoint : IEndpoint
             return Results.Ok(data);
         })
         .WithName("GetTopBorrowedBooks")
-        .RequireAuthorization("QuanLyOnly")
+        .RequireAuthorization()
            .WithTags("Reports")
         .WithGroupName("v1")
         .WithSummary("Xếp hạng đầu sách được mượn nhiều nhất");

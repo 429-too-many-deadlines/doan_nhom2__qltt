@@ -40,7 +40,7 @@ public class CreateBookEndpoint : IEndpoint
             };
         })
         .WithName("CreateBook")
-        .RequireAuthorization("QuanLyHoacThuThu")
+        .RequireAuthorization()
            .WithTags("Books")
         .WithSummary("Thêm mới đầu sách");
     }

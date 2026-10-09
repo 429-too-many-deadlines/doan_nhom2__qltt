@@ -38,7 +38,7 @@ public class ReturnBookEndpoint : IEndpoint
             };
         })
         .WithName("ReturnBook")
-        .RequireAuthorization("ThuThuOnly")
+        .RequireAuthorization()
            .WithTags("Transactions")
         .WithGroupName("v1")
         .WithSummary("Trả sách");

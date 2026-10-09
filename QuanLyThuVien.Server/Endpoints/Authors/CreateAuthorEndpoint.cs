@@ -17,19 +17,26 @@ public class CreateAuthorEndpoint : IEndpoint
     {
         app.MapPost("api/authors", async (IDbConnection db, [FromBody] CreateAuthorRequest req) =>
         {
-            try
+            var parameters = new DynamicParameters();
+            parameters.Add("@MATG", req.MaTG);
+            parameters.Add("@TENTG", req.TenTG);
+            parameters.Add("@NAMSINH", req.NamSinh);
+            parameters.Add("@QUOCTICH", req.QuocTich);
+            parameters.Add("@ReturnValue", dbType: DbType.Int32, direction: ParameterDirection.ReturnValue);
+
+            await db.ExecuteAsync("SP_THEMTACGIA", parameters, commandType: CommandType.StoredProcedure);
+            var result = parameters.Get<int>("@ReturnValue");
+
+            return result switch
             {
-                var sql = "INSERT INTO TACGIA(MATG, TENTG, NAMSINH, QUOCTICH) VALUES(@MaTG, @TenTG, @NamSinh, @QuocTich)";
-                await db.ExecuteAsync(sql, req);
-                return Results.Ok(new MessageResponse("Thêm tác giả thành công"));
-            }
-            catch (System.Exception ex)
-            {
-                return Results.BadRequest(new MessageResponse(ex.Message));
-            }
+                0 => Results.BadRequest(new MessageResponse("Mã tác giả đã tồn tại.")),
+                1 => Results.BadRequest(new MessageResponse("Năm sinh tác giả không hợp lệ.")),
+                2 => Results.Ok(new MessageResponse("Thêm tác giả thành công")),
+                _ => Results.StatusCode(500)
+            };
         })
         .WithName("CreateAuthor")
-        .RequireAuthorization("QuanLyHoacThuThu")
+        .RequireAuthorization()
         .WithTags("Authors")
         .WithSummary("Thêm tác giả");
     }

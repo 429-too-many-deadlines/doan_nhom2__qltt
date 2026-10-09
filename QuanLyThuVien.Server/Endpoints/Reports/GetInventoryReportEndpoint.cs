@@ -17,7 +17,7 @@ public class GetInventoryReportEndpoint : IEndpoint
             return Results.Ok(data);
         })
         .WithName("GetInventoryReport")
-        .RequireAuthorization("QuanLyOnly")
+        .RequireAuthorization()
            .WithTags("Reports")
         .WithGroupName("v1")
         .WithSummary("Tình trạng kho sách theo đầu sách");

@@ -37,7 +37,7 @@ public class CreateReaderEndpoint : IEndpoint
             };
         })
         .WithName("CreateReader")
-        .RequireAuthorization("QuanLyHoacThuThu")
+        .RequireAuthorization()
            .WithTags("Readers")
         .WithGroupName("v1")
         .WithSummary("Thêm độc giả mới");

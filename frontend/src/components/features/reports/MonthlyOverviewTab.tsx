@@ -21,27 +21,39 @@ import {
 } from 'recharts';
 import { BookOpen, FileText, CircleDollarSign } from 'lucide-react';
 
+import { ReportTabSkeleton } from './ReportSkeleton';
+
 interface MonthlyOverviewTabProps {
   month: number;
   year: number;
 }
 
+const statsCache = new Map<string, MonthlyStatsResponse>();
+
 export const MonthlyOverviewTab = ({ month, year }: MonthlyOverviewTabProps) => {
-  const [stats, setStats] = useState<MonthlyStatsResponse | null>(null);
-  const [loading, setLoading] = useState(false);
+  const cacheKey = `${month}-${year}`;
+  const [stats, setStats] = useState<MonthlyStatsResponse | null>(() => statsCache.get(cacheKey) || null);
+  const [loading, setLoading] = useState(!statsCache.has(cacheKey));
 
   useEffect(() => {
     let isMounted = true;
+    const cached = statsCache.get(cacheKey);
+    if (cached) {
+      setStats(cached);
+    } else {
+      setLoading(true);
+    }
+
     const fetchStats = async () => {
       try {
-        setLoading(true);
         const data = await reportsService.getMonthlyStats(month, year);
+        statsCache.set(cacheKey, data);
         if (isMounted) {
           setStats(data);
         }
       } catch (error) {
         console.error('Lỗi khi tải thống kê tháng:', error);
-        if (isMounted) setStats(null);
+        if (isMounted && !cached) setStats(null);
       } finally {
         if (isMounted) setLoading(false);
       }
@@ -51,7 +63,11 @@ export const MonthlyOverviewTab = ({ month, year }: MonthlyOverviewTabProps) => 
     return () => {
       isMounted = false;
     };
-  }, [month, year]);
+  }, [cacheKey, month, year]);
+
+  if (loading && !stats) {
+    return <ReportTabSkeleton />;
+  }
 
   const soPhieu = stats?.soPhieu ?? stats?.SOPHIEU ?? 0;
   const soLuotSach = stats?.soLuotSach ?? stats?.SOLUOTSACH ?? 0;

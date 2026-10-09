@@ -14,22 +14,23 @@ public class GetPublishersEndpoint : IEndpoint
     {
         app.MapGet("api/publishers", async (IDbConnection db, string? query, int page = 1, int pageSize = 10) =>
         {
-            var offset = (page - 1) * pageSize;
-            var sqlCount = "SELECT COUNT(*) FROM NHAXUATBAN";
-            var sqlData = "SELECT * FROM NHAXUATBAN";
-            
-            if (!string.IsNullOrEmpty(query))
+            var parameters = new DynamicParameters();
+            parameters.Add("@TUKHOA", string.IsNullOrWhiteSpace(query) ? null : query);
+            parameters.Add("@PageNumber", page);
+            parameters.Add("@PageSize", pageSize);
+
+            var items = await db.QueryAsync<dynamic>("SP_LAYDANHSACHNHAXUATBAN", parameters, commandType: CommandType.StoredProcedure);
+
+            int totalCount = 0;
+            var firstRow = items.FirstOrDefault();
+            if (firstRow != null)
             {
-                sqlCount += " WHERE TENNXB LIKE @Query OR MANXB LIKE @Query";
-                sqlData += " WHERE TENNXB LIKE @Query OR MANXB LIKE @Query";
+                var rowDict = (IDictionary<string, object>)firstRow;
+                if (rowDict.TryGetValue("TotalRecord", out var tr) && tr != null)
+                {
+                    totalCount = Convert.ToInt32(tr);
+                }
             }
-
-            sqlData += " ORDER BY MANXB OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY";
-
-            var parameters = new { Query = $"%{query}%", Offset = offset, PageSize = pageSize };
-            
-            var totalCount = await db.ExecuteScalarAsync<int>(sqlCount, parameters);
-            var items = await db.QueryAsync<dynamic>(sqlData, parameters);
 
             return Results.Ok(new PagedResult<dynamic>
             {
@@ -40,7 +41,7 @@ public class GetPublishersEndpoint : IEndpoint
             });
         })
         .WithName("GetPublishers")
-        .RequireAuthorization("QuanLyHoacThuThu")
+        .RequireAuthorization()
         .WithTags("Publishers")
         .WithSummary("Lấy danh sách nhà xuất bản");
     }

@@ -17,19 +17,26 @@ public class CreatePublisherEndpoint : IEndpoint
     {
         app.MapPost("api/publishers", async (IDbConnection db, [FromBody] CreatePublisherRequest req) =>
         {
-            try
+            var parameters = new DynamicParameters();
+            parameters.Add("@MANXB", req.MaNXB);
+            parameters.Add("@TENNXB", req.TenNXB);
+            parameters.Add("@DIACHI", req.DiaChi);
+            parameters.Add("@SODT", req.SoDT);
+            parameters.Add("@ReturnValue", dbType: DbType.Int32, direction: ParameterDirection.ReturnValue);
+
+            await db.ExecuteAsync("SP_THEMNHAXUATBAN", parameters, commandType: CommandType.StoredProcedure);
+            var result = parameters.Get<int>("@ReturnValue");
+
+            return result switch
             {
-                var sql = "INSERT INTO NHAXUATBAN(MANXB, TENNXB, DIACHI, SODT) VALUES(@MaNXB, @TenNXB, @DiaChi, @SoDT)";
-                await db.ExecuteAsync(sql, req);
-                return Results.Ok(new MessageResponse("Thêm nhà xuất bản thành công"));
-            }
-            catch (System.Exception ex)
-            {
-                return Results.BadRequest(new MessageResponse(ex.Message));
-            }
+                0 => Results.BadRequest(new MessageResponse("Mã nhà xuất bản đã tồn tại.")),
+                1 => Results.BadRequest(new MessageResponse("Tên nhà xuất bản đã tồn tại.")),
+                2 => Results.Ok(new MessageResponse("Thêm nhà xuất bản thành công")),
+                _ => Results.StatusCode(500)
+            };
         })
         .WithName("CreatePublisher")
-        .RequireAuthorization("QuanLyHoacThuThu")
+        .RequireAuthorization()
         .WithTags("Publishers")
         .WithSummary("Thêm nhà xuất bản");
     }

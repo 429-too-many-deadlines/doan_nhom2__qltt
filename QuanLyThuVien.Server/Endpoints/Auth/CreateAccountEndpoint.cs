@@ -14,10 +14,10 @@ public class CreateAccountEndpoint : IEndpoint
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost("/api/auth/create-account", HandleAsync)
-           .RequireAuthorization("QuanLyOnly")
+           .RequireAuthorization()
            .WithTags("Auth")
            .WithSummary("Tạo tài khoản")
-           .WithDescription("Gọi SP_TAOTAIKHOAN. Chỉ quản lý mới có quyền tạo.");
+           .WithDescription("Gọi SP_TAOTAIKHOAN.");
     }
 
     private static async Task<IResult> HandleAsync(

@@ -17,21 +17,26 @@ public class UpdatePublisherEndpoint : IEndpoint
     {
         app.MapPut("api/publishers/{id}", async (IDbConnection db, string id, [FromBody] UpdatePublisherRequest req) =>
         {
-            try
+            var parameters = new DynamicParameters();
+            parameters.Add("@MANXB", id);
+            parameters.Add("@TENNXB", req.TenNXB);
+            parameters.Add("@DIACHI", req.DiaChi);
+            parameters.Add("@SODT", req.SoDT);
+            parameters.Add("@ReturnValue", dbType: DbType.Int32, direction: ParameterDirection.ReturnValue);
+
+            await db.ExecuteAsync("SP_SUANHAXUATBAN", parameters, commandType: CommandType.StoredProcedure);
+            var result = parameters.Get<int>("@ReturnValue");
+
+            return result switch
             {
-                var sql = "UPDATE NHAXUATBAN SET TENNXB = @TenNXB, DIACHI = @DiaChi, SODT = @SoDT WHERE MANXB = @MaNXB";
-                var result = await db.ExecuteAsync(sql, new { TenNXB = req.TenNXB, DiaChi = req.DiaChi, SoDT = req.SoDT, MaNXB = id });
-                
-                if (result == 0) return Results.NotFound(new MessageResponse("Không tìm thấy nhà xuất bản"));
-                return Results.Ok(new MessageResponse("Cập nhật nhà xuất bản thành công"));
-            }
-            catch (System.Exception ex)
-            {
-                return Results.BadRequest(new MessageResponse(ex.Message));
-            }
+                0 => Results.NotFound(new MessageResponse("Không tìm thấy nhà xuất bản")),
+                1 => Results.BadRequest(new MessageResponse("Tên nhà xuất bản đã tồn tại.")),
+                2 => Results.Ok(new MessageResponse("Cập nhật nhà xuất bản thành công")),
+                _ => Results.StatusCode(500)
+            };
         })
         .WithName("UpdatePublisher")
-        .RequireAuthorization("QuanLyHoacThuThu")
+        .RequireAuthorization()
         .WithTags("Publishers")
         .WithSummary("Cập nhật nhà xuất bản");
     }

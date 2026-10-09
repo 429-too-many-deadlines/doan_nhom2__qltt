@@ -20,7 +20,7 @@ public class GetReaderHistoryEndpoint : IEndpoint
             return Results.Ok(history);
         })
         .WithName("GetReaderHistory")
-        .RequireAuthorization("QuanLyHoacThuThu")
+        .RequireAuthorization()
            .WithTags("Readers")
         .WithGroupName("v1")
         .WithSummary("Xem lịch sử mượn sách của độc giả");

@@ -14,22 +14,23 @@ public class GetAuthorsEndpoint : IEndpoint
     {
         app.MapGet("api/authors", async (IDbConnection db, string? query, int page = 1, int pageSize = 10) =>
         {
-            var offset = (page - 1) * pageSize;
-            var sqlCount = "SELECT COUNT(*) FROM TACGIA";
-            var sqlData = "SELECT * FROM TACGIA";
-            
-            if (!string.IsNullOrEmpty(query))
+            var parameters = new DynamicParameters();
+            parameters.Add("@TUKHOA", string.IsNullOrWhiteSpace(query) ? null : query);
+            parameters.Add("@PageNumber", page);
+            parameters.Add("@PageSize", pageSize);
+
+            var authors = await db.QueryAsync<dynamic>("SP_LAYDANHSACHTACGIA", parameters, commandType: CommandType.StoredProcedure);
+
+            int totalCount = 0;
+            var firstRow = authors.FirstOrDefault();
+            if (firstRow != null)
             {
-                sqlCount += " WHERE TENTG LIKE @Query OR MATG LIKE @Query";
-                sqlData += " WHERE TENTG LIKE @Query OR MATG LIKE @Query";
+                var rowDict = (IDictionary<string, object>)firstRow;
+                if (rowDict.TryGetValue("TotalRecord", out var tr) && tr != null)
+                {
+                    totalCount = Convert.ToInt32(tr);
+                }
             }
-
-            sqlData += " ORDER BY MATG OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY";
-
-            var parameters = new { Query = $"%{query}%", Offset = offset, PageSize = pageSize };
-            
-            var totalCount = await db.ExecuteScalarAsync<int>(sqlCount, parameters);
-            var authors = await db.QueryAsync<dynamic>(sqlData, parameters);
 
             return Results.Ok(new PagedResult<dynamic>
             {
@@ -40,7 +41,7 @@ public class GetAuthorsEndpoint : IEndpoint
             });
         })
         .WithName("GetAuthors")
-        .RequireAuthorization("QuanLyHoacThuThu")
+        .RequireAuthorization()
         .WithTags("Authors")
         .WithSummary("Lấy danh sách tác giả");
     }

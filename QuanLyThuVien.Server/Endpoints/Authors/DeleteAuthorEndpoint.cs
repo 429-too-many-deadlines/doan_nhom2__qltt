@@ -14,20 +14,23 @@ public class DeleteAuthorEndpoint : IEndpoint
     {
         app.MapDelete("api/authors/{id}", async (IDbConnection db, string id) =>
         {
-            var count = await db.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM DAUSACH_TACGIA WHERE MATG = @MaTG", new { MaTG = id });
-            if (count > 0)
-            {
-                return Results.BadRequest(new MessageResponse("Không thể xoá tác giả đã được gán cho đầu sách"));
-            }
+            var parameters = new DynamicParameters();
+            parameters.Add("@MATG", id);
+            parameters.Add("@ReturnValue", dbType: DbType.Int32, direction: ParameterDirection.ReturnValue);
 
-            var sql = "DELETE FROM TACGIA WHERE MATG = @MaTG";
-            var result = await db.ExecuteAsync(sql, new { MaTG = id });
-            
-            if (result == 0) return Results.NotFound(new MessageResponse("Không tìm thấy tác giả"));
-            return Results.Ok(new MessageResponse("Xoá tác giả thành công"));
+            await db.ExecuteAsync("SP_XOATACGIA", parameters, commandType: CommandType.StoredProcedure);
+            var result = parameters.Get<int>("@ReturnValue");
+
+            return result switch
+            {
+                0 => Results.NotFound(new MessageResponse("Không tìm thấy tác giả")),
+                1 => Results.BadRequest(new MessageResponse("Không thể xoá tác giả đã được gán cho đầu sách")),
+                2 => Results.Ok(new MessageResponse("Xoá tác giả thành công")),
+                _ => Results.StatusCode(500)
+            };
         })
         .WithName("DeleteAuthor")
-        .RequireAuthorization("QuanLyHoacThuThu")
+        .RequireAuthorization()
         .WithTags("Authors")
         .WithSummary("Xóa tác giả");
     }

@@ -115,11 +115,11 @@ export default function Authors() {
                     </TableRow>
                   ) : (
                     items.map((item) => (
-                      <TableRow key={item.MATG}>
-                        <TableCell className="font-medium">{item.MATG}</TableCell>
-                        <TableCell>{item.TENTG}</TableCell>
-                        <TableCell>{item.NAMSINH}</TableCell>
-                        <TableCell>{item.QUOCTICH}</TableCell>
+                      <TableRow key={item.MATG || (item as any).matg}>
+                        <TableCell className="font-medium font-mono text-xs">{item.MATG || (item as any).matg || '-'}</TableCell>
+                        <TableCell className="font-medium">{item.TENTG || (item as any).tentg || '-'}</TableCell>
+                        <TableCell>{item.NAMSINH ?? (item as any).namSinh ?? '-'}</TableCell>
+                        <TableCell>{item.QUOCTICH || (item as any).quocTich || '-'}</TableCell>
                         <TableCell>
                           <div className="flex gap-2">
                             <Button size="icon" variant="outline" onClick={() => handleEdit(item)}>

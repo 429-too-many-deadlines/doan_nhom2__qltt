@@ -39,7 +39,14 @@ export default function BookDetails() {
     setLoadingCopies(true);
     try {
       const data = await booksService.getBookCopies(id!);
-      setCopies(data);
+      const normalized = (data || []).map((c: any) => ({
+        MACS: c.MACS || c.MaCS || c.macs || '',
+        MADS: c.MADS || c.MaDS || c.mads || id!,
+        NGAYNHAP: c.NGAYNHAP || c.NgayNhap || c.ngayNhap || '',
+        VITRI: c.VITRI ?? c.ViTri ?? c.viTri ?? '',
+        TINHTRANG: c.TINHTRANG || c.TinhTrang || c.tinhTrang || 'Có sẵn',
+      }));
+      setCopies(normalized);
     } catch {
       // toast.error('Lỗi khi tải bản sao');
     } finally {
@@ -51,7 +58,11 @@ export default function BookDetails() {
     setLoadingAuthors(true);
     try {
       const data = await booksService.getBookAuthors(id!);
-      setBookAuthors(data);
+      const normalized = (data || []).map((a: any) => ({
+        MATG: a.MATG || a.MaTG || a.matg || '',
+        VAITRO: a.VAITRO || a.VaiTro || a.vaitro || 'Tác giả',
+      }));
+      setBookAuthors(normalized);
     } catch {
       // toast.error('Lỗi khi tải tác giả của sách');
     } finally {
@@ -172,37 +183,42 @@ export default function BookDetails() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Mã TG</TableHead>
+                    <TableHead>Tên Tác Giả</TableHead>
                     <TableHead>Vai trò</TableHead>
-                    <TableHead></TableHead>
+                    <TableHead className="w-[80px]"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {loadingAuthors ? (
-                    <TableRow><TableCell colSpan={3} className="text-center h-24">Đang tải...</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={4} className="text-center h-24">Đang tải...</TableCell></TableRow>
                   ) : bookAuthors.length === 0 ? (
-                    <TableRow><TableCell colSpan={3} className="text-center h-24">Chưa có tác giả</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={4} className="text-center h-24">Chưa có tác giả</TableCell></TableRow>
                   ) : (
-                    bookAuthors.map((item) => (
-                      <TableRow key={item.MATG}>
-                        <TableCell className="font-medium">{item.MATG}</TableCell>
-                        <TableCell>
-                          <select 
-                            className="h-8 rounded-md border border-input text-sm"
-                            value={item.VAITRO} 
-                            onChange={(e) => handleAuthorRoleChange(item.MATG, e.target.value)}
-                          >
-                            <option value="Tác giả">Tác giả</option>
-                            <option value="Đồng tác giả">Đồng tác giả</option>
-                            <option value="Dịch giả">Dịch giả</option>
-                          </select>
-                        </TableCell>
-                        <TableCell>
-                          <Button size="icon" variant="destructive" onClick={() => handleRemoveAuthorFromBook(item.MATG)}>
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))
+                    bookAuthors.map((item) => {
+                      const authorInfo = allAuthors.find(a => (a.MATG || (a as any).maTG) === item.MATG);
+                      return (
+                        <TableRow key={item.MATG}>
+                          <TableCell className="font-medium">{item.MATG}</TableCell>
+                          <TableCell>{authorInfo?.TENTG || '-'}</TableCell>
+                          <TableCell>
+                            <select 
+                              className="h-8 rounded-md border border-input text-sm"
+                              value={item.VAITRO} 
+                              onChange={(e) => handleAuthorRoleChange(item.MATG, e.target.value)}
+                            >
+                              <option value="Tác giả">Tác giả</option>
+                              <option value="Đồng tác giả">Đồng tác giả</option>
+                              <option value="Dịch giả">Dịch giả</option>
+                            </select>
+                          </TableCell>
+                          <TableCell>
+                            <Button size="icon" variant="destructive" onClick={() => handleRemoveAuthorFromBook(item.MATG)}>
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
                   )}
                 </TableBody>
               </Table>
@@ -246,65 +262,72 @@ export default function BookDetails() {
                   ) : copies.length === 0 ? (
                     <TableRow><TableCell colSpan={5} className="text-center h-24">Chưa có bản sao nào</TableCell></TableRow>
                   ) : (
-                    copies.map((item) => (
-                      <TableRow key={item.MACS}>
-                        <TableCell className="font-medium">{item.MACS}</TableCell>
-                        <TableCell>{item.NGAYNHAP?.split('T')[0]}</TableCell>
-                        
-                        {editingCopyId === item.MACS ? (
-                          <>
-                            <TableCell>
-                              <Input 
-                                className="h-8 w-24"
-                                value={editCopyData.VITRI} 
-                                onChange={(e) => setEditCopyData({...editCopyData, VITRI: e.target.value})} 
-                              />
-                            </TableCell>
-                            <TableCell>
-                              <select 
-                                className="h-8 rounded-md border border-input text-sm"
-                                value={editCopyData.TINHTRANG} 
-                                onChange={(e) => setEditCopyData({...editCopyData, TINHTRANG: e.target.value})}
-                              >
-                                <option value="Có sẵn">Có sẵn</option>
-                                <option value="Đang mượn">Đang mượn</option>
-                                <option value="Hư hỏng">Hư hỏng</option>
-                                <option value="Mất">Mất</option>
-                              </select>
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <Button size="icon" variant="ghost" onClick={handleUpdateCopy} className="mr-1 text-green-600">
-                                <Save className="w-4 h-4" />
-                              </Button>
-                              <Button size="icon" variant="ghost" onClick={() => setEditingCopyId(null)} className="text-gray-500">
-                                <X className="w-4 h-4" />
-                              </Button>
-                            </TableCell>
-                          </>
-                        ) : (
-                          <>
-                            <TableCell>{item.VITRI}</TableCell>
-                            <TableCell>{item.TINHTRANG}</TableCell>
-                            <TableCell className="text-right">
-                              <Button 
-                                size="icon" 
-                                variant="ghost" 
-                                onClick={() => {
-                                  setEditingCopyId(item.MACS);
-                                  setEditCopyData({ VITRI: item.VITRI, TINHTRANG: item.TINHTRANG });
-                                }} 
-                                className="mr-1 text-blue-600"
-                              >
-                                <Edit2 className="w-4 h-4" />
-                              </Button>
-                              <Button size="icon" variant="destructive" onClick={() => handleDeleteCopy(item.MACS)}>
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </TableCell>
-                          </>
-                        )}
-                      </TableRow>
-                    ))
+                    copies.map((item) => {
+                      const macs = item.MACS || item.MaCS || '';
+                      const ngayNhap = (item.NGAYNHAP || item.NgayNhap)?.split('T')[0] || '-';
+                      const viTri = item.VITRI ?? item.ViTri ?? '-';
+                      const tinhTrang = item.TINHTRANG || item.TinhTrang || 'Có sẵn';
+
+                      return (
+                        <TableRow key={macs}>
+                          <TableCell className="font-medium">{macs}</TableCell>
+                          <TableCell>{ngayNhap}</TableCell>
+                          
+                          {editingCopyId === macs ? (
+                            <>
+                              <TableCell>
+                                <Input 
+                                  className="h-8 w-24"
+                                  value={editCopyData.VITRI} 
+                                  onChange={(e) => setEditCopyData({...editCopyData, VITRI: e.target.value})} 
+                                />
+                              </TableCell>
+                              <TableCell>
+                                <select 
+                                  className="h-8 rounded-md border border-input text-sm"
+                                  value={editCopyData.TINHTRANG} 
+                                  onChange={(e) => setEditCopyData({...editCopyData, TINHTRANG: e.target.value})}
+                                >
+                                  <option value="Có sẵn">Có sẵn</option>
+                                  <option value="Đang mượn">Đang mượn</option>
+                                  <option value="Hư hỏng">Hư hỏng</option>
+                                  <option value="Mất">Mất</option>
+                                </select>
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <Button size="icon" variant="ghost" onClick={handleUpdateCopy} className="mr-1 text-green-600">
+                                  <Save className="w-4 h-4" />
+                                </Button>
+                                <Button size="icon" variant="ghost" onClick={() => setEditingCopyId(null)} className="text-gray-500">
+                                  <X className="w-4 h-4" />
+                                </Button>
+                              </TableCell>
+                            </>
+                          ) : (
+                            <>
+                              <TableCell>{viTri}</TableCell>
+                              <TableCell>{tinhTrang}</TableCell>
+                              <TableCell className="text-right">
+                                <Button 
+                                  size="icon" 
+                                  variant="ghost" 
+                                  onClick={() => {
+                                    setEditingCopyId(macs);
+                                    setEditCopyData({ VITRI: viTri === '-' ? '' : viTri, TINHTRANG: tinhTrang });
+                                  }} 
+                                  className="mr-1 text-blue-600"
+                                >
+                                  <Edit2 className="w-4 h-4" />
+                                </Button>
+                                <Button size="icon" variant="destructive" onClick={() => handleDeleteCopy(macs)}>
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </TableCell>
+                            </>
+                          )}
+                        </TableRow>
+                      );
+                    })
                   )}
                 </TableBody>
               </Table>

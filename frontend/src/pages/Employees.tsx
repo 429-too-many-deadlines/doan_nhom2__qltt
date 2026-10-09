@@ -100,11 +100,11 @@ export default function Employees() {
                     </TableRow>
                   ) : (
                     items.map((item) => (
-                      <TableRow key={item.MANV}>
-                        <TableCell className="font-medium">{item.MANV}</TableCell>
-                        <TableCell>{item.HOTEN}</TableCell>
-                        <TableCell>{item.SODT}</TableCell>
-                        <TableCell>{item.CHUCVU}</TableCell>
+                      <TableRow key={item.MANV || (item as any).manv}>
+                        <TableCell className="font-medium font-mono text-xs">{item.MANV || (item as any).manv || '-'}</TableCell>
+                        <TableCell className="font-medium">{item.HOTEN || (item as any).hoten || '-'}</TableCell>
+                        <TableCell>{item.SODT || (item as any).sodt || '-'}</TableCell>
+                        <TableCell>{item.CHUCVU || (item as any).chucvu || '-'}</TableCell>
                         <TableCell>
                           <div className="flex gap-2">
                             <Button size="icon" variant="outline" onClick={() => handleEdit(item)}>

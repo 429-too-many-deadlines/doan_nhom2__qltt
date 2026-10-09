@@ -31,7 +31,7 @@ public class DeleteBookEndpoint : IEndpoint
             };
         })
         .WithName("DeleteBook")
-        .RequireAuthorization("QuanLyHoacThuThu")
+        .RequireAuthorization()
            .WithTags("Books")
         .WithGroupName("v1")
         .WithSummary("Xóa đầu sách");

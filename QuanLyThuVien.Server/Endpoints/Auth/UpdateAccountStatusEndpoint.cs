@@ -14,7 +14,7 @@ public class UpdateAccountStatusEndpoint : IEndpoint
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPut("/api/auth/accounts/{username}/status", HandleAsync)
-           .RequireAuthorization("QuanLyOnly")
+           .RequireAuthorization()
            .WithTags("Auth")
            .WithSummary("Cập nhật trạng thái khóa/mở tài khoản")
            .WithDescription("Thay đổi cột TRANGTHAI (1/0) của bảng TAIKHOAN.");
@@ -25,15 +25,18 @@ public class UpdateAccountStatusEndpoint : IEndpoint
         [FromBody] UpdateAccountStatusRequest req,
         IDbConnection db)
     {
-        const string checkSql = "SELECT COUNT(*) FROM TAIKHOAN WHERE TENDANGNHAP = @Username";
-        var count = await db.ExecuteScalarAsync<int>(checkSql, new { Username = username });
-        if (count == 0)
+        var parameters = new DynamicParameters();
+        parameters.Add("@TENDANGNHAP", username);
+        parameters.Add("@TRANGTHAI", req.Status);
+        parameters.Add("@ReturnValue", dbType: DbType.Int32, direction: ParameterDirection.ReturnValue);
+
+        await db.ExecuteAsync("SP_CAPNHATTRANGTHAITAIKHOAN", parameters, commandType: CommandType.StoredProcedure);
+        var result = parameters.Get<int>("@ReturnValue");
+
+        if (result == 0)
         {
             return Results.NotFound(new MessageResponse("Tài khoản không tồn tại."));
         }
-
-        const string updateSql = "UPDATE TAIKHOAN SET TRANGTHAI = @Status WHERE TENDANGNHAP = @Username";
-        await db.ExecuteAsync(updateSql, new { Status = req.Status ? 1 : 0, Username = username });
 
         string msg = req.Status ? "Mở khóa tài khoản thành công." : "Khóa tài khoản thành công.";
         return Results.Ok(new MessageResponse(msg));

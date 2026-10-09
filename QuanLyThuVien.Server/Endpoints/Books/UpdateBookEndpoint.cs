@@ -38,7 +38,7 @@ public class UpdateBookEndpoint : IEndpoint
             };
         })
         .WithName("UpdateBook")
-        .RequireAuthorization("QuanLyHoacThuThu")
+        .RequireAuthorization()
            .WithTags("Books")
         .WithSummary("Cập nhật đầu sách");
     }

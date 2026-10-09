@@ -32,7 +32,7 @@ public class GetMonthlyStatsEndpoint : IEndpoint
             ));
         })
         .WithName("GetMonthlyStats")
-        .RequireAuthorization("QuanLyOnly")
+        .RequireAuthorization()
         .WithTags("Reports")
         .WithGroupName("v1")
         .WithSummary("Thống kê hoạt động thư viện theo tháng");

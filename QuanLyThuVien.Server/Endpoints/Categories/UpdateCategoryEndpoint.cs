@@ -17,21 +17,24 @@ public class UpdateCategoryEndpoint : IEndpoint
     {
         app.MapPut("api/categories/{id}", async (IDbConnection db, string id, [FromBody] UpdateCategoryRequest req) =>
         {
-            try
+            var parameters = new DynamicParameters();
+            parameters.Add("@MATL", id);
+            parameters.Add("@TENTL", req.TenTL);
+            parameters.Add("@ReturnValue", dbType: DbType.Int32, direction: ParameterDirection.ReturnValue);
+
+            await db.ExecuteAsync("SP_SUATHELOAI", parameters, commandType: CommandType.StoredProcedure);
+            var result = parameters.Get<int>("@ReturnValue");
+
+            return result switch
             {
-                var sql = "UPDATE THELOAI SET TENTL = @TenTL WHERE MATL = @MaTL";
-                var result = await db.ExecuteAsync(sql, new { TenTL = req.TenTL, MaTL = id });
-                
-                if (result == 0) return Results.NotFound(new MessageResponse("Không tìm thấy thể loại"));
-                return Results.Ok(new MessageResponse("Cập nhật thể loại thành công"));
-            }
-            catch (System.Exception ex)
-            {
-                return Results.BadRequest(new MessageResponse(ex.Message));
-            }
+                0 => Results.NotFound(new MessageResponse("Không tìm thấy thể loại")),
+                1 => Results.BadRequest(new MessageResponse("Tên thể loại đã tồn tại.")),
+                2 => Results.Ok(new MessageResponse("Cập nhật thể loại thành công")),
+                _ => Results.StatusCode(500)
+            };
         })
         .WithName("UpdateCategory")
-        .RequireAuthorization("QuanLyHoacThuThu")
+        .RequireAuthorization()
         .WithTags("Categories")
         .WithSummary("Cập nhật thể loại");
     }

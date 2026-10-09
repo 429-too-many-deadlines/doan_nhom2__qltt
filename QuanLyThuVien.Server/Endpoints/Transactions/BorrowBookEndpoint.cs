@@ -41,7 +41,7 @@ public class BorrowBookEndpoint : IEndpoint
             }
         })
         .WithName("BorrowBooks")
-        .RequireAuthorization("ThuThuOnly")
+        .RequireAuthorization()
            .WithTags("Transactions")
         .WithGroupName("v1")
         .WithSummary("Lập phiếu mượn sách");

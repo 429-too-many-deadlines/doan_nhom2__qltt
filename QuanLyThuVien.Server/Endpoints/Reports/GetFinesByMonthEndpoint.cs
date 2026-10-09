@@ -17,7 +17,7 @@ public class GetFinesByMonthEndpoint : IEndpoint
             return Results.Ok(data);
         })
         .WithName("GetFinesByMonth")
-        .RequireAuthorization("QuanLyOnly")
+        .RequireAuthorization()
            .WithTags("Reports")
         .WithGroupName("v1")
         .WithSummary("Tiền phạt theo tháng và lý do");

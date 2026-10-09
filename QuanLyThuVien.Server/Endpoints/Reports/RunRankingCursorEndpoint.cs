@@ -16,7 +16,7 @@ public class RunRankingCursorEndpoint : IEndpoint
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost("/api/reports/ranking", HandleAsync)
-           .RequireAuthorization("QuanLyHoacThuThu")
+           .RequireAuthorization()
            .WithTags("Reports")
            .WithSummary("Chạy cursor xếp loại độc giả")
            .WithDescription("Gọi SP_CURSOR_XEPLOAIDOCGIA và trả về danh sách xếp loại.");

@@ -14,20 +14,23 @@ public class DeletePublisherEndpoint : IEndpoint
     {
         app.MapDelete("api/publishers/{id}", async (IDbConnection db, string id) =>
         {
-            var count = await db.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM DAUSACH WHERE MANXB = @MaNXB", new { MaNXB = id });
-            if (count > 0)
-            {
-                return Results.BadRequest(new MessageResponse("Không thể xoá NXB đã có đầu sách"));
-            }
+            var parameters = new DynamicParameters();
+            parameters.Add("@MANXB", id);
+            parameters.Add("@ReturnValue", dbType: DbType.Int32, direction: ParameterDirection.ReturnValue);
 
-            var sql = "DELETE FROM NHAXUATBAN WHERE MANXB = @MaNXB";
-            var result = await db.ExecuteAsync(sql, new { MaNXB = id });
-            
-            if (result == 0) return Results.NotFound(new MessageResponse("Không tìm thấy nhà xuất bản"));
-            return Results.Ok(new MessageResponse("Xoá nhà xuất bản thành công"));
+            await db.ExecuteAsync("SP_XOANHAXUATBAN", parameters, commandType: CommandType.StoredProcedure);
+            var result = parameters.Get<int>("@ReturnValue");
+
+            return result switch
+            {
+                0 => Results.NotFound(new MessageResponse("Không tìm thấy nhà xuất bản")),
+                1 => Results.BadRequest(new MessageResponse("Không thể xoá NXB đã có đầu sách")),
+                2 => Results.Ok(new MessageResponse("Xoá nhà xuất bản thành công")),
+                _ => Results.StatusCode(500)
+            };
         })
         .WithName("DeletePublisher")
-        .RequireAuthorization("QuanLyHoacThuThu")
+        .RequireAuthorization()
         .WithTags("Publishers")
         .WithSummary("Xóa nhà xuất bản");
     }

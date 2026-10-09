@@ -17,21 +17,27 @@ public class CreateBookCopyEndpoint : IEndpoint
     {
         app.MapPost("api/books/{id}/copies", async (IDbConnection db, string id, [FromBody] CreateBookCopyRequest req) =>
         {
-            try
+            var parameters = new DynamicParameters();
+            parameters.Add("@MACS", req.MaCS);
+            parameters.Add("@MADS", id);
+            parameters.Add("@VITRI", req.ViTri);
+            parameters.Add("@TINHTRANG", req.TinhTrang ?? "Có sẵn");
+            parameters.Add("@ReturnValue", dbType: DbType.Int32, direction: ParameterDirection.ReturnValue);
+
+            await db.ExecuteAsync("SP_THEMCUONSACH", parameters, commandType: CommandType.StoredProcedure);
+            var result = parameters.Get<int>("@ReturnValue");
+
+            return result switch
             {
-                await db.ExecuteAsync(
-                    "INSERT INTO CUONSACH (MACS, MADS, NGAYNHAP, VITRI, TINHTRANG) VALUES (@MaCS, @MaDS, GETDATE(), @ViTri, @TinhTrang)",
-                    new { MaCS = req.MaCS, MaDS = id, ViTri = req.ViTri, TinhTrang = req.TinhTrang ?? "Có sẵn" }
-                );
-                return Results.Ok(new MessageResponse("Thêm cuốn sách thành công"));
-            }
-            catch (Exception ex)
-            {
-                return Results.BadRequest(new MessageResponse(ex.Message));
-            }
+                0 => Results.BadRequest(new MessageResponse("Mã cuốn sách đã tồn tại.")),
+                1 => Results.BadRequest(new MessageResponse("Mã đầu sách không tồn tại.")),
+                2 => Results.BadRequest(new MessageResponse("Tình trạng cuốn sách không hợp lệ.")),
+                3 => Results.Ok(new MessageResponse("Thêm cuốn sách thành công")),
+                _ => Results.StatusCode(500)
+            };
         })
         .WithName("CreateBookCopy")
-        .RequireAuthorization("QuanLyHoacThuThu")
+        .RequireAuthorization()
         .WithTags("Books");
     }
 }

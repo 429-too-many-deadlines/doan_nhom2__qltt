@@ -19,5 +19,8 @@ export default defineConfig({
         changeOrigin: true
       }
     }
+  },
+  optimizeDeps: {
+    include: ['recharts', 'lucide-react', 'axios', 'date-fns']
   }
 });

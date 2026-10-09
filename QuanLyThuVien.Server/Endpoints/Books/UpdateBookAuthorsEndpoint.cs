@@ -22,13 +22,14 @@ public class UpdateBookAuthorsEndpoint : IEndpoint
             using var transaction = db.BeginTransaction();
             try
             {
-                await db.ExecuteAsync("DELETE FROM DAUSACH_TACGIA WHERE MADS = @Id", new { Id = id }, transaction);
+                await db.ExecuteAsync("SP_XOATACGIADAUSACH", new { MADS = id }, transaction, commandType: CommandType.StoredProcedure);
                 foreach (var author in req.Authors)
                 {
                     await db.ExecuteAsync(
-                        "INSERT INTO DAUSACH_TACGIA (MADS, MATG, VAITRO) VALUES (@MaDS, @MaTG, @VaiTro)",
-                        new { MaDS = id, MaTG = author.MaTG, VaiTro = author.VaiTro ?? "Tác giả" },
-                        transaction
+                        "SP_THEMTACGIADAUSACH",
+                        new { MADS = id, MATG = author.MaTG, VAITRO = author.VaiTro ?? "Tác giả" },
+                        transaction,
+                        commandType: CommandType.StoredProcedure
                     );
                 }
                 transaction.Commit();
@@ -41,7 +42,7 @@ public class UpdateBookAuthorsEndpoint : IEndpoint
             }
         })
         .WithName("UpdateBookAuthors")
-        .RequireAuthorization("QuanLyHoacThuThu")
+        .RequireAuthorization()
         .WithTags("Books");
     }
 }

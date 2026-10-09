@@ -1,19 +1,13 @@
 import { DataTablePagination } from '../components/ui/data-table-pagination';
 import { useState, useEffect } from 'react';
 import { authService } from '../services/auth.service';
+import type { Account } from '../types/api.types';
 
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
 
-
-export interface Account {
-  tendangnhap: string;
-  vaitro: string;
-  MANV?: string;
-  MADG?: string;
-  trangthai: boolean;
-}
+export type { Account };
 
 export default function Accounts() {
   const [createData, setCreateData] = useState({ username: '', password: '', role: 'Thủ thư', MANV: '', MADG: '' });
@@ -62,6 +56,7 @@ export default function Accounts() {
   };
 
   const handleToggleStatus = async (username: string, currentStatus: boolean) => {
+    if (!username) return;
     try {
       await authService.updateAccountStatus(username, !currentStatus);
       // toast.success(`Đã ${!currentStatus ? 'mở khóa' : 'khóa'} tài khoản ${username}`);
@@ -143,6 +138,7 @@ export default function Accounts() {
                 <TableRow>
                   <TableHead>Tên đăng nhập</TableHead>
                   <TableHead>Vai trò</TableHead>
+                  <TableHead>Chủ sở hữu</TableHead>
                   <TableHead>Mã NV</TableHead>
                   <TableHead>Mã ĐG</TableHead>
                   <TableHead>Trạng thái</TableHead>
@@ -150,33 +146,43 @@ export default function Accounts() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {paginatedAccounts.map((acc) => (
-                  <TableRow key={acc.tendangnhap}>
-                    <TableCell className="font-medium">{acc.tendangnhap}</TableCell>
-                    <TableCell>{acc.vaitro}</TableCell>
-                    <TableCell>{acc.MANV || '-'}</TableCell>
-                    <TableCell>{acc.MADG || '-'}</TableCell>
-                    <TableCell>
-                      {acc.trangthai ? (
-                        <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">Hoạt động</span>
-                      ) : (
-                        <span className="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800">Bị khóa</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        variant={acc.trangthai ? "destructive" : "default"}
-                        size="sm"
-                        onClick={() => handleToggleStatus(acc.tendangnhap, acc.trangthai)}
-                      >
-                        {acc.trangthai ? 'Khóa' : 'Mở khóa'}
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {paginatedAccounts.map((acc, idx) => {
+                  const uname = acc.username || acc.tendangnhap || '';
+                  const roleName = acc.role || acc.vaitro || '';
+                  const maNv = acc.maNV || acc.MANV || '-';
+                  const maDg = acc.maDG || acc.MADG || '-';
+                  const owner = acc.ownerName || '-';
+                  const isActive = Boolean(acc.status ?? acc.trangthai);
+
+                  return (
+                    <TableRow key={uname || idx}>
+                      <TableCell className="font-medium">{uname || '-'}</TableCell>
+                      <TableCell>{roleName || '-'}</TableCell>
+                      <TableCell>{owner}</TableCell>
+                      <TableCell>{maNv}</TableCell>
+                      <TableCell>{maDg}</TableCell>
+                      <TableCell>
+                        {isActive ? (
+                          <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">Hoạt động</span>
+                        ) : (
+                          <span className="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800">Bị khóa</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant={isActive ? "destructive" : "default"}
+                          size="sm"
+                          onClick={() => handleToggleStatus(uname, isActive)}
+                        >
+                          {isActive ? 'Khóa' : 'Mở khóa'}
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
                 {accounts.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={6} className="h-24 text-center">
+                    <TableCell colSpan={7} className="h-24 text-center">
                       Không có dữ liệu
                     </TableCell>
                   </TableRow>

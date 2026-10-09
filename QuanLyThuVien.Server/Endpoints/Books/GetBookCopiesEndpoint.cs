@@ -15,7 +15,11 @@ public class GetBookCopiesEndpoint : IEndpoint
     {
         app.MapGet("api/books/{id}/copies", async (IDbConnection db, string id) =>
         {
-            var copies = await db.QueryAsync("SELECT MACS as MaCS, MADS as MaDS, NGAYNHAP as NgayNhap, VITRI as ViTri, TINHTRANG as TinhTrang FROM CUONSACH WHERE MADS = @Id", new { Id = id });
+            var copies = await db.QueryAsync(
+                "SP_LAYCUONSACHTHEODAUSACH",
+                new { MADS = id },
+                commandType: CommandType.StoredProcedure
+            );
             return Results.Ok(copies);
         })
         .WithName("GetBookCopies")

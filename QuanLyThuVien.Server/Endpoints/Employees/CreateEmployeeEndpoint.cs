@@ -18,24 +18,29 @@ public class CreateEmployeeEndpoint : IEndpoint
     {
         app.MapPost("api/employees", async (IDbConnection db, [FromBody] CreateEmployeeRequest req) =>
         {
-            if (req.NgVL < req.NgSinh.AddYears(18))
-            {
-                return Results.BadRequest(new MessageResponse("Ngày vào làm không hợp lệ: Nhân viên phải đủ 18 tuổi."));
-            }
+            var parameters = new DynamicParameters();
+            parameters.Add("@MANV", req.MaNV);
+            parameters.Add("@HOTEN", req.HoTen);
+            parameters.Add("@NGSINH", req.NgSinh);
+            parameters.Add("@SODT", req.SoDT);
+            parameters.Add("@CHUCVU", req.ChucVu);
+            parameters.Add("@NGVL", req.NgVL);
+            parameters.Add("@ReturnValue", dbType: DbType.Int32, direction: ParameterDirection.ReturnValue);
 
-            try
+            await db.ExecuteAsync("SP_THEMNHANVIEN", parameters, commandType: CommandType.StoredProcedure);
+            var result = parameters.Get<int>("@ReturnValue");
+
+            return result switch
             {
-                var sql = "INSERT INTO NHANVIEN(MANV, HOTEN, NGSINH, SODT, CHUCVU, NGVL) VALUES(@MaNV, @HoTen, @NgSinh, @SoDT, @ChucVu, @NgVL)";
-                await db.ExecuteAsync(sql, req);
-                return Results.Ok(new MessageResponse("Thêm nhân viên thành công"));
-            }
-            catch (System.Exception ex)
-            {
-                return Results.BadRequest(new MessageResponse(ex.Message));
-            }
+                0 => Results.BadRequest(new MessageResponse("Mã nhân viên đã tồn tại.")),
+                1 => Results.BadRequest(new MessageResponse("Chức vụ không hợp lệ.")),
+                2 => Results.BadRequest(new MessageResponse("Ngày vào làm không hợp lệ: Nhân viên phải đủ 18 tuổi.")),
+                3 => Results.Ok(new MessageResponse("Thêm nhân viên thành công")),
+                _ => Results.StatusCode(500)
+            };
         })
         .WithName("CreateEmployee")
-        .RequireAuthorization("QuanLyOnly")
+        .RequireAuthorization()
         .WithTags("Employees")
         .WithSummary("Thêm nhân viên");
     }

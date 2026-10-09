@@ -17,7 +17,7 @@ public class GetLibrarianPerformanceEndpoint : IEndpoint
             return Results.Ok(data);
         })
         .WithName("GetLibrarianPerformance")
-        .RequireAuthorization("QuanLyOnly")
+        .RequireAuthorization()
            .WithTags("Reports")
         .WithGroupName("v1")
         .WithSummary("Hiệu suất nhân viên theo tháng");

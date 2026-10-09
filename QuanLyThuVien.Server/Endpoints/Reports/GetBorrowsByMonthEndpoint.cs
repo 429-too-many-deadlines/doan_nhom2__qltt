@@ -17,7 +17,7 @@ public class GetBorrowsByMonthEndpoint : IEndpoint
             return Results.Ok(data);
         })
         .WithName("GetBorrowsByMonth")
-        .RequireAuthorization("QuanLyOnly")
+        .RequireAuthorization()
            .WithTags("Reports")
         .WithGroupName("v1")
         .WithSummary("Lượt mượn theo tháng và thể loại");

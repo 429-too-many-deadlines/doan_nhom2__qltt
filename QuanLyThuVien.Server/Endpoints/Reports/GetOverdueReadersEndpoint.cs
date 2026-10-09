@@ -17,7 +17,7 @@ public class GetOverdueReadersEndpoint : IEndpoint
             return Results.Ok(data);
         })
         .WithName("GetOverdueReaders")
-        .RequireAuthorization("QuanLyOnly")
+        .RequireAuthorization()
            .WithTags("Reports")
         .WithGroupName("v1")
         .WithSummary("Danh sách độc giả đang giữ sách quá hạn");

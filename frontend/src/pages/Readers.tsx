@@ -115,22 +115,24 @@ export default function Readers() {
                     <TableHead>Mã ĐG</TableHead>
                     <TableHead>Họ Tên</TableHead>
                     <TableHead>Giới Tính</TableHead>
+                    <TableHead>Số ĐT</TableHead>
                     <TableHead>Tổng Nợ</TableHead>
                     <TableHead className="w-[150px]">Hành Động</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {loadingReaders ? (
-                    <TableRow><TableCell colSpan={5} className="text-center h-24">Đang tải...</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={6} className="text-center h-24">Đang tải...</TableCell></TableRow>
                   ) : readers.length === 0 ? (
-                    <TableRow><TableCell colSpan={5} className="text-center h-24">Không có dữ liệu.</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={6} className="text-center h-24">Không có dữ liệu.</TableCell></TableRow>
                   ) : (
                     readers.map((r, i) => (
                       <TableRow key={r.MADG || i}>
-                        <TableCell className="font-medium">{r.MADG}</TableCell>
-                        <TableCell>{r.HOTEN}</TableCell>
-                        <TableCell>{r.GIOITINH}</TableCell>
-                        <TableCell>{r.TONGNO}</TableCell>
+                        <TableCell className="font-medium font-mono text-xs">{r.MADG || (r as any).madg || '-'}</TableCell>
+                        <TableCell className="font-medium">{r.HOTEN || (r as any).hoten || '-'}</TableCell>
+                        <TableCell>{r.GIOITINH || (r as any).gioitinh || '-'}</TableCell>
+                        <TableCell>{r.SODT || (r as any).sodt || '-'}</TableCell>
+                        <TableCell className="font-semibold text-rose-600">{Number(r.TONGNO ?? (r as any).tongno ?? 0).toLocaleString('vi-VN')} đ</TableCell>
                         <TableCell>
                           <div className="flex gap-2">
                             <Button size="icon" variant="outline" onClick={() => handleEdit(r)}>

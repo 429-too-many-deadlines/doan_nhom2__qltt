@@ -14,22 +14,24 @@ public class GetCategoriesEndpoint : IEndpoint
     {
         app.MapGet("api/categories", async (IDbConnection db, string? query, int page = 1, int pageSize = 10) =>
         {
-            var offset = (page - 1) * pageSize;
-            var sqlCount = "SELECT COUNT(*) FROM THELOAI";
-            var sqlData = "SELECT * FROM THELOAI";
+            var parameters = new DynamicParameters();
+            parameters.Add("@TUKHOA", string.IsNullOrWhiteSpace(query) ? null : query);
+            parameters.Add("@PageNumber", page);
+            parameters.Add("@PageSize", pageSize);
 
-            if (!string.IsNullOrEmpty(query))
+            var items = await db.QueryAsync<dynamic>("SP_LAYDANHSACHTHELOAI", parameters, commandType: CommandType.StoredProcedure);
+
+            int totalCount = 0;
+            var firstRow = items.FirstOrDefault();
+            if (firstRow != null)
             {
-                sqlCount += " WHERE TENTL LIKE @Query OR MATL LIKE @Query";
-                sqlData += " WHERE TENTL LIKE @Query OR MATL LIKE @Query";
+                var rowDict = (IDictionary<string, object>)firstRow;
+                if (rowDict.TryGetValue("TotalRecord", out var tr) && tr != null)
+                {
+                    totalCount = Convert.ToInt32(tr);
+                }
             }
 
-            sqlData += " ORDER BY MATL OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY";
-
-            var parameters = new { Query = $"%{query}%", Offset = offset, PageSize = pageSize };
-
-            var totalCount = await db.ExecuteScalarAsync<int>(sqlCount, parameters);
-            var items = await db.QueryAsync<dynamic>(sqlData, parameters);
             return Results.Ok(new PagedResult<dynamic>
             {
                 Items = items,

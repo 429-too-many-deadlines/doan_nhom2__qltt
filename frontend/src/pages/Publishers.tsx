@@ -116,11 +116,11 @@ export default function Publishers() {
                     </TableRow>
                   ) : (
                     items.map((item) => (
-                      <TableRow key={item.MANXB}>
-                        <TableCell className="font-medium">{item.MANXB}</TableCell>
-                        <TableCell>{item.TENNXB}</TableCell>
-                        <TableCell>{item.DIACHI}</TableCell>
-                        <TableCell>{item.SODT}</TableCell>
+                      <TableRow key={item.MANXB || (item as any).manxb}>
+                        <TableCell className="font-medium font-mono text-xs">{item.MANXB || (item as any).manxb || '-'}</TableCell>
+                        <TableCell className="font-medium">{item.TENNXB || (item as any).tennxb || '-'}</TableCell>
+                        <TableCell>{item.DIACHI || (item as any).diachi || '-'}</TableCell>
+                        <TableCell>{item.SODT || (item as any).sodt || '-'}</TableCell>
                         <TableCell>
                           <div className="flex gap-2">
                             <Button size="icon" variant="outline" onClick={() => handleEdit(item)}>

@@ -98,9 +98,9 @@ export default function Categories() {
                     </TableRow>
                   ) : (
                     categories.map((cat) => (
-                      <TableRow key={cat.MATL}>
-                        <TableCell className="font-medium">{cat.MATL}</TableCell>
-                        <TableCell>{cat.TENTL}</TableCell>
+                      <TableRow key={cat.MATL || (cat as any).matl}>
+                        <TableCell className="font-medium font-mono text-xs">{cat.MATL || (cat as any).matl || '-'}</TableCell>
+                        <TableCell>{cat.TENTL || (cat as any).tentl || '-'}</TableCell>
                         <TableCell>
                           <div className="flex gap-2">
                             <Button size="icon" variant="outline" onClick={() => handleEdit(cat)}>

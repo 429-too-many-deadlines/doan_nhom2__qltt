@@ -36,7 +36,7 @@ public class PayFineEndpoint : IEndpoint
             };
         })
         .WithName("PayFine")
-        .RequireAuthorization("ThuThuOnly")
+        .RequireAuthorization()
            .WithTags("Transactions")
         .WithGroupName("v1")
         .WithSummary("Thanh toán tiền phạt");

@@ -14,27 +14,46 @@ import {
 } from "@/components/ui/sidebar"
 import { Home, BookOpen, Users, ArrowRightLeft, BarChart, Settings, Shield, Tags, PenTool, Building, Contact} from "lucide-react"
 
+import { useEffect } from "react"
 import { useAuth } from "@/contexts/AuthContext"
 
+const routePreloaders: Record<string, () => void> = {
+  "/reports": () => { import("@/pages/Reports") },
+  "/books": () => { import("@/pages/Books") },
+  "/transactions": () => { import("@/pages/Transactions") },
+}
+
+const handlePrefetch = (url: string) => {
+  routePreloaders[url]?.()
+}
+
 const menuItems = [
-  { title: "Trang chủ", url: "/", icon: Home, roles: ["Quản lý", "Thủ thư", "Độc giả"] },
-  { title: "Quản lý Sách", url: "/books", icon: BookOpen, roles: ["Quản lý", "Thủ thư", "Độc giả"] },
-  { title: "Thể loại", url: "/categories", icon: Tags, roles: ["Quản lý", "Thủ thư"] },
-  { title: "Tác giả", url: "/authors", icon: PenTool, roles: ["Quản lý", "Thủ thư"] },
-  { title: "Nhà xuất bản", url: "/publishers", icon: Building, roles: ["Quản lý", "Thủ thư"] },
-  { title: "Quản lý Độc giả", url: "/readers", icon: Users, roles: ["Quản lý", "Thủ thư"] },
-  { title: "Quản lý Nhân viên", url: "/employees", icon: Contact, roles: ["Quản lý"] },
-  { title: "Quản lý Mượn trả", url: "/transactions", icon: ArrowRightLeft, roles: ["Quản lý", "Thủ thư", "Độc giả"] },
-  { title: "Báo cáo thống kê", url: "/reports", icon: BarChart, roles: ["Quản lý", "Thủ thư"] },
-  { title: "Tài khoản", url: "/accounts", icon: Shield, roles: ["Quản lý"] },
-  { title: "Cài đặt", url: "/settings", icon: Settings, roles: ["Quản lý"] },
+  { title: "Trang chủ", url: "/", icon: Home },
+  { title: "Quản lý Sách", url: "/books", icon: BookOpen },
+  { title: "Thể loại", url: "/categories", icon: Tags },
+  { title: "Tác giả", url: "/authors", icon: PenTool },
+  { title: "Nhà xuất bản", url: "/publishers", icon: Building },
+  { title: "Quản lý Độc giả", url: "/readers", icon: Users },
+  { title: "Quản lý Nhân viên", url: "/employees", icon: Contact },
+  { title: "Quản lý Mượn trả", url: "/transactions", icon: ArrowRightLeft },
+  { title: "Báo cáo thống kê", url: "/reports", icon: BarChart },
+  { title: "Tài khoản", url: "/accounts", icon: Shield },
+  { title: "Cài đặt", url: "/settings", icon: Settings },
 ]
 
 export function AppSidebar() {
   const location = useLocation()
   const { user } = useAuth()
 
-  const filteredMenuItems = menuItems.filter(item => user && item.roles.includes(user.role))
+  useEffect(() => {
+    // Warm up the reports chunk during idle time so navigation is instantaneous
+    const timer = setTimeout(() => {
+      import("@/pages/Reports")
+    }, 1200)
+    return () => clearTimeout(timer)
+  }, [])
+
+  const filteredMenuItems = user ? menuItems : []
 
   return (
     <Sidebar collapsible="icon">
@@ -63,7 +82,11 @@ export function AppSidebar() {
               {filteredMenuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild isActive={location.pathname === item.url}>
-                    <Link to={item.url}>
+                    <Link
+                      to={item.url}
+                      onMouseEnter={() => handlePrefetch(item.url)}
+                      onFocus={() => handlePrefetch(item.url)}
+                    >
                       <item.icon />
                       <span>{item.title}</span>
                     </Link>

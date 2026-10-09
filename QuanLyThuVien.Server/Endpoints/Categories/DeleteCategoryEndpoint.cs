@@ -14,21 +14,23 @@ public class DeleteCategoryEndpoint : IEndpoint
     {
         app.MapDelete("api/categories/{id}", async (IDbConnection db, string id) =>
         {
-            // Check if there are books using this category
-            var count = await db.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM DAUSACH WHERE MATL = @MaTL", new { MaTL = id });
-            if (count > 0)
-            {
-                return Results.BadRequest(new MessageResponse("Không thể xoá thể loại đang có sách"));
-            }
+            var parameters = new DynamicParameters();
+            parameters.Add("@MATL", id);
+            parameters.Add("@ReturnValue", dbType: DbType.Int32, direction: ParameterDirection.ReturnValue);
 
-            var sql = "DELETE FROM THELOAI WHERE MATL = @MaTL";
-            var result = await db.ExecuteAsync(sql, new { MaTL = id });
-            
-            if (result == 0) return Results.NotFound(new MessageResponse("Không tìm thấy thể loại"));
-            return Results.Ok(new MessageResponse("Xoá thể loại thành công"));
+            await db.ExecuteAsync("SP_XOATHELOAI", parameters, commandType: CommandType.StoredProcedure);
+            var result = parameters.Get<int>("@ReturnValue");
+
+            return result switch
+            {
+                0 => Results.NotFound(new MessageResponse("Không tìm thấy thể loại")),
+                1 => Results.BadRequest(new MessageResponse("Không thể xoá thể loại đang có sách")),
+                2 => Results.Ok(new MessageResponse("Xoá thể loại thành công")),
+                _ => Results.StatusCode(500)
+            };
         })
         .WithName("DeleteCategory")
-        .RequireAuthorization("QuanLyHoacThuThu")
+        .RequireAuthorization()
         .WithTags("Categories")
         .WithSummary("Xóa thể loại");
     }

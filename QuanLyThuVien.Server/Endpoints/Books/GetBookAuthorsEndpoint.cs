@@ -15,7 +15,11 @@ public class GetBookAuthorsEndpoint : IEndpoint
     {
         app.MapGet("api/books/{id}/authors", async (IDbConnection db, string id) =>
         {
-            var authors = await db.QueryAsync("SELECT MATG as MaTG, VAITRO as VaiTro FROM DAUSACH_TACGIA WHERE MADS = @Id", new { Id = id });
+            var authors = await db.QueryAsync(
+                "SP_LAYTACGIATHEODAUSACH",
+                new { MADS = id },
+                commandType: CommandType.StoredProcedure
+            );
             return Results.Ok(authors);
         })
         .WithName("GetBookAuthors")

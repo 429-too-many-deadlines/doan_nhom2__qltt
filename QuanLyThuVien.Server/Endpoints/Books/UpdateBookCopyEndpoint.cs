@@ -17,21 +17,25 @@ public class UpdateBookCopyEndpoint : IEndpoint
     {
         app.MapPut("api/books/copies/{macs}", async (IDbConnection db, string macs, [FromBody] UpdateBookCopyRequest req) =>
         {
-            try
+            var parameters = new DynamicParameters();
+            parameters.Add("@MACS", macs);
+            parameters.Add("@VITRI", req.ViTri);
+            parameters.Add("@TINHTRANG", req.TinhTrang);
+            parameters.Add("@ReturnValue", dbType: DbType.Int32, direction: ParameterDirection.ReturnValue);
+
+            await db.ExecuteAsync("SP_SUACUONSACH", parameters, commandType: CommandType.StoredProcedure);
+            var result = parameters.Get<int>("@ReturnValue");
+
+            return result switch
             {
-                await db.ExecuteAsync(
-                    "UPDATE CUONSACH SET VITRI = @ViTri, TINHTRANG = @TinhTrang WHERE MACS = @MaCS",
-                    new { MaCS = macs, ViTri = req.ViTri, TinhTrang = req.TinhTrang }
-                );
-                return Results.Ok(new MessageResponse("Cập nhật cuốn sách thành công"));
-            }
-            catch (Exception ex)
-            {
-                return Results.BadRequest(new MessageResponse(ex.Message));
-            }
+                0 => Results.NotFound(new MessageResponse("Không tìm thấy cuốn sách")),
+                1 => Results.BadRequest(new MessageResponse("Tình trạng cuốn sách không hợp lệ.")),
+                2 => Results.Ok(new MessageResponse("Cập nhật cuốn sách thành công")),
+                _ => Results.StatusCode(500)
+            };
         })
         .WithName("UpdateBookCopy")
-        .RequireAuthorization("QuanLyHoacThuThu")
+        .RequireAuthorization()
         .WithTags("Books");
     }
 }

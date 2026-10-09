@@ -17,7 +17,7 @@ GO
    - Nguoc lai insert, ngay lap the = hom nay, han the: khach ngoai 6 thang,
      cac loai khac 2 nam      -> tra ve 2
    --------------------------------------------------------------------- */
-CREATE PROCEDURE SP_THEMDOCGIA
+CREATE OR ALTER PROCEDURE SP_THEMDOCGIA
 @MADG CHAR (5), @HOTEN NVARCHAR (40), @NGSINH DATE, @GIOITINH NVARCHAR (3), @DIACHI NVARCHAR (100), @SODT VARCHAR (15), @EMAIL VARCHAR (50)
 AS
 BEGIN
@@ -52,7 +52,7 @@ GO
    SP 2. Tim sach theo tu khoa (ten sach, ten tac gia hoac ten the loai).
    Tham so vao: TUKHOA. Tra ve danh sach dau sach va so cuon con san.
    --------------------------------------------------------------------- */
-CREATE PROCEDURE SP_TIMSACH
+CREATE OR ALTER PROCEDURE SP_TIMSACH
 @TUKHOA NVARCHAR (100),
 @PageNumber INT = 1,
 @PageSize INT = 10
@@ -111,7 +111,7 @@ GO
    - Tat ca trong 1 transaction: loi o bat ky cuon nao thi huy toan bo.
    Tra ve: 1 thanh cong, 0 that bai.
    --------------------------------------------------------------------- */
-CREATE PROCEDURE SP_LAPPHIEUMUON
+CREATE OR ALTER PROCEDURE SP_LAPPHIEUMUON
 @MADG CHAR (5), @MANV CHAR (4), @DSMACS VARCHAR (200), @MAPM CHAR (6) OUTPUT
 AS
 BEGIN
@@ -180,7 +180,7 @@ GO
    - Nguoc lai cap nhat ngay tra = hom nay (trigger TRG_CTPM_TRASACH tu
      cap nhat tinh trang sach, lap phieu phat)  -> tra ve 2
    --------------------------------------------------------------------- */
-CREATE PROCEDURE SP_TRASACH
+CREATE OR ALTER PROCEDURE SP_TRASACH
 @MAPM CHAR (6), @MACS CHAR (5), @TINHTRANGTRA NVARCHAR (20)=N'Bình thường', @TIENPHAT MONEY OUTPUT
 AS
 BEGIN
@@ -227,7 +227,7 @@ GO
    - Nguoc lai danh dau cac phieu phat da thanh toan
      (TRG_PHIEUPHAT_TONGNO cap nhat lai TONGNO) -> tra ve 2
    --------------------------------------------------------------------- */
-CREATE PROCEDURE SP_THANHTOANPHAT
+CREATE OR ALTER PROCEDURE SP_THANHTOANPHAT
 @MADG CHAR (5), @SOTIEN MONEY OUTPUT
 AS
 BEGIN
@@ -271,7 +271,7 @@ GO
                  phat sinh trong thang.
    Dong thoi tra ve bang top 5 dau sach duoc muon nhieu nhat trong thang.
    --------------------------------------------------------------------- */
-CREATE PROCEDURE SP_THONGKETHANG
+CREATE OR ALTER PROCEDURE SP_THONGKETHANG
 @THANG INT, @NAM INT, @SOPHIEU INT OUTPUT, @SOLUOTSACH INT OUTPUT, @TIENPHAT MONEY OUTPUT
 AS
 BEGIN
@@ -342,7 +342,7 @@ SELECT @SP AS SOPHIEU, @SL AS SOLUOTSACH, @TP AS TIENPHAT
    
    - Nguoc lai cap nhat      -> tra ve 2
    --------------------------------------------------------------------- */
-CREATE PROCEDURE SP_SUADOCGIA
+CREATE OR ALTER PROCEDURE SP_SUADOCGIA
 @MADG CHAR (5), @HOTEN NVARCHAR (40), @NGSINH DATE, @GIOITINH NVARCHAR (3), @DIACHI NVARCHAR (100), @SODT VARCHAR (15), @EMAIL VARCHAR (50)
 AS
 BEGIN
@@ -373,7 +373,7 @@ GO
    - MADS khong ton tai       -> tra ve 0
    - Nguoc lai cap nhat       -> tra ve 1
    --------------------------------------------------------------------- */
-CREATE PROCEDURE SP_SUADAUSACH
+CREATE OR ALTER PROCEDURE SP_SUADAUSACH
 @MADS CHAR (5), @TENDS NVARCHAR (100), @MATL CHAR (4), @MANXB CHAR (5), @NAMXB INT, @SOTRANG INT, @GIA MONEY
 AS
 BEGIN
@@ -406,7 +406,7 @@ GO
    - MANXB khong ton tai   -> tra ve 2
    - Nguoc lai insert      -> tra ve 3
    --------------------------------------------------------------------- */
-CREATE PROCEDURE SP_THEMDAUSACH
+CREATE OR ALTER PROCEDURE SP_THEMDAUSACH
 @MADS CHAR (5), @TENDS NVARCHAR (100), @MATL CHAR (4), @MANXB CHAR (5), @NAMXB INT, @SOTRANG INT, @GIA MONEY
 AS
 BEGIN
@@ -444,13 +444,14 @@ BEGIN
 	PRINT N'Thêm đầu sách thành công.';
 	RETURN 3;
 END
+GO
 
 /* ---------------------------------------------------------------------
    SP 10. Tim doc gia.
    Tham so vao: TUKHOA (tim theo MADG hoac HOTEN). 
    Tra ve: Danh sach doc gia.
    --------------------------------------------------------------------- */
-CREATE PROCEDURE SP_TIMDOCGIA
+CREATE OR ALTER PROCEDURE SP_TIMDOCGIA
 	@TUKHOA NVARCHAR(100),
 	@PageNumber INT = 1,
 	@PageSize INT = 10
@@ -474,7 +475,7 @@ GO
    - Dau sach dang co cuon sach -> tra ve 1 (Khong the xoa)
    - Nguoc lai xoa -> tra ve 2
    --------------------------------------------------------------------- */
-CREATE PROCEDURE SP_XOADAUSACH
+CREATE OR ALTER PROCEDURE SP_XOADAUSACH
 	@MADS CHAR(5)
 AS
 BEGIN
@@ -506,7 +507,7 @@ GO
    - Doc gia co lich su muon sach -> tra ve 1 (Khong the xoa)
    - Nguoc lai xoa -> tra ve 2
    --------------------------------------------------------------------- */
-CREATE PROCEDURE SP_XOADOCGIA
+CREATE OR ALTER PROCEDURE SP_XOADOCGIA
 	@MADG CHAR(5)
 AS
 BEGIN
@@ -533,5 +534,708 @@ BEGIN
 
 	PRINT N'Xóa độc giả thành công.'
 	RETURN 2
+END
+GO
+
+/* =====================================================================
+   STORED PROCEDURES CRUD BO SUNG CHO BACKEND API
+   ===================================================================== */
+
+/* ---------------------------------------------------------------------
+   SP 13. Them the loai.
+   Tham so vao: MATL, TENTL.
+   - MATL da ton tai  -> tra ve 0
+   - TENTL da ton tai -> tra ve 1
+   - Nguoc lai insert -> tra ve 2
+   --------------------------------------------------------------------- */
+CREATE OR ALTER PROCEDURE SP_THEMTHELOAI
+	@MATL CHAR(4),
+	@TENTL NVARCHAR(50)
+AS
+BEGIN
+	SET NOCOUNT ON;
+	IF EXISTS (SELECT 1 FROM THELOAI WHERE MATL = @MATL)
+	BEGIN
+		PRINT N'Mã thể loại đã tồn tại.';
+		RETURN 0;
+	END
+	IF EXISTS (SELECT 1 FROM THELOAI WHERE TENTL = @TENTL)
+	BEGIN
+		PRINT N'Tên thể loại đã tồn tại.';
+		RETURN 1;
+	END
+	INSERT INTO THELOAI (MATL, TENTL) VALUES (@MATL, @TENTL);
+	PRINT N'Thêm thể loại thành công.';
+	RETURN 2;
+END
+GO
+
+/* ---------------------------------------------------------------------
+   SP 14. Sua the loai.
+   Tham so vao: MATL, TENTL.
+   - MATL khong ton tai                -> tra ve 0
+   - TENTL bi trung voi the loai khac  -> tra ve 1
+   - Nguoc lai update                  -> tra ve 2
+   --------------------------------------------------------------------- */
+CREATE OR ALTER PROCEDURE SP_SUATHELOAI
+	@MATL CHAR(4),
+	@TENTL NVARCHAR(50)
+AS
+BEGIN
+	SET NOCOUNT ON;
+	IF NOT EXISTS (SELECT 1 FROM THELOAI WHERE MATL = @MATL)
+	BEGIN
+		PRINT N'Mã thể loại không tồn tại.';
+		RETURN 0;
+	END
+	IF EXISTS (SELECT 1 FROM THELOAI WHERE TENTL = @TENTL AND MATL <> @MATL)
+	BEGIN
+		PRINT N'Tên thể loại đã tồn tại.';
+		RETURN 1;
+	END
+	UPDATE THELOAI SET TENTL = @TENTL WHERE MATL = @MATL;
+	PRINT N'Cập nhật thể loại thành công.';
+	RETURN 2;
+END
+GO
+
+/* ---------------------------------------------------------------------
+   SP 15. Xoa the loai.
+   Tham so vao: MATL.
+   - MATL khong ton tai       -> tra ve 0
+   - Dang co dau sach su dung -> tra ve 1
+   - Nguoc lai xoa            -> tra ve 2
+   --------------------------------------------------------------------- */
+CREATE OR ALTER PROCEDURE SP_XOATHELOAI
+	@MATL CHAR(4)
+AS
+BEGIN
+	SET NOCOUNT ON;
+	IF NOT EXISTS (SELECT 1 FROM THELOAI WHERE MATL = @MATL)
+	BEGIN
+		PRINT N'Mã thể loại không tồn tại.';
+		RETURN 0;
+	END
+	IF EXISTS (SELECT 1 FROM DAUSACH WHERE MATL = @MATL)
+	BEGIN
+		PRINT N'Không thể xóa thể loại đang có sách.';
+		RETURN 1;
+	END
+	DELETE FROM THELOAI WHERE MATL = @MATL;
+	PRINT N'Xóa thể loại thành công.';
+	RETURN 2;
+END
+GO
+
+/* ---------------------------------------------------------------------
+   SP 16. Lay danh sach the loai (ho tro tim kiem va phan trang).
+   Tham so vao: TUKHOA, PageNumber, PageSize.
+   --------------------------------------------------------------------- */
+CREATE OR ALTER PROCEDURE SP_LAYDANHSACHTHELOAI
+	@TUKHOA NVARCHAR(50) = NULL,
+	@PageNumber INT = 1,
+	@PageSize INT = 10
+AS
+BEGIN
+	SET NOCOUNT ON;
+	SELECT MATL, TENTL, COUNT(*) OVER() AS TotalRecord
+	FROM THELOAI
+	WHERE @TUKHOA IS NULL OR @TUKHOA = ''
+	   OR MATL LIKE '%' + @TUKHOA + '%'
+	   OR TENTL LIKE N'%' + @TUKHOA + N'%'
+	ORDER BY MATL
+	OFFSET (@PageNumber - 1) * @PageSize ROWS
+	FETCH NEXT @PageSize ROWS ONLY;
+END
+GO
+
+/* ---------------------------------------------------------------------
+   SP 17. Them nhan vien.
+   Tham so vao: MANV, HOTEN, NGSINH, SODT, CHUCVU, NGVL.
+   - MANV da ton tai       -> tra ve 0
+   - Chuc vu khong hop le  -> tra ve 1
+   - Khong du 18 tuoi      -> tra ve 2
+   - Nguoc lai insert      -> tra ve 3
+   --------------------------------------------------------------------- */
+CREATE OR ALTER PROCEDURE SP_THEMNHANVIEN
+	@MANV CHAR(4),
+	@HOTEN NVARCHAR(40),
+	@NGSINH DATE,
+	@SODT VARCHAR(15),
+	@CHUCVU NVARCHAR(20),
+	@NGVL DATE
+AS
+BEGIN
+	SET NOCOUNT ON;
+	IF EXISTS (SELECT 1 FROM NHANVIEN WHERE MANV = @MANV)
+	BEGIN
+		PRINT N'Mã nhân viên đã tồn tại.';
+		RETURN 0;
+	END
+	IF @CHUCVU NOT IN (N'Quản lý', N'Thủ thư', N'Kỹ thuật viên')
+	BEGIN
+		PRINT N'Chức vụ không hợp lệ.';
+		RETURN 1;
+	END
+	IF DATEADD(YEAR, 18, @NGSINH) > @NGVL
+	BEGIN
+		PRINT N'Nhân viên chưa đủ 18 tuổi khi vào làm.';
+		RETURN 2;
+	END
+	INSERT INTO NHANVIEN (MANV, HOTEN, NGSINH, SODT, CHUCVU, NGVL)
+	VALUES (@MANV, @HOTEN, @NGSINH, @SODT, @CHUCVU, @NGVL);
+	PRINT N'Thêm nhân viên thành công.';
+	RETURN 3;
+END
+GO
+
+/* ---------------------------------------------------------------------
+   SP 18. Sua nhan vien.
+   Tham so vao: MANV, HOTEN, NGSINH, SODT, CHUCVU, NGVL.
+   - MANV khong ton tai    -> tra ve 0
+   - Chuc vu khong hop le  -> tra ve 1
+   - Khong du 18 tuoi      -> tra ve 2
+   - Nguoc lai update      -> tra ve 3
+   --------------------------------------------------------------------- */
+CREATE OR ALTER PROCEDURE SP_SUANHANVIEN
+	@MANV CHAR(4),
+	@HOTEN NVARCHAR(40),
+	@NGSINH DATE,
+	@SODT VARCHAR(15),
+	@CHUCVU NVARCHAR(20),
+	@NGVL DATE
+AS
+BEGIN
+	SET NOCOUNT ON;
+	IF NOT EXISTS (SELECT 1 FROM NHANVIEN WHERE MANV = @MANV)
+	BEGIN
+		PRINT N'Mã nhân viên không tồn tại.';
+		RETURN 0;
+	END
+	IF @CHUCVU NOT IN (N'Quản lý', N'Thủ thư', N'Kỹ thuật viên')
+	BEGIN
+		PRINT N'Chức vụ không hợp lệ.';
+		RETURN 1;
+	END
+	IF DATEADD(YEAR, 18, @NGSINH) > @NGVL
+	BEGIN
+		PRINT N'Nhân viên chưa đủ 18 tuổi khi vào làm.';
+		RETURN 2;
+	END
+	UPDATE NHANVIEN
+	SET HOTEN = @HOTEN, NGSINH = @NGSINH, SODT = @SODT, CHUCVU = @CHUCVU, NGVL = @NGVL
+	WHERE MANV = @MANV;
+	PRINT N'Cập nhật nhân viên thành công.';
+	RETURN 3;
+END
+GO
+
+/* ---------------------------------------------------------------------
+   SP 19. Xoa nhan vien.
+   Tham so vao: MANV.
+   - MANV khong ton tai -> tra ve 0
+   - Da lap phieu muon  -> tra ve 1 (khong the xoa)
+   - Nguoc lai xoa      -> tra ve 2
+   --------------------------------------------------------------------- */
+CREATE OR ALTER PROCEDURE SP_XOANHANVIEN
+	@MANV CHAR(4)
+AS
+BEGIN
+	SET NOCOUNT ON;
+	IF NOT EXISTS (SELECT 1 FROM NHANVIEN WHERE MANV = @MANV)
+	BEGIN
+		PRINT N'Mã nhân viên không tồn tại.';
+		RETURN 0;
+	END
+	IF EXISTS (SELECT 1 FROM PHIEUMUON WHERE MANV = @MANV)
+	BEGIN
+		PRINT N'Nhân viên đã từng lập phiếu mượn, không thể xóa.';
+		RETURN 1;
+	END
+	DELETE FROM TAIKHOAN WHERE MANV = @MANV;
+	DELETE FROM NHANVIEN WHERE MANV = @MANV;
+	PRINT N'Xóa nhân viên thành công.';
+	RETURN 2;
+END
+GO
+
+/* ---------------------------------------------------------------------
+   SP 20. Lay danh sach nhan vien (ho tro tim kiem va phan trang).
+   Tham so vao: TUKHOA, PageNumber, PageSize.
+   --------------------------------------------------------------------- */
+CREATE OR ALTER PROCEDURE SP_LAYDANHSACHNHANVIEN
+	@TUKHOA NVARCHAR(50) = NULL,
+	@PageNumber INT = 1,
+	@PageSize INT = 10
+AS
+BEGIN
+	SET NOCOUNT ON;
+	SELECT MANV, HOTEN, NGSINH, SODT, CHUCVU, NGVL, COUNT(*) OVER() AS TotalRecord
+	FROM NHANVIEN
+	WHERE @TUKHOA IS NULL OR @TUKHOA = ''
+	   OR MANV LIKE '%' + @TUKHOA + '%'
+	   OR HOTEN LIKE N'%' + @TUKHOA + N'%'
+	   OR SODT LIKE '%' + @TUKHOA + '%'
+	ORDER BY MANV
+	OFFSET (@PageNumber - 1) * @PageSize ROWS
+	FETCH NEXT @PageSize ROWS ONLY;
+END
+GO
+
+/* ---------------------------------------------------------------------
+   SP 21. Them nha xuat ban.
+   Tham so vao: MANXB, TENNXB, DIACHI, SODT.
+   - MANXB da ton tai  -> tra ve 0
+   - TENNXB da ton tai -> tra ve 1
+   - Nguoc lai insert  -> tra ve 2
+   --------------------------------------------------------------------- */
+CREATE OR ALTER PROCEDURE SP_THEMNHAXUATBAN
+	@MANXB CHAR(5),
+	@TENNXB NVARCHAR(60),
+	@DIACHI NVARCHAR(100) = NULL,
+	@SODT VARCHAR(15) = NULL
+AS
+BEGIN
+	SET NOCOUNT ON;
+	IF EXISTS (SELECT 1 FROM NHAXUATBAN WHERE MANXB = @MANXB)
+	BEGIN
+		PRINT N'Mã nhà xuất bản đã tồn tại.';
+		RETURN 0;
+	END
+	IF EXISTS (SELECT 1 FROM NHAXUATBAN WHERE TENNXB = @TENNXB)
+	BEGIN
+		PRINT N'Tên nhà xuất bản đã tồn tại.';
+		RETURN 1;
+	END
+	INSERT INTO NHAXUATBAN (MANXB, TENNXB, DIACHI, SODT)
+	VALUES (@MANXB, @TENNXB, @DIACHI, @SODT);
+	PRINT N'Thêm nhà xuất bản thành công.';
+	RETURN 2;
+END
+GO
+
+/* ---------------------------------------------------------------------
+   SP 22. Sua nha xuat ban.
+   Tham so vao: MANXB, TENNXB, DIACHI, SODT.
+   - MANXB khong ton tai                -> tra ve 0
+   - TENNXB da ton tai o ban ghi khac   -> tra ve 1
+   - Nguoc lai update                   -> tra ve 2
+   --------------------------------------------------------------------- */
+CREATE OR ALTER PROCEDURE SP_SUANHAXUATBAN
+	@MANXB CHAR(5),
+	@TENNXB NVARCHAR(60),
+	@DIACHI NVARCHAR(100) = NULL,
+	@SODT VARCHAR(15) = NULL
+AS
+BEGIN
+	SET NOCOUNT ON;
+	IF NOT EXISTS (SELECT 1 FROM NHAXUATBAN WHERE MANXB = @MANXB)
+	BEGIN
+		PRINT N'Mã nhà xuất bản không tồn tại.';
+		RETURN 0;
+	END
+	IF EXISTS (SELECT 1 FROM NHAXUATBAN WHERE TENNXB = @TENNXB AND MANXB <> @MANXB)
+	BEGIN
+		PRINT N'Tên nhà xuất bản đã tồn tại.';
+		RETURN 1;
+	END
+	UPDATE NHAXUATBAN
+	SET TENNXB = @TENNXB, DIACHI = @DIACHI, SODT = @SODT
+	WHERE MANXB = @MANXB;
+	PRINT N'Cập nhật nhà xuất bản thành công.';
+	RETURN 2;
+END
+GO
+
+/* ---------------------------------------------------------------------
+   SP 23. Xoa nha xuat ban.
+   Tham so vao: MANXB.
+   - MANXB khong ton tai      -> tra ve 0
+   - Dang co dau sach su dung -> tra ve 1
+   - Nguoc lai xoa            -> tra ve 2
+   --------------------------------------------------------------------- */
+CREATE OR ALTER PROCEDURE SP_XOANHAXUATBAN
+	@MANXB CHAR(5)
+AS
+BEGIN
+	SET NOCOUNT ON;
+	IF NOT EXISTS (SELECT 1 FROM NHAXUATBAN WHERE MANXB = @MANXB)
+	BEGIN
+		PRINT N'Mã nhà xuất bản không tồn tại.';
+		RETURN 0;
+	END
+	IF EXISTS (SELECT 1 FROM DAUSACH WHERE MANXB = @MANXB)
+	BEGIN
+		PRINT N'Không thể xóa nhà xuất bản đang có sách.';
+		RETURN 1;
+	END
+	DELETE FROM NHAXUATBAN WHERE MANXB = @MANXB;
+	PRINT N'Xóa nhà xuất bản thành công.';
+	RETURN 2;
+END
+GO
+
+/* ---------------------------------------------------------------------
+   SP 24. Lay danh sach nha xuat ban (ho tro tim kiem va phan trang).
+   Tham so vao: TUKHOA, PageNumber, PageSize.
+   --------------------------------------------------------------------- */
+CREATE OR ALTER PROCEDURE SP_LAYDANHSACHNHAXUATBAN
+	@TUKHOA NVARCHAR(60) = NULL,
+	@PageNumber INT = 1,
+	@PageSize INT = 10
+AS
+BEGIN
+	SET NOCOUNT ON;
+	SELECT MANXB, TENNXB, DIACHI, SODT, COUNT(*) OVER() AS TotalRecord
+	FROM NHAXUATBAN
+	WHERE @TUKHOA IS NULL OR @TUKHOA = ''
+	   OR MANXB LIKE '%' + @TUKHOA + '%'
+	   OR TENNXB LIKE N'%' + @TUKHOA + N'%'
+	ORDER BY MANXB
+	OFFSET (@PageNumber - 1) * @PageSize ROWS
+	FETCH NEXT @PageSize ROWS ONLY;
+END
+GO
+
+/* ---------------------------------------------------------------------
+   SP 25. Them tac gia.
+   Tham so vao: MATG, TENTG, NAMSINH, QUOCTICH.
+   - MATG da ton tai         -> tra ve 0
+   - Nam sinh khong hop le   -> tra ve 1
+   - Nguoc lai insert        -> tra ve 2
+   --------------------------------------------------------------------- */
+CREATE OR ALTER PROCEDURE SP_THEMTACGIA
+	@MATG CHAR(5),
+	@TENTG NVARCHAR(50),
+	@NAMSINH INT = NULL,
+	@QUOCTICH NVARCHAR(30) = NULL
+AS
+BEGIN
+	SET NOCOUNT ON;
+	IF EXISTS (SELECT 1 FROM TACGIA WHERE MATG = @MATG)
+	BEGIN
+		PRINT N'Mã tác giả đã tồn tại.';
+		RETURN 0;
+	END
+	IF @NAMSINH IS NOT NULL AND (@NAMSINH < 1000 OR @NAMSINH > YEAR(GETDATE()))
+	BEGIN
+		PRINT N'Năm sinh tác giả không hợp lệ.';
+		RETURN 1;
+	END
+	INSERT INTO TACGIA (MATG, TENTG, NAMSINH, QUOCTICH)
+	VALUES (@MATG, @TENTG, @NAMSINH, @QUOCTICH);
+	PRINT N'Thêm tác giả thành công.';
+	RETURN 2;
+END
+GO
+
+/* ---------------------------------------------------------------------
+   SP 26. Sua tac gia.
+   Tham so vao: MATG, TENTG, NAMSINH, QUOCTICH.
+   - MATG khong ton tai      -> tra ve 0
+   - Nam sinh khong hop le   -> tra ve 1
+   - Nguoc lai update        -> tra ve 2
+   --------------------------------------------------------------------- */
+CREATE OR ALTER PROCEDURE SP_SUATACGIA
+	@MATG CHAR(5),
+	@TENTG NVARCHAR(50),
+	@NAMSINH INT = NULL,
+	@QUOCTICH NVARCHAR(30) = NULL
+AS
+BEGIN
+	SET NOCOUNT ON;
+	IF NOT EXISTS (SELECT 1 FROM TACGIA WHERE MATG = @MATG)
+	BEGIN
+		PRINT N'Mã tác giả không tồn tại.';
+		RETURN 0;
+	END
+	IF @NAMSINH IS NOT NULL AND (@NAMSINH < 1000 OR @NAMSINH > YEAR(GETDATE()))
+	BEGIN
+		PRINT N'Năm sinh tác giả không hợp lệ.';
+		RETURN 1;
+	END
+	UPDATE TACGIA
+	SET TENTG = @TENTG, NAMSINH = @NAMSINH, QUOCTICH = @QUOCTICH
+	WHERE MATG = @MATG;
+	PRINT N'Cập nhật tác giả thành công.';
+	RETURN 2;
+END
+GO
+
+/* ---------------------------------------------------------------------
+   SP 27. Xoa tac gia.
+   Tham so vao: MATG.
+   - MATG khong ton tai               -> tra ve 0
+   - Tac gia dang lien ket dau sach   -> tra ve 1
+   - Nguoc lai xoa                    -> tra ve 2
+   --------------------------------------------------------------------- */
+CREATE OR ALTER PROCEDURE SP_XOATACGIA
+	@MATG CHAR(5)
+AS
+BEGIN
+	SET NOCOUNT ON;
+	IF NOT EXISTS (SELECT 1 FROM TACGIA WHERE MATG = @MATG)
+	BEGIN
+		PRINT N'Mã tác giả không tồn tại.';
+		RETURN 0;
+	END
+	IF EXISTS (SELECT 1 FROM DAUSACH_TACGIA WHERE MATG = @MATG)
+	BEGIN
+		PRINT N'Không thể xóa tác giả đang liên kết với đầu sách.';
+		RETURN 1;
+	END
+	DELETE FROM TACGIA WHERE MATG = @MATG;
+	PRINT N'Xóa tác giả thành công.';
+	RETURN 2;
+END
+GO
+
+/* ---------------------------------------------------------------------
+   SP 28. Lay danh sach tac gia (ho tro tim kiem va phan trang).
+   Tham so vao: TUKHOA, PageNumber, PageSize.
+   --------------------------------------------------------------------- */
+CREATE OR ALTER PROCEDURE SP_LAYDANHSACHTACGIA
+	@TUKHOA NVARCHAR(50) = NULL,
+	@PageNumber INT = 1,
+	@PageSize INT = 10
+AS
+BEGIN
+	SET NOCOUNT ON;
+	SELECT MATG, TENTG, NAMSINH, QUOCTICH, COUNT(*) OVER() AS TotalRecord
+	FROM TACGIA
+	WHERE @TUKHOA IS NULL OR @TUKHOA = ''
+	   OR MATG LIKE '%' + @TUKHOA + '%'
+	   OR TENTG LIKE N'%' + @TUKHOA + N'%'
+	ORDER BY MATG
+	OFFSET (@PageNumber - 1) * @PageSize ROWS
+	FETCH NEXT @PageSize ROWS ONLY;
+END
+GO
+
+/* ---------------------------------------------------------------------
+   SP 29. Lay danh sach cac cuon sach cua mot dau sach.
+   Tham so vao: MADS.
+   --------------------------------------------------------------------- */
+CREATE OR ALTER PROCEDURE SP_LAYCUONSACHTHEODAUSACH
+	@MADS CHAR(5)
+AS
+BEGIN
+	SET NOCOUNT ON;
+	SELECT MACS, MADS, NGAYNHAP, VITRI, TINHTRANG
+	FROM CUONSACH
+	WHERE MADS = @MADS
+	ORDER BY MACS;
+END
+GO
+
+/* ---------------------------------------------------------------------
+   SP 30. Them cuon sach moi cho dau sach.
+   Tham so vao: MACS, MADS, VITRI, TINHTRANG.
+   - MACS da ton tai           -> tra ve 0
+   - MADS khong ton tai        -> tra ve 1
+   - Tinh trang khong hop le   -> tra ve 2
+   - Nguoc lai insert          -> tra ve 3
+   --------------------------------------------------------------------- */
+CREATE OR ALTER PROCEDURE SP_THEMCUONSACH
+	@MACS CHAR(5),
+	@MADS CHAR(5),
+	@VITRI NVARCHAR(20) = NULL,
+	@TINHTRANG NVARCHAR(20) = N'Có sẵn'
+AS
+BEGIN
+	SET NOCOUNT ON;
+	IF EXISTS (SELECT 1 FROM CUONSACH WHERE MACS = @MACS)
+	BEGIN
+		PRINT N'Mã cuốn sách đã tồn tại.';
+		RETURN 0;
+	END
+	IF NOT EXISTS (SELECT 1 FROM DAUSACH WHERE MADS = @MADS)
+	BEGIN
+		PRINT N'Mã đầu sách không tồn tại.';
+		RETURN 1;
+	END
+	IF @TINHTRANG NOT IN (N'Có sẵn', N'Đang mượn', N'Hư hỏng', N'Mất')
+	BEGIN
+		PRINT N'Tình trạng cuốn sách không hợp lệ.';
+		RETURN 2;
+	END
+	INSERT INTO CUONSACH (MACS, MADS, NGAYNHAP, VITRI, TINHTRANG)
+	VALUES (@MACS, @MADS, GETDATE(), @VITRI, @TINHTRANG);
+	PRINT N'Thêm cuốn sách thành công.';
+	RETURN 3;
+END
+GO
+
+/* ---------------------------------------------------------------------
+   SP 31. Cap nhat vi tri va tinh trang cuon sach.
+   Tham so vao: MACS, VITRI, TINHTRANG.
+   - MACS khong ton tai        -> tra ve 0
+   - Tinh trang khong hop le   -> tra ve 1
+   - Nguoc lai update          -> tra ve 2
+   --------------------------------------------------------------------- */
+CREATE OR ALTER PROCEDURE SP_SUACUONSACH
+	@MACS CHAR(5),
+	@VITRI NVARCHAR(20) = NULL,
+	@TINHTRANG NVARCHAR(20)
+AS
+BEGIN
+	SET NOCOUNT ON;
+	IF NOT EXISTS (SELECT 1 FROM CUONSACH WHERE MACS = @MACS)
+	BEGIN
+		PRINT N'Cuốn sách không tồn tại.';
+		RETURN 0;
+	END
+	IF @TINHTRANG NOT IN (N'Có sẵn', N'Đang mượn', N'Hư hỏng', N'Mất')
+	BEGIN
+		PRINT N'Tình trạng không hợp lệ.';
+		RETURN 1;
+	END
+	UPDATE CUONSACH
+	SET VITRI = @VITRI, TINHTRANG = @TINHTRANG
+	WHERE MACS = @MACS;
+	PRINT N'Cập nhật cuốn sách thành công.';
+	RETURN 2;
+END
+GO
+
+/* ---------------------------------------------------------------------
+   SP 32. Xoa cuon sach.
+   Tham so vao: MACS.
+   - MACS khong ton tai            -> tra ve 0
+   - Cuon sach da co lich su muon  -> tra ve 1
+   - Nguoc lai xoa                 -> tra ve 2
+   --------------------------------------------------------------------- */
+CREATE OR ALTER PROCEDURE SP_XOACUONSACH
+	@MACS CHAR(5)
+AS
+BEGIN
+	SET NOCOUNT ON;
+	IF NOT EXISTS (SELECT 1 FROM CUONSACH WHERE MACS = @MACS)
+	BEGIN
+		PRINT N'Mã cuốn sách không tồn tại.';
+		RETURN 0;
+	END
+	IF EXISTS (SELECT 1 FROM CTPHIEUMUON WHERE MACS = @MACS)
+	BEGIN
+		PRINT N'Cuốn sách đã có lịch sử mượn, không thể xóa.';
+		RETURN 1;
+	END
+	DELETE FROM CUONSACH WHERE MACS = @MACS;
+	PRINT N'Xóa cuốn sách thành công.';
+	RETURN 2;
+END
+GO
+
+/* ---------------------------------------------------------------------
+   SP 33. Lay danh sach tac gia cua mot dau sach.
+   Tham so vao: MADS.
+   --------------------------------------------------------------------- */
+CREATE OR ALTER PROCEDURE SP_LAYTACGIATHEODAUSACH
+	@MADS CHAR(5)
+AS
+BEGIN
+	SET NOCOUNT ON;
+	SELECT MATG, VAITRO
+	FROM DAUSACH_TACGIA
+	WHERE MADS = @MADS;
+END
+GO
+
+/* ---------------------------------------------------------------------
+   SP 34. Xoa toan bo lien ket tac gia cua mot dau sach.
+   Tham so vao: MADS.
+   --------------------------------------------------------------------- */
+CREATE OR ALTER PROCEDURE SP_XOATACGIADAUSACH
+	@MADS CHAR(5)
+AS
+BEGIN
+	SET NOCOUNT ON;
+	DELETE FROM DAUSACH_TACGIA WHERE MADS = @MADS;
+END
+GO
+
+/* ---------------------------------------------------------------------
+   SP 35. Them hoac cap nhat vai tro tac gia cho dau sach.
+   Tham so vao: MADS, MATG, VAITRO.
+   - MADS khong ton tai     -> tra ve 0
+   - MATG khong ton tai     -> tra ve 1
+   - Vai tro khong hop le   -> tra ve 2
+   - Nguoc lai thanh cong   -> tra ve 3
+   --------------------------------------------------------------------- */
+CREATE OR ALTER PROCEDURE SP_THEMTACGIADAUSACH
+	@MADS CHAR(5),
+	@MATG CHAR(5),
+	@VAITRO NVARCHAR(20) = N'Tác giả'
+AS
+BEGIN
+	SET NOCOUNT ON;
+	IF NOT EXISTS (SELECT 1 FROM DAUSACH WHERE MADS = @MADS)
+	BEGIN
+		PRINT N'Mã đầu sách không tồn tại.';
+		RETURN 0;
+	END
+	IF NOT EXISTS (SELECT 1 FROM TACGIA WHERE MATG = @MATG)
+	BEGIN
+		PRINT N'Mã tác giả không tồn tại.';
+		RETURN 1;
+	END
+	IF @VAITRO NOT IN (N'Tác giả', N'Đồng tác giả', N'Dịch giả')
+	BEGIN
+		PRINT N'Vai trò tác giả không hợp lệ.';
+		RETURN 2;
+	END
+	IF EXISTS (SELECT 1 FROM DAUSACH_TACGIA WHERE MADS = @MADS AND MATG = @MATG)
+	BEGIN
+		UPDATE DAUSACH_TACGIA SET VAITRO = @VAITRO WHERE MADS = @MADS AND MATG = @MATG;
+	END
+	ELSE
+	BEGIN
+		INSERT INTO DAUSACH_TACGIA (MADS, MATG, VAITRO) VALUES (@MADS, @MATG, @VAITRO);
+	END
+	RETURN 3;
+END
+GO
+
+/* ---------------------------------------------------------------------
+   SP 36. Lay danh sach phieu muon kem chi tiet (phan trang).
+   Tham so vao: PageNumber, PageSize.
+   --------------------------------------------------------------------- */
+CREATE OR ALTER PROCEDURE SP_LAYDANHSACHPHIEUMUON
+	@PageNumber INT = 1,
+	@PageSize INT = 10
+AS
+BEGIN
+	SET NOCOUNT ON;
+	SELECT PM.MAPM, PM.MADG, DG.HOTEN AS TENDG, PM.MANV, PM.NGAYMUON, PM.HANTRA, PM.TINHTRANG,
+	       CT.MACS, CT.NGAYTRA, CT.TINHTRANGTRA,
+	       COUNT(*) OVER() AS TotalRecord
+	FROM PHIEUMUON PM
+	LEFT JOIN DOCGIA DG ON PM.MADG = DG.MADG
+	LEFT JOIN CTPHIEUMUON CT ON PM.MAPM = CT.MAPM
+	ORDER BY PM.NGAYMUON DESC, PM.MAPM DESC
+	OFFSET (@PageNumber - 1) * @PageSize ROWS
+	FETCH NEXT @PageSize ROWS ONLY;
+END
+GO
+
+/* ---------------------------------------------------------------------
+   SP 37. Lay danh sach phieu phat kem thong tin doc gia (phan trang).
+   Tham so vao: PageNumber, PageSize.
+   --------------------------------------------------------------------- */
+CREATE OR ALTER PROCEDURE SP_LAYDANHSACHPHIEUPHAT
+	@PageNumber INT = 1,
+	@PageSize INT = 10
+AS
+BEGIN
+	SET NOCOUNT ON;
+	SELECT PP.MAPP, PP.MAPM, PM.MADG, DG.HOTEN AS TENDG, PP.MACS, PP.NGAYLAP, PP.LYDO, PP.SOTIEN, PP.DATHANHTOAN,
+	       COUNT(*) OVER() AS TotalRecord
+	FROM PHIEUPHAT PP
+	INNER JOIN CTPHIEUMUON CT ON PP.MAPM = CT.MAPM AND PP.MACS = CT.MACS
+	INNER JOIN PHIEUMUON PM ON CT.MAPM = PM.MAPM
+	LEFT JOIN DOCGIA DG ON PM.MADG = DG.MADG
+	ORDER BY PP.NGAYLAP DESC, PP.MAPP DESC
+	OFFSET (@PageNumber - 1) * @PageSize ROWS
+	FETCH NEXT @PageSize ROWS ONLY;
 END
 GO

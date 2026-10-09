@@ -15,21 +15,23 @@ public class GetFineSlipsEndpoint : IEndpoint
     {
         app.MapGet("api/transactions/fines", async (IDbConnection db, int page = 1, int pageSize = 10) =>
         {
-            var offset = (page - 1) * pageSize;
-            var queryCount = "SELECT COUNT(*) FROM PHIEUPHAT";
-            var totalCount = await db.ExecuteScalarAsync<int>(queryCount);
+            var parameters = new DynamicParameters();
+            parameters.Add("@PageNumber", page);
+            parameters.Add("@PageSize", pageSize);
 
-            var query = @"
-                SELECT PP.MAPP, PP.MAPM, PM.MADG, DG.HOTEN AS TENDG, PP.MACS, PP.NGAYLAP, PP.LYDO, PP.SOTIEN, PP.DATHANHTOAN
-                FROM PHIEUPHAT PP
-                INNER JOIN CTPHIEUMUON CT ON PP.MAPM = CT.MAPM AND PP.MACS = CT.MACS
-                INNER JOIN PHIEUMUON PM ON CT.MAPM = PM.MAPM
-                LEFT JOIN DOCGIA DG ON PM.MADG = DG.MADG
-                ORDER BY PP.NGAYLAP DESC, PP.MAPP DESC
-                OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY";
-            
-            var items = await db.QueryAsync<dynamic>(query, new { Offset = offset, PageSize = pageSize });
-            
+            var items = await db.QueryAsync<dynamic>("SP_LAYDANHSACHPHIEUPHAT", parameters, commandType: CommandType.StoredProcedure);
+
+            int totalCount = 0;
+            var firstRow = items.FirstOrDefault();
+            if (firstRow != null)
+            {
+                var rowDict = (IDictionary<string, object>)firstRow;
+                if (rowDict.TryGetValue("TotalRecord", out var tr) && tr != null)
+                {
+                    totalCount = Convert.ToInt32(tr);
+                }
+            }
+
             return Results.Ok(new PagedResult<dynamic>
             {
                 Items = items,

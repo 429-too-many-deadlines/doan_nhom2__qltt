@@ -14,20 +14,23 @@ public class DeleteEmployeeEndpoint : IEndpoint
     {
         app.MapDelete("api/employees/{id}", async (IDbConnection db, string id) =>
         {
-            var count = await db.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM PHIEUMUON WHERE MANV = @MaNV", new { MaNV = id });
-            if (count > 0)
-            {
-                return Results.BadRequest(new MessageResponse("Không thể xoá nhân viên đã lập phiếu mượn"));
-            }
+            var parameters = new DynamicParameters();
+            parameters.Add("@MANV", id);
+            parameters.Add("@ReturnValue", dbType: DbType.Int32, direction: ParameterDirection.ReturnValue);
 
-            var sql = "DELETE FROM NHANVIEN WHERE MANV = @MaNV";
-            var result = await db.ExecuteAsync(sql, new { MaNV = id });
-            
-            if (result == 0) return Results.NotFound(new MessageResponse("Không tìm thấy nhân viên"));
-            return Results.Ok(new MessageResponse("Xoá nhân viên thành công"));
+            await db.ExecuteAsync("SP_XOANHANVIEN", parameters, commandType: CommandType.StoredProcedure);
+            var result = parameters.Get<int>("@ReturnValue");
+
+            return result switch
+            {
+                0 => Results.NotFound(new MessageResponse("Không tìm thấy nhân viên")),
+                1 => Results.BadRequest(new MessageResponse("Không thể xoá nhân viên đã lập phiếu mượn")),
+                2 => Results.Ok(new MessageResponse("Xoá nhân viên thành công")),
+                _ => Results.StatusCode(500)
+            };
         })
         .WithName("DeleteEmployee")
-        .RequireAuthorization("QuanLyOnly")
+        .RequireAuthorization()
         .WithTags("Employees")
         .WithSummary("Xóa nhân viên");
     }

@@ -16,7 +16,7 @@ public class BackupEndpoint : IEndpoint
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost("/api/settings/backup", HandleAsync)
-           .RequireAuthorization("QuanLyOnly")
+           .RequireAuthorization()
            .WithTags("Settings")
            .WithSummary("Sao lưu cơ sở dữ liệu")
            .WithDescription("Gọi SP_SAOLUU. Tham số type = 'FULL' hoặc 'DIFF'.");

@@ -139,29 +139,33 @@ export default function Books() {
                   <TableRow>
                     <TableHead>Mã Sách</TableHead>
                     <TableHead>Tên Sách</TableHead>
+                    <TableHead>Thể Loại</TableHead>
                     <TableHead>Tác Giả</TableHead>
+                    <TableHead>Còn Lại</TableHead>
                     <TableHead className="w-[180px]">Hành Động</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {loading ? (
                     <TableRow>
-                      <TableCell colSpan={4} className="h-24 text-center">
+                      <TableCell colSpan={6} className="h-24 text-center">
                         Đang tải...
                       </TableCell>
                     </TableRow>
                   ) : books.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={4} className="h-24 text-center">
+                      <TableCell colSpan={6} className="h-24 text-center">
                         Không tìm thấy sách.
                       </TableCell>
                     </TableRow>
                   ) : (
                     books.map((book) => (
                       <TableRow key={book.MADS || Math.random().toString()}>
-                        <TableCell className="font-medium">{book.MADS}</TableCell>
-                        <TableCell>{book.TENDS}</TableCell>
-                        <TableCell>{book.TACGIA}</TableCell>
+                        <TableCell className="font-medium font-mono text-xs">{book.MADS || (book as any).mads || '-'}</TableCell>
+                        <TableCell className="font-medium">{book.TENDS || (book as any).tends || '-'}</TableCell>
+                        <TableCell>{book.TENTL || (book as any).tentl || '-'}</TableCell>
+                        <TableCell>{book.TACGIA || (book as any).tacgia || '-'}</TableCell>
+                        <TableCell>{(book.SLCON ?? (book as any).slcon ?? book.SOLUONG ?? '-')}</TableCell>
                         <TableCell>
                           <div className="flex gap-2">
                             <Button 

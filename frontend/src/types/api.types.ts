@@ -53,18 +53,43 @@ export interface MonthlyStatsResponse {
 
 
 
+// --- Account Types ---
+export interface Account {
+  username: string;
+  role: string;
+  maNV?: string | null;
+  maDG?: string | null;
+  ownerName?: string;
+  status: boolean;
+  // Fallback aliases
+  tendangnhap?: string;
+  vaitro?: string;
+  MANV?: string;
+  MADG?: string;
+  trangthai?: boolean;
+}
+
 // --- Book Copies & Authors ---
 export interface BookCopy {
   MACS: string;
   MADS: string;
-  NGAYNHAP: string;
-  VITRI: string;
-  TINHTRANG: string;
+  NGAYNHAP?: string;
+  VITRI?: string;
+  TINHTRANG?: string;
+  // Fallback aliases for camel/Pascal case
+  MaCS?: string;
+  MaDS?: string;
+  NgayNhap?: string;
+  ViTri?: string;
+  TinhTrang?: string;
 }
 
 export interface BookAuthor {
   MATG: string;
   VAITRO: string;
+  // Fallback aliases
+  MaTG?: string;
+  VaiTro?: string;
 }
 
 
@@ -132,15 +157,20 @@ export interface Reader {
 }
 
 export interface FineSlip {
-    maPT: string;
-    MADG: string;
-    soTienThu: number;
-    ngayThu: string;
-    LYDO?: string;
     MAPP?: string;
     MAPM?: string;
+    MADG?: string;
     TENDG?: string;
+    MACS?: string;
+    NGAYLAP?: string;
+    LYDO?: string;
+    SOTIEN?: number;
     DATHANHTOAN?: boolean;
+    // Fallback / legacy fields
+    maPT?: string;
+    maPP?: string;
+    soTienThu?: number;
+    ngayThu?: string;
 }
 
 export interface BackupHistory {

@@ -31,7 +31,7 @@ public class DeleteReaderEndpoint : IEndpoint
             };
         })
         .WithName("DeleteReader")
-        .RequireAuthorization("QuanLyHoacThuThu")
+        .RequireAuthorization()
            .WithTags("Readers")
         .WithGroupName("v1")
         .WithSummary("Xóa độc giả");

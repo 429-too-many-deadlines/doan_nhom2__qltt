@@ -17,7 +17,7 @@ public class RunReminderCursorEndpoint : IEndpoint
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost("/api/reports/reminders", HandleAsync)
-           .RequireAuthorization("QuanLyHoacThuThu")
+           .RequireAuthorization()
            .WithTags("Reports")
            .WithSummary("Chạy cursor nhắc nhở quá hạn")
            .WithDescription("Gọi SP_CURSOR_NHACNHOQUAHAN và trả về danh sách nhắc nhở.");

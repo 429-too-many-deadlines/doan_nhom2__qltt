@@ -1,5 +1,5 @@
 import { apiClient } from '../lib/api';
-import type { ChangePasswordRequest, CreateAccountRequest, MessageResponse } from '../types/api.types';
+import type { Account, ChangePasswordRequest, CreateAccountRequest, MessageResponse } from '../types/api.types';
 
 export const authService = {
   createAccount: async (data: CreateAccountRequest): Promise<MessageResponse> => {
@@ -10,8 +10,8 @@ export const authService = {
     const response = await apiClient.post<MessageResponse>('/api/auth/change-password', data);
     return response.data;
   },
-  getAccounts: async (): Promise<import('../pages/Accounts').Account[]> => {
-    const response = await apiClient.get<import('../pages/Accounts').Account[]>('/api/auth/accounts');
+  getAccounts: async (): Promise<Account[]> => {
+    const response = await apiClient.get<Account[]>('/api/auth/accounts');
     return response.data;
   },
   updateAccountStatus: async (username: string, status: boolean): Promise<MessageResponse> => {

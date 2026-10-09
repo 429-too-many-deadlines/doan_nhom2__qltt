@@ -40,7 +40,7 @@ public class UpdateReaderEndpoint : IEndpoint
             };
         })
         .WithName("UpdateReader")
-        .RequireAuthorization("QuanLyHoacThuThu")
+        .RequireAuthorization()
            .WithTags("Readers")
         .WithGroupName("v1")
         .WithSummary("Cập nhật thông tin độc giả");

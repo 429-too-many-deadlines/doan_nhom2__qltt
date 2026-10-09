@@ -17,7 +17,7 @@ GO
    ===================================================================== */
 
 /* SP tao tai khoan. Tra ve 0: trung ten dang nhap, 1: thanh cong */
-CREATE PROCEDURE SP_TAOTAIKHOAN
+CREATE OR ALTER PROCEDURE SP_TAOTAIKHOAN
 	@TENDANGNHAP	VARCHAR(30),
 	@MATKHAU		NVARCHAR(100),
 	@VAITRO			NVARCHAR(20),
@@ -42,7 +42,7 @@ GO
 
 /* SP dang nhap. Tra ve thong tin tai khoan neu dung, nguoc lai bang rong.
    Tham so ra @KETQUA: 0 sai ten/mat khau, 1 tai khoan bi khoa, 2 thanh cong */
-CREATE PROCEDURE SP_DANGNHAP
+CREATE OR ALTER PROCEDURE SP_DANGNHAP
 	@TENDANGNHAP	VARCHAR(30),
 	@MATKHAU		NVARCHAR(100),
 	@KETQUA			INT OUTPUT
@@ -77,7 +77,7 @@ END
 GO
 
 /* SP doi mat khau. Tra ve 0: sai mat khau cu, 1: thanh cong */
-CREATE PROCEDURE SP_DOIMATKHAU
+CREATE OR ALTER PROCEDURE SP_DOIMATKHAU
 	@TENDANGNHAP	VARCHAR(30),
 	@MATKHAUCU		NVARCHAR(100),
 	@MATKHAUMOI		NVARCHAR(100)
@@ -93,6 +93,43 @@ BEGIN
 	SET MATKHAU = HASHBYTES('SHA2_256', @MATKHAUMOI)
 	WHERE TENDANGNHAP = @TENDANGNHAP
 	RETURN 1
+END
+GO
+
+/* SP lay danh sach tai khoan */
+CREATE OR ALTER PROCEDURE SP_LAYDANHSACHTAIKHOAN
+AS
+BEGIN
+	SET NOCOUNT ON;
+	SELECT 
+		tk.TENDANGNHAP AS Username,
+		tk.VAITRO AS Role,
+		tk.MANV AS MaNV,
+		tk.MADG AS MaDG,
+		COALESCE(nv.HOTEN, dg.HOTEN, N'Chưa liên kết') AS OwnerName,
+		tk.TRANGTHAI AS Status
+	FROM TAIKHOAN tk
+	LEFT JOIN NHANVIEN nv ON tk.MANV = nv.MANV
+	LEFT JOIN DOCGIA dg ON tk.MADG = dg.MADG
+	ORDER BY tk.TENDANGNHAP;
+END
+GO
+
+/* SP cap nhat trang thai tai khoan. Tra ve 0: khong ton tai, 1: thanh cong */
+CREATE OR ALTER PROCEDURE SP_CAPNHATTRANGTHAITAIKHOAN
+	@TENDANGNHAP VARCHAR(30),
+	@TRANGTHAI BIT
+AS
+BEGIN
+	SET NOCOUNT ON;
+	IF NOT EXISTS (SELECT 1 FROM TAIKHOAN WHERE TENDANGNHAP = @TENDANGNHAP)
+	BEGIN
+		PRINT N'Tài khoản không tồn tại.';
+		RETURN 0;
+	END
+	UPDATE TAIKHOAN SET TRANGTHAI = @TRANGTHAI WHERE TENDANGNHAP = @TENDANGNHAP;
+	PRINT N'Cập nhật trạng thái tài khoản thành công.';
+	RETURN 1;
 END
 GO
 
@@ -259,7 +296,7 @@ bcp "SELECT MADS, TENDS, SOLUONG, SLCON FROM QUANLYTHUVIEN.dbo.DAUSACH" queryout
    ===================================================================== */
 
 /* SP sao luu CSDL (goi tu ung dung). Loai: 'FULL' hoac 'DIFF' */
-CREATE PROCEDURE SP_SAOLUU
+CREATE OR ALTER PROCEDURE SP_SAOLUU
 	@DUONGDAN	NVARCHAR(260),
 	@LOAI		VARCHAR(4) = 'FULL'
 AS

@@ -60,10 +60,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("QuanLyOnly", policy => policy.RequireRole("Quản lý"));
-    options.AddPolicy("ThuThuOnly", policy => policy.RequireRole("Thủ thư"));
-    options.AddPolicy("QuanLyHoacThuThu", policy => policy.RequireRole("Quản lý", "Thủ thư"));
-    options.AddPolicy("DocGiaOnly", policy => policy.RequireRole("Độc giả"));
+    // Bỏ phân quyền: Chỉ cần đăng nhập là có thể truy cập tất cả tài nguyên
+    options.AddPolicy("QuanLyOnly", policy => policy.RequireAuthenticatedUser());
+    options.AddPolicy("ThuThuOnly", policy => policy.RequireAuthenticatedUser());
+    options.AddPolicy("QuanLyHoacThuThu", policy => policy.RequireAuthenticatedUser());
+    options.AddPolicy("DocGiaOnly", policy => policy.RequireAuthenticatedUser());
 });
 
 builder.Services.AddCors(options =>
