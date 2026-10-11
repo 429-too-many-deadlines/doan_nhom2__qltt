@@ -714,7 +714,203 @@ END
 
 \muc{Giải thích} Trigger này được kích hoạt dây chuyền từ TRG\_CTPM\_TRASACH (khi lập phiếu phạt) và từ SP\_THANHTOANPHAT (khi thanh toán), nhờ đó TONGNO luôn đồng bộ mà không thủ tục nào phải tự cập nhật.
 
-%%CH4B%%
+\subsection{Function}
+
+\textbf{Function 1:} FN\_SOSACHDANGMUON (hàm vô hướng)
+
+\muc{Bài toán} Cho mã độc giả, trả về số cuốn sách độc giả đang giữ (chưa trả); trả về $-1$ nếu không có độc giả này.
+
+\muc{Code}
+\begin{sql}
+CREATE FUNCTION FN_SOSACHDANGMUON (@MADG CHAR(5)) RETURNS INT AS
+BEGIN
+  IF NOT EXISTS (SELECT * FROM DOCGIA WHERE MADG = @MADG) RETURN -1
+  DECLARE @SOSACH INT
+  SELECT @SOSACH = COUNT(*)
+  FROM CTPHIEUMUON CT JOIN PHIEUMUON PM ON CT.MAPM = PM.MAPM
+  WHERE PM.MADG = @MADG AND CT.NGAYTRA IS NULL
+  RETURN @SOSACH
+END
+\end{sql}
+\muc{Kết quả} DG007 $\rightarrow$ 3; DG012 (vừa mượn PM0329) $\rightarrow$ 2; DG003 $\rightarrow$ 0; mã không tồn tại XX000 $\rightarrow -1$.
+\anhgiucho{kết quả gọi FN\_SOSACHDANGMUON}
+
+\muc{Giải thích} Giá trị $-1$ giúp phân biệt ``không có độc giả'' với ``không mượn cuốn nào''. Hàm vô hướng dùng được trực tiếp trong SELECT, ví dụ để hiển thị số sách đang giữ bên cạnh danh sách độc giả.
+
+\textbf{Function 2:} FN\_TIENPHATTRE (hàm vô hướng)
+
+\muc{Bài toán} Cho hạn trả và ngày trả, tính tiền phạt trả trễ theo quy định 5.000đ/ngày; trả đúng hạn hoặc trả sớm thì bằng 0.
+
+\muc{Code}
+\begin{sql}
+CREATE FUNCTION FN_TIENPHATTRE (@HANTRA DATE, @NGAYTRA DATE) RETURNS MONEY AS
+BEGIN
+  DECLARE @SONGAYTRE INT = DATEDIFF(DAY, @HANTRA, @NGAYTRA)
+  IF @SONGAYTRE <= 0 RETURN 0
+  RETURN @SONGAYTRE * 5000
+END
+\end{sql}
+\muc{Kết quả} Hạn 2026-09-15: trả 2026-09-26 (trễ 11 ngày) $\rightarrow$ 55.000; trả đúng hạn $\rightarrow$ 0; trả sớm 2026-09-10 $\rightarrow$ 0.
+\anhgiucho{kết quả gọi FN\_TIENPHATTRE}
+
+\muc{Giải thích} Quy định mức phạt được đặt ở một nơi duy nhất; trigger trả sách, cursor nhắc nhở và view độc giả quá hạn đều gọi lại hàm này, nên khi đổi mức phạt chỉ cần sửa hàm.
+
+\textbf{Function 3:} FN\_LICHSUMUON (hàm trả về bảng)
+
+\muc{Bài toán} Cho mã độc giả, trả về bảng lịch sử mượn: mã phiếu, cuốn sách, tên sách, ngày mượn, hạn trả, ngày trả, số ngày trễ và trạng thái từng cuốn.
+
+\muc{Code}
+\begin{sql}
+CREATE FUNCTION FN_LICHSUMUON (@MADG CHAR(5)) RETURNS TABLE AS RETURN (
+  SELECT PM.MAPM, CS.MACS, DS.TENDS, PM.NGAYMUON, PM.HANTRA, CT.NGAYTRA,
+    CASE WHEN CT.NGAYTRA IS NULL AND PM.HANTRA < CAST(GETDATE() AS DATE)
+           THEN DATEDIFF(DAY, PM.HANTRA, GETDATE())
+         WHEN CT.NGAYTRA > PM.HANTRA THEN DATEDIFF(DAY, PM.HANTRA, CT.NGAYTRA)
+         ELSE 0 END AS SONGAYTRE,
+    CASE WHEN CT.NGAYTRA IS NOT NULL THEN N'Đã trả (' + CT.TINHTRANGTRA + N')'
+         WHEN PM.HANTRA < CAST(GETDATE() AS DATE) THEN N'Quá hạn'
+         ELSE N'Đang mượn' END AS TRANGTHAI
+  FROM PHIEUMUON PM JOIN CTPHIEUMUON CT ON PM.MAPM = CT.MAPM
+    JOIN CUONSACH CS ON CT.MACS = CS.MACS JOIN DAUSACH DS ON CS.MADS = DS.MADS
+  WHERE PM.MADG = @MADG)
+\end{sql}
+\muc{Kết quả} \texttt{SELECT * FROM dbo.FN\_LICHSUMUON('DG007')} trả về 5 dòng: 2 cuốn của PM0003 ``Đã trả (Bình thường)'' và 3 cuốn của PM0013 ``Đang mượn'' (hạn 2026-10-15). Với DG001, cuốn CS011 của PM0011 hiện ``Đã trả (Bình thường)'' với 26 ngày trễ.
+\anhgiucho{kết quả FN\_LICHSUMUON với DG007}
+
+\muc{Giải thích} Hàm inline table-valued được dùng như một bảng có tham số, có thể JOIN hoặc lọc tiếp. Website dùng hàm này cho màn hình lịch sử mượn của độc giả.
+
+\subsection{Cursor}
+
+\textbf{Cursor 1:} SP\_CURSOR\_XEPLOAIDOCGIA
+
+\muc{Bài toán} Duyệt từng độc giả, tính số lượt mượn, số lần trễ, số lần làm hư/mất và tổng tiền phạt, sau đó xếp loại vào bảng DOCGIA\_XEPLOAI: ``Chưa mượn'', ``Hạn chế'' (có làm mất sách hoặc nợ trên 100.000đ), ``Cảnh báo'' (trễ từ 2 lần hoặc làm hư sách), ``Bình thường'' (trễ 1 lần), ``Uy tín'' (còn lại).
+
+\muc{Code}
+\begin{sql}
+DECLARE CUR_DOCGIA CURSOR FOR SELECT MADG, TONGNO FROM DOCGIA
+OPEN CUR_DOCGIA
+FETCH NEXT FROM CUR_DOCGIA INTO @MADG, @TONGNO
+WHILE @@FETCH_STATUS = 0
+BEGIN
+  ...  -- tinh @SOLUOT, @SOTRE, @SOHUMAT, @SOMAT, @TIENPHAT cho @MADG
+  SET @XEPLOAI = CASE
+    WHEN @SOLUOT = 0                    THEN N'Chưa mượn'
+    WHEN @SOMAT > 0 OR @TONGNO > 100000 THEN N'Hạn chế'
+    WHEN @SOTRE >= 2 OR @SOHUMAT > 0    THEN N'Cảnh báo'
+    WHEN @SOTRE = 1                     THEN N'Bình thường'
+    ELSE N'Uy tín' END
+  INSERT INTO DOCGIA_XEPLOAI (MADG, SOLUOTMUON, SOLANTRE, SOLANHUMAT,
+                              TONGTIENPHAT, XEPLOAI)
+  VALUES (@MADG, @SOLUOT, @SOTRE, @SOHUMAT, @TIENPHAT, @XEPLOAI)
+  FETCH NEXT FROM CUR_DOCGIA INTO @MADG, @TONGNO
+END
+CLOSE CUR_DOCGIA  DEALLOCATE CUR_DOCGIA
+\end{sql}
+\muc{Kết quả} Chạy sau các ví dụ ở mục 4.1.1--4.1.2, 119 độc giả được xếp loại: Chưa mượn 101, Cảnh báo 6, Bình thường 5, Uy tín 5, Hạn chế 2. Ví dụ: DG007 ``Uy tín'' (5 lượt, không trễ); DG002 ``Cảnh báo'' (trễ 3 lần); DG009 ``Hạn chế'' (làm mất sách, nợ 250.000đ); DG001 ``Hạn chế'' (nợ 130.000đ phát sinh từ ví dụ SP\_TRASACH).
+\anhgiucho{bảng DOCGIA\_XEPLOAI sau khi chạy cursor}
+
+\muc{Giải thích} Mỗi độc giả cần nhiều phép đếm và một chuỗi điều kiện có thứ tự ưu tiên, nên cursor xử lý từng dòng giúp logic dễ đọc. Cursor được gói trong stored procedure để website gọi lại và luôn được đóng, giải phóng sau khi dùng.
+
+\textbf{Cursor 2:} SP\_CURSOR\_NHACNHOQUAHAN
+
+\muc{Bài toán} Với một ngày kiểm tra (mặc định hôm nay), duyệt từng cuốn sách chưa trả đã quá hạn, tính số ngày trễ và tiền phạt tạm tính, soạn nội dung tin nhắn nhắc nhở và lưu vào bảng NHACNHO\_QUAHAN; cuốn đã được nhắc trong ngày thì không thêm lại.
+
+\muc{Code}
+\begin{sql}
+DECLARE CUR_QUAHAN CURSOR FOR
+  SELECT PM.MAPM, CT.MACS, DG.MADG, DG.HOTEN, DG.SODT, DS.TENDS, PM.HANTRA
+  FROM CTPHIEUMUON CT JOIN PHIEUMUON PM ON CT.MAPM = PM.MAPM ...
+  WHERE CT.NGAYTRA IS NULL AND PM.HANTRA < @NGAYKIEMTRA ORDER BY PM.HANTRA
+OPEN CUR_QUAHAN
+FETCH NEXT FROM CUR_QUAHAN
+  INTO @MAPM, @MACS, @MADG, @HOTEN, @SODT, @TENDS, @HANTRA
+WHILE @@FETCH_STATUS = 0
+BEGIN
+  IF NOT EXISTS (SELECT * FROM NHACNHO_QUAHAN WHERE MAPM = @MAPM
+                 AND MACS = @MACS AND NGAYLAP = @NGAYKIEMTRA)
+  BEGIN
+    SET @SONGAYTRE = DATEDIFF(DAY, @HANTRA, @NGAYKIEMTRA)
+    SET @TIENPHAT  = dbo.FN_TIENPHATTRE(@HANTRA, @NGAYKIEMTRA)
+    SET @NOIDUNG = N'Thư viện thông báo: bạn ' + @HOTEN + N' đang giữ sách "'
+      + @TENDS + N'" quá hạn ' + CAST(@SONGAYTRE AS NVARCHAR(10)) + N' ngày ...'
+    INSERT INTO NHACNHO_QUAHAN (...) VALUES (...)
+  END
+  FETCH NEXT FROM CUR_QUAHAN
+  INTO @MAPM, @MACS, @MADG, @HOTEN, @SODT, @TENDS, @HANTRA
+END
+CLOSE CUR_QUAHAN  DEALLOCATE CUR_QUAHAN
+\end{sql}
+\muc{Kết quả} Ngày 2026-10-11 tạo 4 nhắc nhở (sau khi CS011 và CS003 đã được trả ở các ví dụ trên), nhiều nhất là DG004 giữ ``Cơ sở văn hóa Việt Nam'' quá hạn 17 ngày, tạm tính 85.000đ. Chạy lại trong cùng ngày: ``Đã tạo 0 nhắc nhở mới.''
+\anhgiucho{bảng NHACNHO\_QUAHAN với nội dung tin nhắn}
+
+\muc{Giải thích} Mỗi dòng cần ghép một chuỗi tin nhắn riêng và kiểm tra đã nhắc hay chưa, nên phù hợp với cursor. Điều kiện \texttt{NOT EXISTS} làm thủ tục an toàn khi chạy nhiều lần trong ngày.
+
+\section{An toàn thông tin}
+\subsection{Xác thực}
+Hệ thống có hai lớp xác thực:
+\begin{itemize}
+\item \textbf{SQL Server Authentication:} ba login \texttt{LG\_QUANLY}, \texttt{LG\_THUTHU}, \texttt{LG\_DOCGIA} được tạo bằng \texttt{CREATE LOGIN ... WITH PASSWORD = ..., CHECK\_POLICY = ON} (bắt buộc mật khẩu đủ mạnh), CSDL mặc định là QUANLYTHUVIEN. Mỗi login được ánh xạ tới một user trong CSDL bằng \texttt{CREATE USER U\_... FOR LOGIN LG\_...}.
+\item \textbf{Đăng nhập website:} bảng TAIKHOAN không lưu mật khẩu gốc mà lưu \texttt{HASHBYTES('SHA2\_256', matkhau)}. Thủ tục \texttt{SP\_DANGNHAP} băm mật khẩu người dùng nhập rồi so sánh; tham số ra @KETQUA bằng 0 (sai), 1 (tài khoản bị khóa) hoặc 2 (thành công).
+\end{itemize}
+\muc{Kết quả} Cột MATKHAU của tài khoản \texttt{admin} có dạng \texttt{0xEC278A38901287B277...}; \texttt{SP\_DANGNHAP 'admin', '123456'} trả @KETQUA = 2, nhập sai mật khẩu trả @KETQUA = 0.
+
+\subsection{Phân quyền}
+Mỗi user thuộc một role; quyền được cấp cho role thay vì cho từng user (Bảng~\ref{tab:phanquyen}).
+\begin{table}[H]
+\centering\small
+\caption{Phân quyền theo role}\label{tab:phanquyen}
+\begin{tabularx}{\textwidth}{|p{2.2cm}|L|p{4.3cm}|}\hline
+\rowcolor{nenbang}\textbf{Role} & \textbf{GRANT (được phép)} & \textbf{DENY (bị từ chối)}\\\hline
+R\_QUANLY & Thành viên db\_datareader, db\_datawriter, db\_backupoperator; EXECUTE trên schema dbo; xem cả 5 view báo cáo & --\\\hline
+R\_THUTHU & SELECT toàn schema; INSERT, UPDATE trên DOCGIA, DAUSACH, CUONSACH, PHIEUMUON, CTPHIEUMUON, PHIEUPHAT; EXECUTE các SP nghiệp vụ và cursor nhắc nhở & DELETE toàn schema; SELECT trên TAIKHOAN\\\hline
+R\_DOCGIA & SELECT trên DAUSACH, THELOAI, TACGIA, DAUSACH\_TACGIA, NHAXUATBAN; CUONSACH (chỉ 4 cột); EXECUTE SP\_TIMSACH & SELECT trên DOCGIA, TAIKHOAN; INSERT/UPDATE/DELETE toàn schema\\\hline
+\end{tabularx}
+\end{table}
+Lệnh \texttt{GRANT SELECT ON PHIEUPHAT TO R\_DOCGIA} rồi \texttt{REVOKE} được dùng để minh họa thu hồi quyền.
+
+\muc{Kết quả} Kiểm tra bằng \texttt{EXECUTE AS USER}: U\_THUTHU xem được 119 độc giả nhưng \texttt{DELETE FROM PHIEUPHAT} và \texttt{SELECT * FROM TAIKHOAN} bị từ chối (``The DELETE/SELECT permission was denied on the object ...''); U\_DOCGIA xem được 16 đầu sách nhưng SELECT trên DOCGIA, UPDATE trên DAUSACH và SELECT trên PHIEUPHAT (đã REVOKE) đều bị từ chối.
+\anhgiucho{thông báo ``permission was denied'' khi chạy EXECUTE AS}
+
+\subsection{Import và Export}
+\textbf{Import:} danh sách độc giả mới trong tệp \texttt{DOCGIA\_IMPORT.csv} (UTF-16, dòng đầu là tiêu đề, giữ được tiếng Việt) được nạp vào bảng tạm bằng \texttt{BULK INSERT ... WITH (FORMAT = 'CSV', DATAFILETYPE = 'widechar', FIRSTROW = 2)}, sau đó chỉ INSERT những mã chưa tồn tại vào DOCGIA để các ràng buộc CHECK vẫn được kiểm tra. \textbf{Export:} dùng công cụ dòng lệnh \texttt{bcp "SELECT MADS, TENDS, SOLUONG, SLCON FROM QUANLYTHUVIEN.dbo.DAUSACH" queryout DAUSACH.csv -c -C 65001 -t,} hoặc trình hướng dẫn Tasks $>$ Export Data của SSMS để xuất ra Excel.
+\anhgiucho{các bước Import/Export và tệp kết quả}
+
+\subsection{Backup và Restore}
+CSDL dùng recovery model FULL. Thủ tục \texttt{SP\_SAOLUU @DUONGDAN, @LOAI} thực hiện sao lưu toàn phần (FULL) hoặc sao lưu phần thay đổi (DIFF) rồi trả về lịch sử sao lưu từ \texttt{msdb.dbo.backupset}; chỉ role R\_QUANLY được quyền gọi. Khi phục hồi, bản FULL được restore với \texttt{NORECOVERY}, sau đó bản DIFF với \texttt{RECOVERY}; nếu restore sang máy khác thì nối lại user với login bằng \texttt{ALTER USER U\_... WITH LOGIN = LG\_...}.
+\begin{sql}
+BACKUP DATABASE QUANLYTHUVIEN
+  TO DISK = N'/var/opt/mssql/data/QUANLYTHUVIEN_FULL.bak'
+  WITH INIT, NAME = N'QUANLYTHUVIEN - Full Backup'
+RESTORE DATABASE QUANLYTHUVIEN FROM DISK = N'.../QUANLYTHUVIEN_FULL.bak'
+  WITH NORECOVERY, REPLACE
+RESTORE DATABASE QUANLYTHUVIEN FROM DISK = N'.../QUANLYTHUVIEN_DIFF.bak'
+  WITH RECOVERY
+\end{sql}
+\muc{Kết quả} Một lần sao lưu FULL xử lý 818 trang dữ liệu, tệp .bak khoảng 6,46 MB; lịch sử trong msdb còn ghi nhận các bản sao lưu FULL trước đó (ngày 09/10/2026).
+\anhgiucho{lịch sử sao lưu và CSDL sau khi restore}
+
+\section{Trình bày thông tin (Report)}
+Báo cáo được hiển thị trên trang \textbf{Báo cáo} của website demo. Mỗi report lấy dữ liệu từ một view \texttt{VW\_BC\_*} trong CSDL thông qua API ASP.NET Core (Dapper), sau đó frontend React vẽ biểu đồ bằng thư viện Recharts. Website không lưu sẵn số liệu: mỗi lần mở trang đều truy vấn lại CSDL. Số liệu nhận xét dưới đây lấy từ bản sao CSDL ngày 11/10/2026, trước các thao tác minh họa ở mục 4.1.
+
+\textbf{Report 1:} Tình trạng kho sách theo đầu sách (\texttt{VW\_BC\_TINHTRANGKHO}, biểu đồ cột chồng)
+\anhgiucho{Report 1}\captionof{figure}{Report tình trạng kho sách}
+Kho có 26 cuốn: 13 có sẵn, 10 đang được mượn, 2 bị hư và 1 bị mất. Đầu sách ``Clean Code'' đang được mượn hết cả 2 cuốn, nên là ứng viên cần nhập thêm.
+
+\textbf{Report 2:} Xếp hạng đầu sách được mượn nhiều nhất (\texttt{VW\_BC\_SACHMUONNHIEU}, biểu đồ cột ngang)
+\anhgiucho{Report 2}\captionof{figure}{Report đầu sách được mượn nhiều nhất}
+``Mắt biếc'' dẫn đầu với 5 lượt mượn từ 5 độc giả; ba đầu sách đồng hạng 2 với 4 lượt mỗi đầu sách là ``Harry Potter và Hòn đá Phù thủy'', ``Đắc nhân tâm'' và ``Database System Concepts''.
+
+\textbf{Report 3:} Lượt mượn theo tháng và thể loại (\texttt{VW\_BC\_LUOTMUON\_THANG}, biểu đồ đường)
+\anhgiucho{Report 3}\captionof{figure}{Report lượt mượn theo tháng}
+Lượt mượn tăng từ 3 lượt/tháng (tháng 4, 5) lên 7 lượt (tháng 6--8) và đạt 11 lượt vào tháng 9, trùng thời điểm bắt đầu năm học. Văn học Việt Nam là thể loại được mượn nhiều nhất (11 lượt).
+
+\textbf{Report 4:} Tiền phạt theo tháng và lý do (\texttt{VW\_BC\_TIENPHAT\_THANG}, biểu đồ tròn và bảng tổng hợp)
+\anhgiucho{Report 4}\captionof{figure}{Report tiền phạt theo lý do}
+Tổng tiền phạt là 498.000đ từ 10 phiếu, trong đó phạt mất sách chiếm 250.000đ (khoảng 50\%). Thư viện đã thu 233.000đ; còn 265.000đ chưa thu, phần lớn là khoản mất sách của DG009.
+
+\textbf{Report 5:} Độc giả đang giữ sách quá hạn (\texttt{VW\_BC\_DOCGIA\_QUAHAN}, bảng cảnh báo)
+\anhgiucho{Report 5}\captionof{figure}{Report độc giả giữ sách quá hạn}
+Có 6 cuốn quá hạn thuộc 5 độc giả; trễ lâu nhất là DG001 với 26 ngày (tạm tính 130.000đ), tiếp theo là DG004 với 17 ngày (85.000đ). Danh sách này là đầu vào cho cursor nhắc nhở ở mục 4.1.4.
 
 \chapter{DEMO VÀ KẾT LUẬN}
 %%CH5%%

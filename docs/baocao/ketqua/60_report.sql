@@ -1,4 +1,4 @@
--- Ket qua 5 REPORT (view) tren ban sao, sau cac thao tac minh hoa
+-- Ket qua 5 REPORT (view) tren ban sao SACH (chay ngay sau 01_clone.sql, truoc cac vi du minh hoa)
 USE QUANLYTHUVIEN_BAOCAO
 SET NOCOUNT ON
 PRINT '=== R1 VW_BC_TINHTRANGKHO ==='
