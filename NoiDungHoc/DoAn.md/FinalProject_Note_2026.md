@@ -22,5 +22,4 @@
        *Lưu ý:* Bắt buộc phải tương tác với database trên SQL Server, load data lên và xử lý data thông qua các câu truy vấn tại SQL Server. Website demo chỉ đóng vai trò trình bày các thông tin truy vấn, không lưu trữ sẵn (sẽ check trong code Website Demo).
      - **B) Trình bày thông tin:** yêu cầu cơ bản, trình bày “ảnh chụp màn hình” reports được tạo ra từ công cụ Tableau/PowerBI. Trong trường hợp nhóm có thời gian, có thể visualize trực tiếp trên HTML, nhưng bắt buộc phải load dữ liệu từ database, không lưu sẵn dữ liệu tại backend.
 4. **Bắt buộc:** Chỉ sử dụng SQL Server hoặc MySQL.
-5. **Cho phép:** Sử dụng các công cụ hỗ trợ lập trình dựa trên AI cho việc thực hiện Website Demo. Các nội dung còn lại không được phép sử dụng (bao gồm báo cáo, slides, các câu truy vấn,…).
 
