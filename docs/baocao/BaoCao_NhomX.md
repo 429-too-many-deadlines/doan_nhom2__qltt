@@ -119,7 +119,8 @@
 - Bảng 2.1: Danh sách thực thể và thuộc tính
 - Bảng 2.2: Danh sách ràng buộc toàn vẹn
 - Bảng 3.1: Số dòng dữ liệu của từng bảng
-- Bảng 4.1: Phân quyền theo role
+- Bảng 4.1: Các stored procedure hỗ trợ website
+- Bảng 4.2: Phân quyền theo role
 
 ## DANH MỤC HÌNH VẼ
 
@@ -255,18 +256,23 @@ flowchart LR
 |---|---|---|---|
 | 1 | Giá sách > 0, số trang > 0, năm xuất bản từ 1900 đến năm hiện tại | DAUSACH | CHECK |
 | 2 | 0 ≤ SLCON ≤ SOLUONG | DAUSACH | CHECK |
-| 3 | Tình trạng cuốn sách thuộc {Có sẵn, Đang mượn, Hư hỏng, Mất} | CUONSACH | CHECK |
-| 4 | Ngày hết hạn thẻ sau ngày lập thẻ; độc giả đủ 16 tuổi; email đúng mẫu | DOCGIA | CHECK |
-| 5 | Hạn trả sau ngày mượn | PHIEUMUON | CHECK |
-| 6 | Đã trả thì phải có tình trạng trả, chưa trả thì cả hai đều rỗng | CTPHIEUMUON | CHECK |
-| 7 | Lý do phạt thuộc {Trả trễ, Hư hỏng, Mất sách}, số tiền > 0 | PHIEUPHAT | CHECK |
-| 8 | SOLUONG, SLCON bằng số cuốn và số cuốn "Có sẵn" của đầu sách | DAUSACH, CUONSACH | TRG_CUONSACH_CAPNHATSL |
-| 9 | Chỉ lập phiếu khi thẻ còn hạn và độc giả không nợ | PHIEUMUON, DOCGIA | TRG_PHIEUMUON_KIEMTRA |
-| 10 | Chỉ cho mượn cuốn "Có sẵn"; một cuốn không nằm trong hai phiếu chưa trả | CTPHIEUMUON, CUONSACH | TRG_CTPM_MUONSACH |
-| 11 | Trả sách: cập nhật cuốn sách, tự lập phiếu phạt, đóng phiếu khi trả hết | CTPHIEUMUON, PHIEUPHAT | TRG_CTPM_TRASACH |
-| 12 | TONGNO bằng tổng tiền phạt chưa thanh toán | DOCGIA, PHIEUPHAT | TRG_PHIEUPHAT_TONGNO |
+| 3 | Tên thể loại không trùng; tên nhà xuất bản không trùng | THELOAI, NHAXUATBAN | UNIQUE |
+| 4 | Năm sinh tác giả để trống hoặc từ 1000 đến năm hiện tại | TACGIA | CHECK |
+| 5 | Vai trò thuộc {Tác giả, Đồng tác giả, Dịch giả} | DAUSACH_TACGIA | CHECK |
+| 6 | Tình trạng cuốn sách thuộc {Có sẵn, Đang mượn, Hư hỏng, Mất} | CUONSACH | CHECK |
+| 7 | Giới tính thuộc {Nam, Nữ}; TONGNO ≥ 0 | DOCGIA | CHECK |
+| 8 | Ngày hết hạn thẻ sau ngày lập thẻ; độc giả đủ 16 tuổi; email đúng mẫu | DOCGIA | CHECK |
+| 9 | Hạn trả sau ngày mượn; tình trạng phiếu thuộc {Đang mượn, Đã trả} | PHIEUMUON | CHECK |
+| 10 | Tình trạng trả thuộc {Bình thường, Hư hỏng, Mất} | CTPHIEUMUON | CHECK |
+| 11 | Đã trả thì phải có tình trạng trả, chưa trả thì cả hai đều rỗng | CTPHIEUMUON | CHECK |
+| 12 | Lý do phạt thuộc {Trả trễ, Hư hỏng, Mất sách}, số tiền > 0 | PHIEUPHAT | CHECK |
+| 13 | SOLUONG, SLCON bằng số cuốn và số cuốn "Có sẵn" của đầu sách | DAUSACH, CUONSACH | TRG_CUONSACH_CAPNHATSL |
+| 14 | Chỉ lập phiếu khi thẻ còn hạn và độc giả không nợ | PHIEUMUON, DOCGIA | TRG_PHIEUMUON_KIEMTRA |
+| 15 | Chỉ cho mượn cuốn "Có sẵn"; một cuốn không nằm trong hai phiếu chưa trả | CTPHIEUMUON, CUONSACH | TRG_CTPM_MUONSACH |
+| 16 | Trả sách: cập nhật cuốn sách, tự lập phiếu phạt, đóng phiếu khi trả hết | CTPHIEUMUON, PHIEUPHAT | TRG_CTPM_TRASACH |
+| 17 | TONGNO bằng tổng tiền phạt chưa thanh toán | DOCGIA, PHIEUPHAT | TRG_PHIEUPHAT_TONGNO |
 
-Các ràng buộc 1–7 có bối cảnh trên một quan hệ nên được cài đặt bằng CHECK. Các ràng buộc 8–12 liên quan đến nhiều quan hệ hoặc là thuộc tính dẫn xuất, nên phải dùng trigger (mục 4.1.2).
+Các ràng buộc 1–12 có bối cảnh trên một quan hệ nên được cài đặt bằng 18 CHECK và 2 UNIQUE (một dòng trong bảng có thể gồm nhiều CHECK). Các ràng buộc 13–17 liên quan đến nhiều quan hệ hoặc là thuộc tính dẫn xuất, nên phải dùng trigger (mục 4.1.2).
 
 ## 2.4. Sơ đồ ERD (mức quan niệm)
 
@@ -372,6 +378,51 @@ Dữ liệu được chọn để bao phủ các tình huống nghiệp vụ và
 Tất cả kết quả trong chương này được chạy trên **bản sao** `QUANLYTHUVIEN_BAOCAO` của CSDL vào ngày 11/10/2026, nên các giá trị phụ thuộc ngày hiện tại (số ngày trễ, hạn trả, hạn thẻ) được tính theo ngày này. Script và kết quả đầy đủ nằm trong thư mục `docs/baocao/ketqua/`.
 
 ### 4.1.1. Stored Procedure
+
+Hệ thống có tổng cộng 38 stored procedure. Mục này trình bày chi tiết 5 thủ tục nghiệp vụ chính; 2 thủ tục chứa cursor được trình bày ở mục 4.1.4, 3 thủ tục `SP_DANGNHAP`, `SP_DOIMATKHAU`, `SP_SAOLUU` ở mục 4.2. 28 thủ tục còn lại phục vụ các màn hình quản lý của website (Bảng 4.1).
+
+*Bảng 4.1: Các stored procedure hỗ trợ website*
+
+| Đối tượng | Stored procedure |
+|---|---|
+| Thể loại | SP_THEMTHELOAI, SP_SUATHELOAI, SP_XOATHELOAI, SP_LAYDANHSACHTHELOAI |
+| Tác giả | SP_THEMTACGIA, SP_SUATACGIA, SP_XOATACGIA, SP_LAYDANHSACHTACGIA |
+| Nhà xuất bản | SP_THEMNHAXUATBAN, SP_SUANHAXUATBAN, SP_XOANHAXUATBAN, SP_LAYDANHSACHNHAXUATBAN |
+| Đầu sách | SP_THEMDAUSACH, SP_SUADAUSACH, SP_XOADAUSACH, SP_TIMSACH, SP_LAYTACGIATHEODAUSACH, SP_THEMTACGIADAUSACH, SP_XOATACGIADAUSACH |
+| Cuốn sách | SP_THEMCUONSACH, SP_SUACUONSACH, SP_XOACUONSACH, SP_LAYCUONSACHTHEODAUSACH |
+| Độc giả | SP_SUADOCGIA, SP_XOADOCGIA, SP_TIMDOCGIA |
+| Mượn – trả | SP_LAYDANHSACHPHIEUMUON, SP_LAYDANHSACHPHIEUPHAT |
+
+Các thủ tục này theo chung ba quy ước:
+
+- **Mã trả về:** 0 khi mã không tồn tại (sửa, xóa) hoặc đã tồn tại (thêm); 1 khi vi phạm điều kiện nghiệp vụ (trùng tên, còn dữ liệu tham chiếu); giá trị lớn nhất khi thành công. Backend đọc mã này để hiển thị thông báo phù hợp.
+- **Chặn xóa khi còn tham chiếu:** không xóa thể loại hoặc nhà xuất bản đang có đầu sách, đầu sách còn cuốn sách, tác giả đã gắn với đầu sách, cuốn sách đã từng được mượn, độc giả đã có lịch sử mượn trả.
+- **Tìm kiếm có phân trang:** các thủ tục `SP_TIM...` và `SP_LAYDANHSACH...` nhận `@TUKHOA`, `@PageNumber`, `@PageSize`, dùng `OFFSET ... FETCH NEXT` và trả thêm cột `TotalRecord = COUNT(*) OVER()` để website vẽ thanh phân trang.
+
+```sql
+CREATE OR ALTER PROCEDURE SP_TIMSACH @TUKHOA NVARCHAR(100),
+  @PageNumber INT = 1, @PageSize INT = 10
+AS BEGIN
+  SELECT DS.MADS, DS.TENDS, TL.TENTL, NXB.TENNXB, ...,
+         STUFF((SELECT N', ' + TG.TENTG FROM DAUSACH_TACGIA DT
+                JOIN TACGIA TG ON DT.MATG = TG.MATG WHERE DT.MADS = DS.MADS
+                FOR XML PATH('')), 1, 2, '') AS TACGIA,
+         DS.SOLUONG, DS.SLCON, COUNT(*) OVER() AS TotalRecord
+  FROM DAUSACH DS JOIN THELOAI TL ON DS.MATL = TL.MATL
+    JOIN NHAXUATBAN NXB ON DS.MANXB = NXB.MANXB
+  WHERE DS.TENDS LIKE N'%' + @TUKHOA + N'%'
+     OR TL.TENTL LIKE N'%' + @TUKHOA + N'%'
+     OR EXISTS (SELECT * FROM DAUSACH_TACGIA DT
+                JOIN TACGIA TG ON DT.MATG = TG.MATG
+                WHERE DT.MADS = DS.MADS AND TG.TENTG LIKE N'%' + @TUKHOA + N'%')
+  ORDER BY DS.TENDS
+  OFFSET (@PageNumber - 1) * @PageSize ROWS FETCH NEXT @PageSize ROWS ONLY;
+END
+```
+
+**Kết quả:** `SP_TIMSACH N'Nguyễn Nhật Ánh'` trả về 2 đầu sách "Cho tôi xin một vé đi tuổi thơ" và "Mắt biếc" (TotalRecord = 2) dù từ khóa là tên tác giả. `SP_TIMDOCGIA N'Nguyễn', 1, 3` trả 3 dòng đầu với TotalRecord = 8. `SP_XOATHELOAI 'TL01'` trả về 1 ("Không thể xóa thể loại đang có sách."), còn `SP_XOATHELOAI 'TL08'` (chưa có sách) trả về 2.
+
+> *[Chèn ảnh chụp kết quả SP_TIMSACH và SP_XOATHELOAI]*
 
 **Procedure 1:** SP_THEMDOCGIA (tham số vào)
 
@@ -850,14 +901,14 @@ CLOSE CUR_QUAHAN  DEALLOCATE CUR_QUAHAN
 Hệ thống có hai lớp xác thực:
 
 - **SQL Server Authentication:** ba login `LG_QUANLY`, `LG_THUTHU`, `LG_DOCGIA` được tạo bằng `CREATE LOGIN ... WITH PASSWORD = ..., CHECK_POLICY = ON` (bắt buộc mật khẩu đủ mạnh), CSDL mặc định là QUANLYTHUVIEN. Mỗi login được ánh xạ tới một user trong CSDL bằng `CREATE USER U_... FOR LOGIN LG_...`.
-- **Đăng nhập website:** bảng TAIKHOAN không lưu mật khẩu gốc mà lưu `HASHBYTES('SHA2_256', matkhau)`. Thủ tục `SP_DANGNHAP` băm mật khẩu người dùng nhập rồi so sánh; tham số ra @KETQUA bằng 0 (sai), 1 (tài khoản bị khóa) hoặc 2 (thành công).
-**Kết quả:** Cột MATKHAU của tài khoản `admin` có dạng `0xEC278A38901287B277...`; `SP_DANGNHAP 'admin', '123456'` trả @KETQUA = 2, nhập sai mật khẩu trả @KETQUA = 0.
+- **Đăng nhập website:** bảng TAIKHOAN không lưu mật khẩu gốc mà lưu `HASHBYTES('SHA2_256', matkhau)`. Thủ tục `SP_DANGNHAP` băm mật khẩu người dùng nhập rồi so sánh; tham số ra @KETQUA bằng 0 (sai), 1 (tài khoản bị khóa) hoặc 2 (thành công). Thủ tục `SP_DOIMATKHAU` chỉ đổi mật khẩu khi giá trị băm của mật khẩu cũ khớp, lưu mật khẩu mới cũng dưới dạng băm, trả về 0 nếu sai mật khẩu cũ và 1 nếu thành công.
+**Kết quả:** Cột MATKHAU của tài khoản `admin` có dạng `0xEC278A38901287B277...`; `SP_DANGNHAP 'admin', '123456'` trả @KETQUA = 2, nhập sai mật khẩu trả @KETQUA = 0. `SP_DOIMATKHAU` với mật khẩu cũ sai trả về 0, với mật khẩu cũ đúng trả về 1.
 
 ### 4.2.2. Phân quyền
 
 Mỗi user thuộc một role; quyền được cấp cho role thay vì cho từng user (bảng dưới đây).
 
-*Bảng 4.1: Phân quyền theo role*
+*Bảng 4.2: Phân quyền theo role*
 
 | **Role** | **GRANT (được phép)** | **DENY (bị từ chối)** |
 |---|---|---|
@@ -960,7 +1011,7 @@ Website demo được xây dựng để trình bày các nội dung xử lý th�
 
 ## 5.2. Kết quả đạt được
 
-- Phân tích và cài đặt hoàn chỉnh CSDL QUANLYTHUVIEN gồm 11 bảng, 12 ràng buộc toàn vẹn chính (7 nhóm CHECK, 5 trigger) cùng bộ dữ liệu mẫu bao quát các tình huống nghiệp vụ.
+- Phân tích và cài đặt hoàn chỉnh CSDL QUANLYTHUVIEN gồm 11 bảng, 17 ràng buộc toàn vẹn (cài đặt bằng 18 CHECK, 2 UNIQUE và 5 trigger) cùng bộ dữ liệu mẫu bao quát các tình huống nghiệp vụ.
 - Hiện thực đủ số lượng đối tượng xử lý theo yêu cầu: 5 stored procedure nghiệp vụ, 5 trigger, 3 function, 2 cursor; tất cả được kiểm chứng bằng kết quả chạy thật.
 - Hoàn thành các nội dung an toàn thông tin: xác thực hai lớp, phân quyền ba role bằng GRANT/DENY/REVOKE, import/export, sao lưu FULL/DIFF và phục hồi.
 - Xây dựng 5 report trên website, lấy dữ liệu trực tiếp từ view, và website demo cho phép thao tác các chức năng nghiệp vụ.

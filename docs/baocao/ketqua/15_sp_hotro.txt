@@ -1,0 +1,28 @@
+Changed database context to 'QUANLYTHUVIEN_BAOCAO'.
+=== SP_TIMSACH (tim theo ten tac gia, phan trang) ===
+MADS|TENDS|TENTL|TENNXB|NAMXB|MATL|MANXB|SOTRANG|GIA|TACGIA|SOLUONG|SLCON|TotalRecord
+----|-----|-----|------|-----|----|-----|-------|---|------|-------|-----|-----------
+DS002|Cho tôi xin một vé đi tuổi thơ|Văn học Việt Nam|NXB Trẻ|2018|TL04|NXB01|220|80000.0000|Nguyễn Nhật Ánh|2|2|2
+DS001|Mắt biếc|Văn học Việt Nam|NXB Trẻ|2019|TL04|NXB01|300|110000.0000|Nguyễn Nhật Ánh|3|2|2
+=== SP_TIMDOCGIA (trang 1, 3 dong) ===
+MADG|HOTEN|NGSINH|GIOITINH|DIACHI|SODT|EMAIL|NGAYLAPTHE|NGAYHETHAN|TONGNO|TotalRecord
+----|-----|------|--------|------|----|-----|----------|----------|------|-----------
+DG001|Nguyễn Minh Anh|2004-03-14|Nữ|Linh Trung, Thủ Đức, TpHCM|0901234561|minhanh.dg001@gmail.com|2025-09-01|2027-09-01|.0000|8
+DG021|Nguyễn Thị Thu Hà|2006-02-11|Nữ|Linh Trung, Thủ Đức, TpHCM|0907000021|thuha.dg021@gmail.com|2025-01-01|2027-01-01|.0000|8
+DG225|Nguyễn Ngọc Phúc|2000-04-09|Nữ|Q7, TpHCM|0911763592|phúc.dg225@gmail.com|2026-07-12|2028-07-11|.0000|8
+=== SP_XOATHELOAI: the loai dang co sach / chua co sach ===
+Không thể xóa thể loại đang có sách.
+MATL|KETQUA
+----|------
+TL01|1
+Xóa thể loại thành công.
+MATL|KETQUA
+----|------
+TL08|2
+=== SP_DOIMATKHAU ===
+SAI_MATKHAU_CU
+--------------
+0
+DUNG_MATKHAU_CU
+---------------
+1
