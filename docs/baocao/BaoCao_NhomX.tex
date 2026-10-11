@@ -9,6 +9,7 @@
 \usepackage[table]{xcolor}
 \usepackage{graphicx,array,tabularx,booktabs,longtable,multirow}
 \usepackage{caption,titlesec,setspace,enumitem,fancyvrb,tocloft}
+\usepackage{float}
 \usepackage{tikz}
 \usetikzlibrary{positioning,arrows.meta,shapes.geometric,calc,fit}
 \usepackage[hidelinks]{hyperref}
@@ -157,10 +158,207 @@ KHOA KHOA HỌC VÀ KỸ THUẬT THÔNG TIN\\}
 \setcounter{page}{1}
 
 \chapter{MÔ TẢ BÀI TOÁN}
-%%CH1%%
+\section{Phát biểu bài toán}
+Một thư viện quy mô vừa (thư viện trường học hoặc thư viện khu phố) phục vụ vài trăm độc giả với hàng trăm đầu sách. Khi còn ghi chép bằng sổ tay và bảng tính, nhân viên thư viện thường gặp các khó khăn sau:
+\begin{itemize}
+\item Không biết chính xác một cuốn sách cụ thể đang nằm trên kệ, đang được ai mượn hay đã bị hư, mất; số lượng còn lại của mỗi đầu sách phải đếm tay.
+\item Tiền phạt trả trễ, làm hư hoặc làm mất sách được tính thủ công nên dễ sai và khó đối chiếu; độc giả còn nợ vẫn có thể tiếp tục mượn.
+\item Việc nhắc độc giả trả sách quá hạn và lập thống kê cuối tháng (sách nào được mượn nhiều, tiền phạt thu được bao nhiêu) tốn nhiều công sức.
+\item Dữ liệu nằm rải rác trong nhiều tệp, không phân quyền và không được sao lưu định kỳ.
+\end{itemize}
+Nhóm xây dựng hệ thống \textbf{Quản lý thư viện} gồm CSDL \texttt{QUANLYTHUVIEN} trên SQL Server và một website demo. Phạm vi hệ thống: quản lý danh mục (thể loại, tác giả, nhà xuất bản, đầu sách, từng cuốn sách), quản lý độc giả và thẻ thư viện, nghiệp vụ mượn -- trả, xử lý tiền phạt, báo cáo thống kê và các chức năng an toàn dữ liệu.
+
+\section{Mục tiêu}
+\begin{itemize}
+\item Theo dõi tình trạng của từng cuốn sách; số lượng và số cuốn còn sẵn của mỗi đầu sách luôn được cập nhật tự động.
+\item Kiểm tra điều kiện mượn ngay tại CSDL: thẻ còn hạn, không còn nợ phạt, cuốn sách đang ở trạng thái ``Có sẵn''.
+\item Tự động lập phiếu phạt khi trả sách trễ, hư hoặc mất, và tự động cộng dồn công nợ của độc giả.
+\item Phân quyền truy cập theo vai trò, mật khẩu được lưu dạng băm, hỗ trợ sao lưu và phục hồi.
+\item Cung cấp các báo cáo trực quan lấy dữ liệu trực tiếp từ CSDL để hỗ trợ ra quyết định.
+\end{itemize}
+
+\section{Đối tượng sử dụng}
+\begin{itemize}
+\item \textbf{Quản lý thư viện:} toàn quyền trên dữ liệu, chạy mọi thủ tục, xem tất cả báo cáo và thực hiện sao lưu CSDL. Trên website demo, vai trò này tương ứng với tài khoản quản trị \texttt{admin}.
+\item \textbf{Thủ thư:} xem toàn bộ dữ liệu nghiệp vụ, lập thẻ độc giả, lập phiếu mượn, nhận trả sách, thu tiền phạt và gửi nhắc nhở quá hạn; không được xóa dữ liệu và không được xem bảng tài khoản.
+\item \textbf{Độc giả:} chỉ được tra cứu danh mục sách và tình trạng sẵn có; không được xem thông tin của độc giả khác và không được thêm, sửa, xóa.
+\end{itemize}
+Ba nhóm này được hiện thực bằng ba role \texttt{R\_QUANLY}, \texttt{R\_THUTHU}, \texttt{R\_DOCGIA} trên SQL Server (mục 4.2).
+
+\section{Quy trình nghiệp vụ thực tế}
+\subsection{Quy trình lập thẻ độc giả}
+\begin{enumerate}
+\item Người đến đăng ký cung cấp họ tên, ngày sinh, giới tính, số điện thoại, địa chỉ và email (nếu có).
+\item Thủ thư kiểm tra người đăng ký đủ 16 tuổi tại ngày lập thẻ và email đúng định dạng.
+\item Hệ thống cấp mã độc giả; ngày lập thẻ là ngày hiện tại, thẻ có hiệu lực 2 năm.
+\item Công nợ ban đầu của độc giả bằng 0; thẻ được in và giao cho độc giả.
+\end{enumerate}
+\subsection{Quy trình mượn sách}
+\begin{enumerate}
+\item Độc giả mang thẻ và những cuốn sách muốn mượn đến quầy.
+\item Thủ thư kiểm tra thẻ còn hạn và độc giả không còn nợ tiền phạt; nếu không đạt thì từ chối.
+\item Với từng cuốn, kiểm tra cuốn sách đang ``Có sẵn'' (không đang được mượn, không hư, không mất).
+\item Lập phiếu mượn với ngày mượn là hôm nay và hạn trả sau 14 ngày; các cuốn sách chuyển sang trạng thái ``Đang mượn''.
+\end{enumerate}
+\subsection{Quy trình trả sách và xử lý phạt}
+\begin{enumerate}
+\item Độc giả trả từng cuốn; thủ thư ghi nhận ngày trả và tình trạng khi trả: bình thường, hư hỏng hoặc mất.
+\item Cuốn trả bình thường trở về ``Có sẵn''; cuốn hư hoặc mất được đánh dấu tương ứng và không cho mượn nữa.
+\item Nếu trả trễ, lập phiếu phạt 5.000đ cho mỗi ngày trễ; nếu hư, phạt 50\% giá sách; nếu mất, phạt 100\% giá sách. Một lần trả có thể phát sinh nhiều phiếu phạt.
+\item Khi tất cả các cuốn trong phiếu đã được trả, phiếu mượn chuyển sang ``Đã trả''.
+\item Độc giả thanh toán toàn bộ tiền phạt; công nợ về 0 thì mới được mượn tiếp.
+\end{enumerate}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[font=\footnotesize, node distance=4mm and 6mm,
+  b/.style={draw, rounded corners=2pt, align=center, text width=2.6cm, minimum height=8mm, fill=nenbang!40},
+  d/.style={draw, diamond, aspect=2.2, align=center, inner sep=1pt, text width=2.1cm, fill=yellow!15},
+  a/.style={-{Stealth[length=2mm]}}]
+\node[b] (yc) at (0,0) {Độc giả đưa thẻ và sách muốn mượn};
+\node[d] (k1) at (3.7,0) {Thẻ còn hạn và không nợ?};
+\node[d] (k2) at (7.5,0) {Cuốn sách ``Có sẵn''?};
+\node[b, text width=2.3cm] (lp) at (11.2,0) {Lập phiếu mượn, hạn trả 14 ngày};
+\node[b, fill=red!10] (tc) at (3.7,-1.9) {Từ chối: gia hạn thẻ hoặc trả nợ trước};
+\node[b, text width=2.3cm] (tr) at (11.2,-1.9) {Trả sách: ghi ngày trả, tình trạng};
+\node[d] (k3) at (11.2,-3.8) {Trễ hạn, hư hoặc mất?};
+\node[b] (pp) at (7.3,-3.8) {Tự động lập phiếu phạt, tăng công nợ};
+\node[b] (tt) at (3.7,-3.8) {Độc giả thanh toán, công nợ về 0};
+\node[b, text width=2.3cm] (dong) at (11.2,-5.6) {Cập nhật cuốn sách, đóng phiếu khi trả hết};
+\draw[a] (yc) -- (k1);
+\draw[a] (k1) -- node[above]{Có} (k2);
+\draw[a] (k2) -- node[above]{Có} (lp);
+\draw[a] (k1) -- node[left]{Không} (tc);
+\draw[a] (k2) |- node[pos=0.25,right]{Không} (tc);
+\draw[a] (lp) -- (tr);
+\draw[a] (tr) -- (k3);
+\draw[a] (k3) -- node[above]{Có} (pp);
+\draw[a] (k3) -- node[right]{Không} (dong);
+\draw[a] (pp) |- (dong);
+\draw[a] (pp) -- (tt);
+\end{tikzpicture}
+\caption{Sơ đồ quy trình mượn -- trả sách và xử lý phạt}
+\label{fig:quytrinh}
+\end{figure}
 
 \chapter{PHÂN TÍCH VÀ THIẾT KẾ}
-%%CH2%%
+\section{Các chức năng của hệ thống}
+\begin{itemize}
+\item \textbf{Xác thực:} đăng nhập bằng tên đăng nhập và mật khẩu (so khớp giá trị băm), đổi mật khẩu, khóa/mở tài khoản.
+\item \textbf{Quản lý danh mục:} thêm, sửa, xóa và tìm kiếm thể loại, tác giả, nhà xuất bản; quản lý đầu sách kèm danh sách tác giả và vai trò (tác giả, đồng tác giả, dịch giả).
+\item \textbf{Quản lý kho sách:} nhập từng cuốn sách vật lý cho một đầu sách, ghi vị trí kệ, cập nhật tình trạng; số lượng và số cuốn còn sẵn của đầu sách tự cập nhật.
+\item \textbf{Quản lý độc giả:} lập thẻ, sửa thông tin, tìm theo mã hoặc họ tên, xem lịch sử mượn và công nợ hiện tại.
+\item \textbf{Mượn -- trả:} lập phiếu mượn nhiều cuốn trong một lần, trả từng cuốn, tự động lập phiếu phạt và thanh toán phạt.
+\item \textbf{Nhắc nhở và xếp loại:} lập danh sách nhắc nhở độc giả giữ sách quá hạn; xếp loại mức độ uy tín của độc giả.
+\item \textbf{Báo cáo:} tình trạng kho, sách được mượn nhiều, lượt mượn theo tháng, tiền phạt theo tháng, độc giả quá hạn.
+\item \textbf{Quản trị CSDL:} phân quyền theo role, import/export dữ liệu, sao lưu và phục hồi.
+\end{itemize}
+
+\section{Các thực thể, thuộc tính và mối quan hệ}
+Bảng~\ref{tab:thucthe} liệt kê 11 thực thể cần quản lý. Thuộc tính in đậm là khóa chính.
+\begin{table}[H]
+\centering\small
+\caption{Danh sách thực thể và thuộc tính}\label{tab:thucthe}
+\begin{tabularx}{\textwidth}{|p{2.9cm}|p{4.1cm}|L|}\hline
+\rowcolor{nenbang}\textbf{Thực thể} & \textbf{Ý nghĩa} & \textbf{Thuộc tính chính}\\\hline
+THELOAI & Thể loại sách & \textbf{MATL}, TENTL\\\hline
+TACGIA & Tác giả, dịch giả & \textbf{MATG}, TENTG, NAMSINH, QUOCTICH\\\hline
+NHAXUATBAN & Nhà xuất bản & \textbf{MANXB}, TENNXB, DIACHI, SODT\\\hline
+DAUSACH & Một tựa sách & \textbf{MADS}, TENDS, NAMXB, SOTRANG, GIA, SOLUONG, SLCON\\\hline
+DAUSACH\_TACGIA & Tác giả tham gia đầu sách & \textbf{MADS, MATG}, VAITRO\\\hline
+CUONSACH & Một cuốn sách vật lý & \textbf{MACS}, NGAYNHAP, VITRI, TINHTRANG\\\hline
+DOCGIA & Độc giả có thẻ & \textbf{MADG}, HOTEN, NGSINH, GIOITINH, SODT, EMAIL, NGAYLAPTHE, NGAYHETHAN, TONGNO\\\hline
+PHIEUMUON & Một lần mượn & \textbf{MAPM}, NGAYMUON, HANTRA, TINHTRANG\\\hline
+CTPHIEUMUON & Cuốn sách trong phiếu & \textbf{MAPM, MACS}, NGAYTRA, TINHTRANGTRA\\\hline
+PHIEUPHAT & Khoản phạt & \textbf{MAPP}, NGAYLAP, LYDO, SOTIEN, DATHANHTOAN\\\hline
+TAIKHOAN & Tài khoản đăng nhập web & \textbf{TENDANGNHAP}, MATKHAU (băm), TRANGTHAI\\\hline
+\end{tabularx}
+\end{table}
+
+\textbf{Mối quan hệ và bản số:}
+\begin{itemize}
+\item Một thể loại có từ 0 đến nhiều đầu sách; mỗi đầu sách thuộc đúng một thể loại. Tương tự, mỗi đầu sách do đúng một nhà xuất bản phát hành.
+\item Đầu sách và tác giả có quan hệ nhiều -- nhiều qua \textit{Viết}, mang thuộc tính VAITRO; một đầu sách có thể chưa ghi nhận tác giả.
+\item Một đầu sách gồm 0..n cuốn sách; mỗi cuốn thuộc đúng một đầu sách.
+\item Một độc giả lập 0..n phiếu mượn; mỗi phiếu thuộc đúng một độc giả.
+\item Phiếu mượn và cuốn sách có quan hệ nhiều -- nhiều qua CTPHIEUMUON: một phiếu có ít nhất một cuốn, một cuốn được mượn nhiều lần theo thời gian.
+\item Mỗi dòng chi tiết mượn phát sinh 0..n phiếu phạt (ví dụ vừa trễ hạn vừa hư hỏng); mỗi phiếu phạt gắn với đúng một dòng chi tiết.
+\item TAIKHOAN dùng cho việc đăng nhập website, độc lập với các thực thể nghiệp vụ.
+\end{itemize}
+
+\section{Ràng buộc toàn vẹn}
+\begin{table}[H]
+\centering\small
+\caption{Danh sách ràng buộc toàn vẹn}\label{tab:rangbuoc}
+\begin{tabularx}{\textwidth}{|c|L|p{2.6cm}|>{\footnotesize}p{4.3cm}|}\hline
+\rowcolor{nenbang}\textbf{STT} & \textbf{Nội dung} & \textbf{Bối cảnh} & \textbf{Cài đặt}\\\hline
+1 & Giá sách $>0$, số trang $>0$, năm xuất bản từ 1900 đến năm hiện tại & DAUSACH & CHECK\\\hline
+2 & $0 \le$ SLCON $\le$ SOLUONG & DAUSACH & CHECK\\\hline
+3 & Tình trạng cuốn sách thuộc \{Có sẵn, Đang mượn, Hư hỏng, Mất\} & CUONSACH & CHECK\\\hline
+4 & Ngày hết hạn thẻ sau ngày lập thẻ; độc giả đủ 16 tuổi; email đúng mẫu & DOCGIA & CHECK\\\hline
+5 & Hạn trả sau ngày mượn & PHIEUMUON & CHECK\\\hline
+6 & Đã trả thì phải có tình trạng trả, chưa trả thì cả hai đều rỗng & CTPHIEUMUON & CHECK\\\hline
+7 & Lý do phạt thuộc \{Trả trễ, Hư hỏng, Mất sách\}, số tiền $>0$ & PHIEUPHAT & CHECK\\\hline
+8 & SOLUONG, SLCON bằng số cuốn và số cuốn ``Có sẵn'' của đầu sách & DAUSACH, CUONSACH & TRG\_CUONSACH\_CAPNHATSL\\\hline
+9 & Chỉ lập phiếu khi thẻ còn hạn và độc giả không nợ & PHIEUMUON, DOCGIA & TRG\_PHIEUMUON\_KIEMTRA\\\hline
+10 & Chỉ cho mượn cuốn ``Có sẵn''; một cuốn không nằm trong hai phiếu chưa trả & CTPHIEUMUON, CUONSACH & TRG\_CTPM\_MUONSACH\\\hline
+11 & Trả sách: cập nhật cuốn sách, tự lập phiếu phạt, đóng phiếu khi trả hết & CTPHIEUMUON, PHIEUPHAT & TRG\_CTPM\_TRASACH\\\hline
+12 & TONGNO bằng tổng tiền phạt chưa thanh toán & DOCGIA, PHIEUPHAT & TRG\_PHIEUPHAT\_TONGNO\\\hline
+\end{tabularx}
+\end{table}
+Các ràng buộc 1--7 có bối cảnh trên một quan hệ nên được cài đặt bằng CHECK. Các ràng buộc 8--12 liên quan đến nhiều quan hệ hoặc là thuộc tính dẫn xuất, nên phải dùng trigger (mục 4.1.2).
+
+\section{Sơ đồ ERD (mức quan niệm)}
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.93, transform shape, font=\scriptsize,
+  e/.style={draw, thick, align=center, minimum width=2.4cm, minimum height=9mm, fill=nenbang!50},
+  r/.style={draw, diamond, aspect=2, align=center, inner sep=1pt, fill=yellow!15},
+  c/.style={font=\tiny, fill=white, inner sep=1pt}]
+\node[e] (tg) at (0,0) {\textbf{TACGIA}\\\underline{MATG}};
+\node[e] (tl) at (5,0) {\textbf{THELOAI}\\\underline{MATL}};
+\node[e] (nxb) at (10.5,0) {\textbf{NHAXUATBAN}\\\underline{MANXB}};
+\node[e] (ds) at (5,-3.2) {\textbf{DAUSACH}\\\underline{MADS}};
+\node[r] (viet) at (0,-3.2) {Viết\\(VAITRO)};
+\node[r] (thuoc) at (5,-1.6) {Thuộc};
+\node[r] (ph) at (10.5,-1.6) {Phát hành};
+\node[r] (gom) at (5,-4.8) {Gồm};
+\node[e] (cs) at (5,-6.4) {\textbf{CUONSACH}\\\underline{MACS}};
+\node[e, double] (ct) at (10.5,-6.4) {\textbf{CTPHIEUMUON}\\\underline{MAPM, MACS}};
+\node[e] (pp) at (14.2,-6.4) {\textbf{PHIEUPHAT}\\\underline{MAPP}};
+\node[e] (pm) at (10.5,-9.2) {\textbf{PHIEUMUON}\\\underline{MAPM}};
+\node[r] (lap) at (7.6,-9.2) {Lập};
+\node[e] (dg) at (5,-9.2) {\textbf{DOCGIA}\\\underline{MADG}};
+\node[e] (tk) at (0,-9.2) {\textbf{TAIKHOAN}\\\underline{TENDANGNHAP}};
+\draw (tg) -- node[c,pos=0.3]{(0,n)} (viet) -- node[c,pos=0.7]{(0,n)} (ds);
+\draw (tl) -- node[c,pos=0.3]{(0,n)} (thuoc) -- node[c,pos=0.7]{(1,1)} (ds);
+\draw (nxb) -- node[c,pos=0.3]{(0,n)} (ph) |- node[c,pos=0.8]{(1,1)} (ds);
+\draw (ds) -- node[c,pos=0.4]{(0,n)} (gom) -- node[c,pos=0.6]{(1,1)} (cs);
+\draw (cs) -- node[c,pos=0.2]{(0,n)} node[c,pos=0.8]{(1,1)} (ct);
+\draw (pm) -- node[c,pos=0.2]{(1,n)} node[c,pos=0.8]{(1,1)} (ct);
+\draw (ct) -- node[c,pos=0.25]{(0,n)} node[c,pos=0.75]{(1,1)} (pp);
+\draw (dg) -- node[c,pos=0.3]{(0,n)} (lap) -- node[c,pos=0.7]{(1,1)} (pm);
+\end{tikzpicture}
+\caption{Sơ đồ ERD của CSDL QUANLYTHUVIEN}
+\label{fig:erd}
+\end{figure}
+CTPHIEUMUON được vẽ như một thực thể kết hợp (khung đôi) vì nó vừa nối phiếu mượn với cuốn sách, vừa là đối tượng phát sinh phiếu phạt.
+
+\section{Mô hình logic và tân từ}
+Khóa chính được gạch chân, khóa ngoại in nghiêng.
+{\sloppy\begin{enumerate}[leftmargin=1.8em]
+\item THELOAI(\pk{MATL}, TENTL). Mỗi thể loại có một mã riêng và một tên không trùng với thể loại khác.
+\item TACGIA(\pk{MATG}, TENTG, NAMSINH, QUOCTICH). Mỗi tác giả có mã riêng, họ tên, năm sinh (có thể chưa biết) và quốc tịch.
+\item NHAXUATBAN(\pk{MANXB}, TENNXB, DIACHI, SODT). Mỗi nhà xuất bản có mã riêng, tên không trùng, địa chỉ và số điện thoại.
+\item DAUSACH(\pk{MADS}, TENDS, \fk{MATL}, \fk{MANXB}, NAMXB, SOTRANG, GIA, SOLUONG, SLCON). Đầu sách MADS có tên TENDS, thuộc thể loại MATL, do nhà xuất bản MANXB phát hành năm NAMXB, dày SOTRANG trang, giá bìa GIA; thư viện có SOLUONG cuốn, trong đó SLCON cuốn đang sẵn sàng cho mượn.
+\item DAUSACH\_TACGIA(\pk{\fk{MADS}}, \pk{\fk{MATG}}, VAITRO). Tác giả MATG tham gia đầu sách MADS với vai trò tác giả, đồng tác giả hoặc dịch giả.
+\item CUONSACH(\pk{MACS}, \fk{MADS}, NGAYNHAP, VITRI, TINHTRANG). Cuốn sách MACS là một bản của đầu sách MADS, nhập kho ngày NGAYNHAP, đặt ở VITRI và đang ở tình trạng TINHTRANG.
+\item DOCGIA(\pk{MADG}, HOTEN, NGSINH, GIOITINH, DIACHI, SODT, EMAIL, NGAYLAPTHE, NGAYHETHAN, TONGNO). Độc giả MADG có các thông tin cá nhân, thẻ được lập ngày NGAYLAPTHE và hết hạn ngày NGAYHETHAN; TONGNO là số tiền phạt chưa thanh toán.
+\item PHIEUMUON(\pk{MAPM}, \fk{MADG}, NGAYMUON, HANTRA, TINHTRANG). Độc giả MADG mượn sách theo phiếu MAPM vào ngày NGAYMUON, phải trả trước HANTRA; phiếu ``Đang mượn'' cho đến khi trả hết thì thành ``Đã trả''.
+\item CTPHIEUMUON(\pk{\fk{MAPM}}, \pk{\fk{MACS}}, NGAYTRA, TINHTRANGTRA). Cuốn MACS được mượn theo phiếu MAPM; khi trả thì ghi ngày trả và tình trạng lúc trả.
+\item PHIEUPHAT(\pk{MAPP}, \fk{MAPM}, \fk{MACS}, NGAYLAP, LYDO, SOTIEN, DATHANHTOAN). Phiếu phạt MAPP lập ngày NGAYLAP cho cuốn MACS của phiếu mượn MAPM vì lý do LYDO, số tiền SOTIEN, đã hoặc chưa thanh toán.
+\item TAIKHOAN(\pk{TENDANGNHAP}, MATKHAU, TRANGTHAI). Tài khoản đăng nhập website; MATKHAU là giá trị băm SHA2-256 của mật khẩu, TRANGTHAI bằng 0 nghĩa là tài khoản bị khóa.
+\end{enumerate}}
 
 \chapter{CÀI ĐẶT}
 %%CH3%%
