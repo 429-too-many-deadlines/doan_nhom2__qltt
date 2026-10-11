@@ -1,0 +1,180 @@
+% Bao cao do an IE103 - Quan ly thong tin. Bien dich: bash build.sh (pdfLaTeX, bang ma T5)
+\documentclass[13pt,a4paper,oneside]{extreport}
+\usepackage[left=3cm,right=2cm,top=2cm,bottom=2cm]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[T5]{fontenc}
+\usepackage[vietnamese]{babel}
+\usepackage{mathptmx}
+\renewcommand{\ttdefault}{qcr}
+\usepackage[table]{xcolor}
+\usepackage{graphicx,array,tabularx,booktabs,longtable,multirow}
+\usepackage{caption,titlesec,setspace,enumitem,fancyvrb,tocloft}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes.geometric,calc,fit}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{xanh}{HTML}{1F3864}
+\definecolor{xam}{HTML}{808080}
+\definecolor{nenbang}{HTML}{D9E2F3}
+\setstretch{1.15}
+\setlength{\parskip}{3pt}
+\setlength{\parindent}{0pt}
+\setlist{nosep,leftmargin=1.5em}
+
+% Tieu de chuong / muc theo khung
+\titleformat{\chapter}[block]{\centering\bfseries\Large\color{xanh}}{CHƯƠNG \thechapter:}{0.4em}{}
+\titlespacing*{\chapter}{0pt}{-10pt}{10pt}
+\titleformat{\section}{\bfseries\large\color{xanh}}{\thesection.}{0.4em}{}
+\titlespacing*{\section}{0pt}{8pt}{3pt}
+\titleformat{\subsection}{\bfseries\itshape}{\thesubsection.}{0.4em}{}
+\titlespacing*{\subsection}{0pt}{6pt}{2pt}
+\captionsetup[table]{name=Bảng,labelsep=colon,font={it,small},skip=3pt}
+\captionsetup[figure]{name=Hình,labelsep=colon,font={it,small},skip=3pt}
+
+% Muc luc va danh muc
+\addto\captionsvietnamese{\renewcommand{\contentsname}{MỤC LỤC}%
+  \renewcommand{\listtablename}{DANH MỤC BẢNG}%
+  \renewcommand{\listfigurename}{DANH MỤC HÌNH VẼ}%
+  \renewcommand{\tablename}{Bảng}\renewcommand{\figurename}{Hình}}
+\renewcommand{\cfttoctitlefont}{\hfill\bfseries\Large\color{xanh}}
+\renewcommand{\cftaftertoctitle}{\hfill}
+\renewcommand{\cftlottitlefont}{\hfill\bfseries\Large\color{xanh}}
+\renewcommand{\cftafterlottitle}{\hfill}
+\renewcommand{\cftloftitlefont}{\hfill\bfseries\Large\color{xanh}}
+\renewcommand{\cftafterloftitle}{\hfill}
+\renewcommand{\cftchappresnum}{Chương }
+\setlength{\cftchapnumwidth}{5.5em}
+\renewcommand{\cfttabpresnum}{Bảng }
+\setlength{\cfttabnumwidth}{4.5em}
+\renewcommand{\cftfigpresnum}{Hình }
+\setlength{\cftfignumwidth}{4.5em}
+
+% Code: Courier co 11, khung don (fancyvrb + inputenc utf8 + T5)
+\DefineVerbatimEnvironment{sql}{Verbatim}{frame=single,fontsize=\fontsize{10.5}{12}\selectfont,framesep=2mm,xleftmargin=0mm}
+
+% Khung giu cho anh chup va nhan muc
+\newcommand{\anhgiucho}[1]{\begin{center}\fcolorbox{xam}{white}{\parbox{0.85\textwidth}{\centering\color{xam}\itshape\small [Chèn ảnh chụp #1]}}\end{center}\vspace{-6pt}}
+\newcommand{\muc}[1]{\textbf{#1:} }
+\newcommand{\pk}[1]{\underline{#1}}
+\newcommand{\fk}[1]{\textit{#1}}
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+
+\begin{document}
+
+%================================ TRANG BIA ================================
+\pagenumbering{gobble}
+\begin{titlepage}
+\centering
+{\bfseries ĐẠI HỌC QUỐC GIA THÀNH PHỐ HỒ CHÍ MINH\\
+TRƯỜNG ĐẠI HỌC CÔNG NGHỆ THÔNG TIN\\
+KHOA KHOA HỌC VÀ KỸ THUẬT THÔNG TIN\\}
+---------\\[1.2cm]
+\fcolorbox{xam}{white}{\parbox[c][3.2cm]{3.6cm}{\centering\color{xam}\itshape\small [Chèn logo trường]}}\\[1.6cm]
+{\bfseries\LARGE\color{xanh} BÁO CÁO ĐỒ ÁN QUẢN LÝ THÔNG TIN\\[0.8cm]
+\Huge XÂY DỰNG HỆ THỐNG\\ QUẢN LÝ THƯ VIỆN\\}
+\vspace{1.5cm}
+\begin{flushleft}\hspace{3.2cm}\begin{minipage}{10cm}
+\textbf{Sinh viên thực hiện:}\\
+\hspace*{1cm}[Họ tên SV1] -- [MSSV 1] (nhóm trưởng)\\
+\hspace*{1cm}[Họ tên SV2] -- [MSSV 2]\\
+\hspace*{1cm}[Họ tên SV3] -- [MSSV 3]\\
+\hspace*{1cm}[Họ tên SV4] -- [MSSV 4]\\[0.3cm]
+\textbf{Giảng viên:}\\
+\hspace*{1cm}ThS. Nguyễn Thành Luân
+\end{minipage}\end{flushleft}
+\vfill
+{\itshape Thành phố Hồ Chí Minh, tháng 10 năm 2026}
+\end{titlepage}
+
+%============================ BAO CAO TOM TAT =============================
+\pagenumbering{roman}
+\setcounter{page}{2}
+\begin{center}{\bfseries\Large\color{xanh} BÁO CÁO TÓM TẮT}\end{center}
+
+\textbf{1. Tiêu đề báo cáo:} XÂY DỰNG HỆ THỐNG QUẢN LÝ THƯ VIỆN
+
+\textbf{2. Danh sách thành viên}
+
+\begin{center}\begin{tabular}{|p{3cm}|p{6.5cm}|p{3.5cm}|}\hline
+\rowcolor{nenbang}\centering\textbf{MSSV} & \centering\textbf{Họ tên} & \centering\arraybackslash\textbf{Ghi chú}\\\hline
+[MSSV 1] & [Họ tên SV1] & Nhóm trưởng\\\hline
+[MSSV 2] & [Họ tên SV2] & \\\hline
+[MSSV 3] & [Họ tên SV3] & \\\hline
+[MSSV 4] & [Họ tên SV4] & \\\hline
+\end{tabular}\end{center}
+
+\textbf{3. Nội dung chi tiết}
+
+\textbf{\textit{Nội dung 1: Mô tả bài toán}}
+\begin{itemize}[leftmargin=2.5em]
+\item[+] Bối cảnh thư viện quản lý thủ công và phạm vi hệ thống cần xây dựng.
+\item[+] Mục tiêu hệ thống và các nhóm người dùng (quản lý, thủ thư, độc giả).
+\item[+] Ba quy trình nghiệp vụ: lập thẻ, mượn sách, trả sách và xử lý phạt.
+\end{itemize}
+\textbf{\textit{Nội dung 2: Phân tích và thiết kế}}
+\begin{itemize}[leftmargin=2.5em]
+\item[+] Danh sách chức năng của hệ thống theo từng phân hệ.
+\item[+] 11 thực thể, mối quan hệ, ràng buộc toàn vẹn và sơ đồ ERD.
+\item[+] Mô hình logic 11 lược đồ quan hệ kèm tân từ.
+\end{itemize}
+\textbf{\textit{Nội dung 3: Cài đặt}}
+\begin{itemize}[leftmargin=2.5em]
+\item[+] Cài đặt CSDL QUANLYTHUVIEN trên SQL Server 2022 với khóa và ràng buộc CHECK.
+\item[+] Dữ liệu mẫu bao quát các tình huống nghiệp vụ (trễ hạn, hư, mất, nợ phạt).
+\end{itemize}
+\textbf{\textit{Nội dung 4: Quản lý thông tin}}
+\begin{itemize}[leftmargin=2.5em]
+\item[+] Xử lý thông tin: 5 stored procedure, 5 trigger, 3 function, 2 cursor.
+\item[+] An toàn thông tin: xác thực, phân quyền theo role, import/export, backup/restore.
+\item[+] Trình bày thông tin: 5 báo cáo thống kê lấy dữ liệu trực tiếp từ view.
+\end{itemize}
+\textbf{\textit{Nội dung 5: Demo và kết luận}}
+\begin{itemize}[leftmargin=2.5em]
+\item[+] Website demo React + ASP.NET Core gọi trực tiếp các đối tượng trong CSDL.
+\item[+] Kết quả đạt được, hạn chế và hướng phát triển.
+\end{itemize}
+
+\textbf{4. Phân công công việc}
+
+\begin{center}\begin{tabular}{|p{2.6cm}|p{4.6cm}|p{6cm}|}\hline
+\rowcolor{nenbang}\centering\textbf{MSSV} & \centering\textbf{Họ tên} & \centering\arraybackslash\textbf{Nội dung được phân công}\\\hline
+[MSSV 1] & [Họ tên SV1] & Chương 1; Chương 2; mục 5.2 -- 5.4\\\hline
+[MSSV 2] & [Họ tên SV2] & Chương 3; mục 4.1.1 -- 4.1.2\\\hline
+[MSSV 3] & [Họ tên SV3] & Mục 4.1.3 -- 4.1.4; mục 4.2\\\hline
+[MSSV 4] & [Họ tên SV4] & Mục 4.3; mục 5.1, 5.5\\\hline
+\end{tabular}\end{center}
+
+\clearpage
+\tableofcontents
+\clearpage
+\listoftables
+\vspace{1cm}
+\listoffigures
+\clearpage
+
+%================================ NOI DUNG =================================
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+\chapter{MÔ TẢ BÀI TOÁN}
+%%CH1%%
+
+\chapter{PHÂN TÍCH VÀ THIẾT KẾ}
+%%CH2%%
+
+\chapter{CÀI ĐẶT}
+%%CH3%%
+
+\chapter{QUẢN LÝ THÔNG TIN}
+%%CH4%%
+
+\chapter{DEMO VÀ KẾT LUẬN}
+%%CH5%%
+
+\clearpage
+\phantomsection
+\addcontentsline{toc}{chapter}{TÀI LIỆU THAM KHẢO}
+\begin{center}{\bfseries\Large\color{xanh} TÀI LIỆU THAM KHẢO}\end{center}
+%%TLTK%%
+
+\end{document}
