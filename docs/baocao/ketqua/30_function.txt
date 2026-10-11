@@ -1,0 +1,22 @@
+Changed database context to 'QUANLYTHUVIEN_BAOCAO'.
+=== F1 FN_SOSACHDANGMUON ===
+DG007|DG012|DG003|KHONGTONTAI
+-----|-----|-----|-----------
+3|2|0|-1
+=== F2 FN_TIENPHATTRE ===
+TRE_11_NGAY|DUNG_HAN|TRA_SOM
+-----------|--------|-------
+55000.0000|.0000|.0000
+=== F3 FN_LICHSUMUON (DG007, DG001) ===
+MAPM|MACS|TENDS|NGAYMUON|HANTRA|NGAYTRA|SONGAYTRE|TRANGTHAI
+----|----|-----|--------|------|-------|---------|---------
+PM0003|CS018|Database System Concepts|2026-06-10|2026-07-10|2026-07-05|0|Đã trả (Bình thường)
+PM0003|CS020|Introduction to Algorithms|2026-06-10|2026-07-10|2026-07-05|0|Đã trả (Bình thường)
+PM0013|CS016|Clean Code|2026-09-15|2026-10-15|NULL|0|Đang mượn
+PM0013|CS020|Introduction to Algorithms|2026-09-15|2026-10-15|NULL|0|Đang mượn
+PM0013|CS023|Harry Potter và Hòn đá Phù thủy|2026-09-15|2026-10-15|NULL|0|Đang mượn
+MAPM|MACS|TENDS|NGAYMUON|HANTRA|NGAYTRA|SONGAYTRE|TRANGTHAI
+----|----|-----|--------|------|-------|---------|---------
+PM0001|CS001|Mắt biếc|2026-06-01|2026-06-15|2026-06-10|0|Đã trả (Bình thường)
+PM0001|CS010|Nhà giả kim|2026-06-01|2026-06-15|2026-06-10|0|Đã trả (Bình thường)
+PM0011|CS011|Nhà giả kim|2026-09-01|2026-09-15|2026-10-11|26|Đã trả (Bình thường)

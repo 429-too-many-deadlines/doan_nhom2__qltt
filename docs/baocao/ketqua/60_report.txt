@@ -1,0 +1,73 @@
+Changed database context to 'QUANLYTHUVIEN_BAOCAO'.
+=== R1 VW_BC_TINHTRANGKHO ===
+STT|MADS|TENDS|TENTL|TONGSO|COSAN|DANGMUON|HUHONG|MAT
+---|----|-----|-----|------|-----|--------|------|---
+1|DS009|Clean Code|Công nghệ thông tin|3|0|2|1|0
+2|DS010|Database System Concepts|Công nghệ thông tin|2|2|0|0|0
+3|DS011|Introduction to Algorithms|Công nghệ thông tin|1|0|1|0|0
+4|DS014|Nguyên lý kinh tế học|Kinh tế|1|1|0|0|0
+5|DS007|Đắc nhân tâm|Kỹ năng sống|3|1|1|1|0
+6|DS015|Cơ sở văn hóa Việt Nam|Lịch sử - Văn hóa|1|0|1|0|0
+TONG|COSAN|DANGMUON|HUHONG|MAT
+----|-----|--------|------|---
+27|12|10|4|1
+TENTL|TONG
+-----|----
+Văn học Việt Nam|7
+Công nghệ thông tin|6
+Thiếu nhi|4
+Văn học nước ngoài|3
+Kỹ năng sống|3
+Lịch sử - Văn hóa|2
+Toán học|1
+Kinh tế|1
+=== R2 VW_BC_SACHMUONNHIEU ===
+HANG|MADS|TENDS|TENTL|SOLUOTMUON|SODOCGIA
+----|----|-----|-----|----------|--------
+1|DS001|Mắt biếc|Văn học Việt Nam|7|6
+2|DS013|Harry Potter và Hòn đá Phù thủy|Thiếu nhi|4|4
+2|DS007|Đắc nhân tâm|Kỹ năng sống|4|4
+2|DS010|Database System Concepts|Công nghệ thông tin|4|4
+5|DS009|Clean Code|Công nghệ thông tin|3|3
+5|DS004|Chí Phèo|Văn học Việt Nam|3|3
+SODAUSACH_CHUAMUON
+------------------
+0
+=== R3 VW_BC_LUOTMUON_THANG ===
+NAM|THANG|TONGLUOT
+---|-----|--------
+2026|4|3
+2026|5|3
+2026|6|7
+2026|7|7
+2026|8|7
+2026|9|11
+2026|10|2
+TENTL|TONG
+-----|----
+Văn học Việt Nam|13
+Công nghệ thông tin|9
+Thiếu nhi|6
+=== R4 VW_BC_TIENPHAT_THANG ===
+NAM|THANG|LYDO|SOPHIEU|TONGTIEN|DATHU|CHUATHU
+---|-----|----|-------|--------|-----|-------
+2026|6|Trả trễ|1|30000.0000|30000.0000|.0000
+2026|7|Hư hỏng|1|25000.0000|25000.0000|.0000
+2026|7|Mất sách|1|250000.0000|.0000|250000.0000
+2026|7|Trả trễ|3|75000.0000|75000.0000|.0000
+2026|8|Hư hỏng|1|43000.0000|43000.0000|.0000
+2026|8|Trả trễ|3|75000.0000|75000.0000|.0000
+2026|10|Hư hỏng|1|55000.0000|.0000|55000.0000
+2026|10|Trả trễ|2|165000.0000|35000.0000|130000.0000
+LYDO|SOPHIEU|TONG|DATHU|CHUATHU
+----|-------|----|-----|-------
+Hư hỏng|3|123000.0000|68000.0000|55000.0000
+Mất sách|1|250000.0000|.0000|250000.0000
+Trả trễ|9|345000.0000|215000.0000|130000.0000
+=== R5 VW_BC_DOCGIA_QUAHAN ===
+STT|MADG|HOTEN|SODT|MAPM|TENDS|NGAYMUON|HANTRA|SONGAYTRE|TIENPHATTAMTINH
+---|----|-----|----|----|-----|--------|------|---------|---------------
+1|DG004|Phạm Đức Duy|0901234564|PM0012|Cơ sở văn hóa Việt Nam|2026-09-10|2026-09-24|17|85000.0000
+2|DG013|Lý Minh Tâm|0901234573|PM0015|Đắc nhân tâm|2026-09-22|2026-09-29|12|60000.0000
+3|DG014|Mai Anh Thư|0901234574|PM0014|Dế Mèn phiêu lưu ký|2026-09-20|2026-10-04|7|35000.0000
+4|DG002|Trần Quốc Bảo|0901234562|PM0016|Giáo trình Giải tích 1|2026-09-24|2026-10-08|3|15000.0000

@@ -1,0 +1,53 @@
+Changed database context to 'QUANLYTHUVIEN_BAOCAO'.
+=== C1 SP_CURSOR_XEPLOAIDOCGIA ===
+XEPLOAI|SODOCGIA
+-------|--------
+Chưa mượn|101
+Cảnh báo|6
+Bình thường|5
+Uy tín|5
+Hạn chế|2
+MADG|HOTEN|SOLUOTMUON|SOLANTRE|SOLANHUMAT|TONGTIENPHAT|XEPLOAI
+----|-----|----------|--------|----------|------------|-------
+DG004|Phạm Đức Duy|2|1|0|.0000|Bình thường
+DG008|Bùi Thị Mai|1|1|0|30000.0000|Bình thường
+DG011|Trịnh Công Phúc|2|1|0|20000.0000|Bình thường
+DG013|Lý Minh Tâm|1|1|0|.0000|Bình thường
+DG303|Phan Đình Uyên|1|1|0|.0000|Bình thường
+DG002|Trần Quốc Bảo|3|3|0|30000.0000|Cảnh báo
+DG003|Lê Thị Cẩm Tú|2|1|1|55000.0000|Cảnh báo
+DG010|Huỳnh Kim Ngân|3|2|0|40000.0000|Cảnh báo
+DG014|Mai Anh Thư|2|2|1|90000.0000|Cảnh báo
+DG015|Phan Hoàng Vũ|2|1|1|73000.0000|Cảnh báo
+DG272|Đặng Tuyết Khang|3|3|0|.0000|Cảnh báo
+DG001|Nguyễn Minh Anh|3|1|0|130000.0000|Hạn chế
+DG009|Ngô Văn Nam|2|0|1|250000.0000|Hạn chế
+DG005|Hoàng Gia Huy|2|0|0|.0000|Uy tín
+DG006|Võ Ngọc Hân|1|0|0|.0000|Uy tín
+DG007|Đặng Thanh Long|5|0|0|.0000|Uy tín
+DG012|Đỗ Bảo Quyên|2|0|0|.0000|Uy tín
+DG300|Phạm Thanh Nghĩa|3|0|0|.0000|Uy tín
+=== C2 SP_CURSOR_NHACNHOQUAHAN ===
+SONHACNHO_TRUOC
+---------------
+0
+Đã tạo 4 nhắc nhở mới.
+MANN|MAPM|MACS|MADG|HOTEN|SODT|TENDS|HANTRA|SONGAYTRE|TIENPHATTAMTINH|NOIDUNG|NGAYLAP
+----|----|----|----|-----|----|-----|------|---------|---------------|-------|-------
+1|PM0012|CS025|DG004|Phạm Đức Duy|0901234564|Cơ sở văn hóa Việt Nam|2026-09-24|17|85000.0000|Thư viện thông báo: bạn Phạm Đức Duy đang giữ sách "Cơ sở văn hóa Việt Nam" quá hạn 17 ngày (hạn trả 24/09/2026). Tiền phạt tạm tính: 85,000đ. Vui lòng trả sách sớm.|2026-10-11
+2|PM0015|CS014|DG013|Lý Minh Tâm|0901234573|Đắc nhân tâm|2026-09-29|12|60000.0000|Thư viện thông báo: bạn Lý Minh Tâm đang giữ sách "Đắc nhân tâm" quá hạn 12 ngày (hạn trả 29/09/2026). Tiền phạt tạm tính: 60,000đ. Vui lòng trả sách sớm.|2026-10-11
+3|PM0014|CS007|DG014|Mai Anh Thư|0901234574|Dế Mèn phiêu lưu ký|2026-10-04|7|35000.0000|Thư viện thông báo: bạn Mai Anh Thư đang giữ sách "Dế Mèn phiêu lưu ký" quá hạn 7 ngày (hạn trả 04/10/2026). Tiền phạt tạm tính: 35,000đ. Vui lòng trả sách sớm.|2026-10-11
+4|PM0016|CS026|DG002|Trần Quốc Bảo|0901234562|Giáo trình Giải tích 1|2026-10-08|3|15000.0000|Thư viện thông báo: bạn Trần Quốc Bảo đang giữ sách "Giáo trình Giải tích 1" quá hạn 3 ngày (hạn trả 08/10/2026). Tiền phạt tạm tính: 15,000đ. Vui lòng trả sách sớm.|2026-10-11
+SONHACNHO_SAU_LAN1
+------------------
+4
+Đã tạo 0 nhắc nhở mới.
+MANN|MAPM|MACS|MADG|HOTEN|SODT|TENDS|HANTRA|SONGAYTRE|TIENPHATTAMTINH|NOIDUNG|NGAYLAP
+----|----|----|----|-----|----|-----|------|---------|---------------|-------|-------
+1|PM0012|CS025|DG004|Phạm Đức Duy|0901234564|Cơ sở văn hóa Việt Nam|2026-09-24|17|85000.0000|Thư viện thông báo: bạn Phạm Đức Duy đang giữ sách "Cơ sở văn hóa Việt Nam" quá hạn 17 ngày (hạn trả 24/09/2026). Tiền phạt tạm tính: 85,000đ. Vui lòng trả sách sớm.|2026-10-11
+2|PM0015|CS014|DG013|Lý Minh Tâm|0901234573|Đắc nhân tâm|2026-09-29|12|60000.0000|Thư viện thông báo: bạn Lý Minh Tâm đang giữ sách "Đắc nhân tâm" quá hạn 12 ngày (hạn trả 29/09/2026). Tiền phạt tạm tính: 60,000đ. Vui lòng trả sách sớm.|2026-10-11
+3|PM0014|CS007|DG014|Mai Anh Thư|0901234574|Dế Mèn phiêu lưu ký|2026-10-04|7|35000.0000|Thư viện thông báo: bạn Mai Anh Thư đang giữ sách "Dế Mèn phiêu lưu ký" quá hạn 7 ngày (hạn trả 04/10/2026). Tiền phạt tạm tính: 35,000đ. Vui lòng trả sách sớm.|2026-10-11
+4|PM0016|CS026|DG002|Trần Quốc Bảo|0901234562|Giáo trình Giải tích 1|2026-10-08|3|15000.0000|Thư viện thông báo: bạn Trần Quốc Bảo đang giữ sách "Giáo trình Giải tích 1" quá hạn 3 ngày (hạn trả 08/10/2026). Tiền phạt tạm tính: 15,000đ. Vui lòng trả sách sớm.|2026-10-11
+SONHACNHO_SAU_LAN2
+------------------
+4

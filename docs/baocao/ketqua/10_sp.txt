@@ -1,0 +1,96 @@
+Changed database context to 'QUANLYTHUVIEN_BAOCAO'.
+=== SP1 SP_THEMDOCGIA ===
+SODOCGIA_TRUOC
+--------------
+118
+Thêm độc giả thành công.
+KETQUA_LAN1
+-----------
+2
+Mã độc giả đã tồn tại.
+KETQUA_LAN2
+-----------
+0
+MADG|HOTEN|NGAYLAPTHE|NGAYHETHAN|TONGNO
+----|-----|----------|----------|------
+DG999|Trần Thị Mai|2026-10-11|2028-10-11|.0000
+SODOCGIA_SAU
+------------
+119
+=== SP2 SP_LAPPHIEUMUON ===
+MADG|DSMACS
+----|------
+DG012|CS001,CS002
+MACS|MADS|TINHTRANG|SLCON
+----|----|---------|-----
+CS001|DS001|Có sẵn|2
+CS002|DS001|Có sẵn|2
+Lập phiếu mượn PM0329 thành công.
+KETQUA|MAPM_MOI
+------|--------
+1|PM0329
+MAPM|MADG|NGAYMUON|HANTRA|TINHTRANG
+----|----|--------|------|---------
+PM0329|DG012|2026-10-11|2026-10-25|Đang mượn
+MAPM|MACS|NGAYTRA|TINHTRANGTRA
+----|----|-------|------------
+PM0329|CS001|NULL|NULL
+PM0329|CS002|NULL|NULL
+MACS|MADS|TINHTRANG|SLCON
+----|----|---------|-----
+CS001|DS001|Đang mượn|0
+CS002|DS001|Đang mượn|0
+=== SP3 SP_TRASACH (PM0011 / CS011, qua han) ===
+MAPM|MACS|MADG|HANTRA|NGAYTRA|TINHTRANG
+----|----|----|------|-------|---------
+PM0011|CS011|DG001|2026-09-15|NULL|Đang mượn
+MADG|TONGNO
+----|------
+DG001|.0000
+Trả sách thành công. Tiền phạt: 130,000 đ
+KETQUA|TIENPHAT
+------|--------
+2|130000.0000
+MAPM|MACS|NGAYTRA|TINHTRANGTRA|TINHTRANG|TINHTRANGPHIEU
+----|----|-------|------------|---------|--------------
+PM0011|CS011|2026-10-11|Bình thường|Có sẵn|Đã trả
+MAPP|MAPM|MACS|NGAYLAP|LYDO|SOTIEN|DATHANHTOAN
+----|----|----|-------|----|------|-----------
+PP0011|PM0011|CS011|2026-10-11|Trả trễ|130000.0000|0
+MADG|TONGNO
+----|------
+DG001|130000.0000
+=== SP4 SP_THANHTOANPHAT (DG010) ===
+MAPP|MAPM|LYDO|SOTIEN|DATHANHTOAN
+----|----|----|------|-----------
+PP0005|PM0018|Trả trễ|25000.0000|1
+PP0008|PM0008|Trả trễ|15000.0000|0
+MADG|TONGNO
+----|------
+DG010|15000.0000
+Đã thanh toán 15,000 đ.
+KETQUA|DATHANHTOAN
+------|-----------
+2|15000.0000
+MAPP|SOTIEN|DATHANHTOAN
+----|------|-----------
+PP0005|25000.0000|1
+PP0008|15000.0000|1
+MADG|TONGNO
+----|------
+DG010|.0000
+Độc giả không có khoản phạt nào chưa thanh toán.
+KETQUA_LAN2
+-----------
+1
+=== SP5 SP_THONGKETHANG (9/2026) ===
+MADS|TENDS|SOLUOTMUON
+----|-----|----------
+DS009|Clean Code|2
+DS001|Mắt biếc|1
+DS003|Dế Mèn phiêu lưu ký|1
+DS006|Nhà giả kim|1
+DS007|Đắc nhân tâm|1
+SOPHIEU|SOLUOTSACH|TIENPHAT
+-------|----------|--------
+6|11|.0000

@@ -1,0 +1,66 @@
+Changed database context to 'QUANLYTHUVIEN_BAOCAO'.
+=== T1 TRG_CUONSACH_CAPNHATSL (them cuon CS999 cho DS009) ===
+MADS|TENDS|SOLUONG|SLCON
+----|-----|-------|-----
+DS009|Clean Code|2|0
+MADS|TENDS|SOLUONG|SLCON
+----|-----|-------|-----
+DS009|Clean Code|3|1
+MADS|TENDS|SOLUONG|SLCON
+----|-----|-------|-----
+DS009|Clean Code|3|0
+=== T2 TRG_PHIEUMUON_KIEMTRA ===
+MADG|NGAYHETHAN|TONGNO
+----|----------|------
+DG006|2026-08-31|.0000
+DG009|2027-09-10|250000.0000
+MADG|THONGBAO
+----|--------
+DG006|Thẻ độc giả đã hết hạn, không thể lập phiếu mượn.
+MADG|THONGBAO
+----|--------
+DG009|Độc giả còn nợ tiền phạt, phải thanh toán trước khi mượn.
+SOPHIEU_PM990x
+--------------
+0
+=== T3 TRG_CTPM_MUONSACH (them CS015 - Mat, va CS001 - dang muon vao PM0329) ===
+MACS|TINHTRANG
+----|---------
+CS001|Đang mượn
+CS015|Mất
+MACS|THONGBAO
+----|--------
+CS015|Có cuốn sách không ở tình trạng "Có sẵn", không thể cho mượn.
+MACS|THONGBAO
+----|--------
+CS001|Có cuốn sách không ở tình trạng "Có sẵn", không thể cho mượn.
+SODONG
+------
+2
+=== T4 TRG_CTPM_TRASACH (tra CS003 cua PM0014: tre han + hu hong) ===
+MAPM|MADG|HANTRA|MACS|TINHTRANG|GIA|TTPHIEU
+----|----|------|----|---------|---|-------
+PM0014|DG014|2026-10-04|CS003|Đang mượn|110000.0000|Đang mượn
+PM0014|DG014|2026-10-04|CS007|Đang mượn|50000.0000|Đang mượn
+MAPM|MACS|NGAYTRA|TINHTRANGTRA|TINHTRANG|TTPHIEU
+----|----|-------|------------|---------|-------
+PM0014|CS003|2026-10-11|Hư hỏng|Hư hỏng|Đang mượn
+PM0014|CS007|NULL|NULL|Đang mượn|Đang mượn
+MAPP|MAPM|MACS|LYDO|SOTIEN
+----|----|----|----|------
+PP0012|PM0014|CS003|Hư hỏng|55000.0000
+PP0013|PM0014|CS003|Trả trễ|35000.0000
+THONGBAO_SUALAI
+---------------
+Sách đã được trả, không thể cập nhật lại thông tin trả.
+=== T5 TRG_PHIEUPHAT_TONGNO (DG014 thanh toan PP0013) ===
+MAPP|LYDO|SOTIEN|DATHANHTOAN
+----|----|------|-----------
+PP0012|Hư hỏng|55000.0000|0
+PP0013|Trả trễ|35000.0000|0
+MADG|TONGNO
+----|------
+DG014|90000.0000
+MADG|TONGNO
+----|------
+DG014|55000.0000
