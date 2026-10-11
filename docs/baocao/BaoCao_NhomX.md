@@ -210,7 +210,7 @@ flowchart LR
 
 ## 2.1. Các chức năng của hệ thống
 
-- **Xác thực:** đăng nhập bằng tên đăng nhập và mật khẩu (so khớp giá trị băm), đổi mật khẩu, khóa/mở tài khoản.
+- **Xác thực:** đăng nhập bằng tên đăng nhập và mật khẩu (so khớp giá trị băm), đổi mật khẩu; tài khoản bị khóa (TRANGTHAI = 0) không đăng nhập được.
 - **Quản lý danh mục:** thêm, sửa, xóa và tìm kiếm thể loại, tác giả, nhà xuất bản; quản lý đầu sách kèm danh sách tác giả và vai trò (tác giả, đồng tác giả, dịch giả).
 - **Quản lý kho sách:** nhập từng cuốn sách vật lý cho một đầu sách, ghi vị trí kệ, cập nhật tình trạng; số lượng và số cuốn còn sẵn của đầu sách tự cập nhật.
 - **Quản lý độc giả:** lập thẻ, sửa thông tin, tìm theo mã hoặc họ tên, xem lịch sử mượn và công nợ hiện tại.
@@ -320,6 +320,7 @@ CREATE TABLE DAUSACH (
   NAMXB   INT NOT NULL,  SOTRANG INT NOT NULL,  GIA MONEY NOT NULL,
   SOLUONG INT NOT NULL DEFAULT 0,  SLCON INT NOT NULL DEFAULT 0,
   CONSTRAINT CK_DAUSACH_NAMXB CHECK (NAMXB BETWEEN 1900 AND YEAR(GETDATE())),
+  CONSTRAINT CK_DAUSACH_SOTRANG CHECK (SOTRANG > 0),
   CONSTRAINT CK_DAUSACH_GIA   CHECK (GIA > 0),
   CONSTRAINT CK_DAUSACH_SL    CHECK (SOLUONG >= 0
                               AND SLCON BETWEEN 0 AND SOLUONG))
@@ -588,8 +589,8 @@ BEGIN
         ROLLBACK TRANSACTION RETURN END
   IF EXISTS (SELECT * FROM inserted I JOIN DOCGIA DG ON I.MADG = DG.MADG
              WHERE DG.TONGNO > 0)
-  BEGIN RAISERROR(N'Độc giả còn nợ tiền phạt, phải thanh toán trước
-                  khi mượn.',16,1)
+  BEGIN RAISERROR(
+          N'Độc giả còn nợ tiền phạt, phải thanh toán trước khi mượn.',16,1)
         ROLLBACK TRANSACTION RETURN END
 END
 ```
@@ -673,7 +674,7 @@ END
 
 **Trigger 5:** TRG_PHIEUPHAT_TONGNO (AFTER INSERT, UPDATE, DELETE trên PHIEUPHAT)
 
-**Bài toán:** Giữ DOCGIA.TONGNO bằng tổng tiền các phiếu phạt chưa thanh toán của độc giả. Tầm ảnh hưởng: PHIEUPHAT (thêm, xóa, sửa SOTIEN, DATHANHTOAN, MAPM).
+**Bài toán:** Giữ DOCGIA.TONGNO bằng tổng tiền các phiếu phạt chưa thanh toán của độc giả. Tầm ảnh hưởng: PHIEUPHAT (thêm, xóa, sửa SOTIEN, DATHANHTOAN, MAPM), DOCGIA (sửa TONGNO).
 
 **Code:**
 
@@ -862,7 +863,7 @@ Mỗi user thuộc một role; quyền được cấp cho role thay vì cho từ
 |---|---|---|
 | R_QUANLY | Thành viên db_datareader, db_datawriter, db_backupoperator; EXECUTE trên schema dbo; xem cả 5 view báo cáo | – |
 | R_THUTHU | SELECT toàn schema; INSERT, UPDATE trên DOCGIA, DAUSACH, CUONSACH, PHIEUMUON, CTPHIEUMUON, PHIEUPHAT; EXECUTE các SP nghiệp vụ và cursor nhắc nhở | DELETE toàn schema; SELECT trên TAIKHOAN |
-| R_DOCGIA | SELECT trên DAUSACH, THELOAI, TACGIA, DAUSACH_TACGIA, NHAXUATBAN; CUONSACH (chỉ 4 cột); EXECUTE SP_TIMSACH | SELECT trên DOCGIA, TAIKHOAN; INSERT/UPDATE/DELETE toàn schema |
+| R_DOCGIA | SELECT trên DAUSACH, THELOAI, TACGIA, DAUSACH_TACGIA, NHAXUATBAN; CUONSACH (chỉ 4 cột); EXECUTE SP_TIMSACH; VW_BC_SACHMUONNHIEU (chỉ view xếp hạng sách) | SELECT trên DOCGIA, TAIKHOAN; INSERT/UPDATE/DELETE toàn schema |
 
 Lệnh `GRANT SELECT ON PHIEUPHAT TO R_DOCGIA` rồi `REVOKE` được dùng để minh họa thu hồi quyền.
 
@@ -890,7 +891,7 @@ RESTORE DATABASE QUANLYTHUVIEN FROM DISK = N'.../QUANLYTHUVIEN_DIFF.bak'
   WITH RECOVERY
 ```
 
-**Kết quả:** Một lần sao lưu FULL xử lý 818 trang dữ liệu, tệp .bak khoảng 6,46 MB; lịch sử trong msdb còn ghi nhận các bản sao lưu FULL trước đó (ngày 09/10/2026).
+**Kết quả:** Một lần sao lưu FULL xử lý 818 trang (dữ liệu và log), tệp .bak khoảng 6,46 MB; lịch sử trong msdb còn ghi nhận các bản sao lưu FULL trước đó (ngày 09/10/2026).
 
 > *[Chèn ảnh chụp lịch sử sao lưu và CSDL sau khi restore]*
 
@@ -898,7 +899,7 @@ RESTORE DATABASE QUANLYTHUVIEN FROM DISK = N'.../QUANLYTHUVIEN_DIFF.bak'
 
 Báo cáo được hiển thị trên trang **Báo cáo** của website demo. Mỗi report lấy dữ liệu từ một view `VW_BC_*` trong CSDL thông qua API ASP.NET Core (Dapper), sau đó frontend React vẽ biểu đồ bằng thư viện Recharts. Website không lưu sẵn số liệu: mỗi lần mở trang đều truy vấn lại CSDL. Số liệu nhận xét dưới đây lấy từ bản sao CSDL ngày 11/10/2026, trước các thao tác minh họa ở mục 4.1.
 
-**Report 1:** Tình trạng kho sách theo đầu sách (`VW_BC_TINHTRANGKHO`, biểu đồ cột chồng)
+**Report 1:** Tình trạng kho sách theo đầu sách (`VW_BC_TINHTRANGKHO`, biểu đồ tròn dạng donut và bảng chi tiết)
 
 > *[Chèn ảnh chụp Report 1]*
 
@@ -922,7 +923,7 @@ Kho có 26 cuốn: 13 có sẵn, 10 đang được mượn, 2 bị hư và 1 b�
 
 Lượt mượn tăng từ 3 lượt/tháng (tháng 4, 5) lên 7 lượt (tháng 6–8) và đạt 11 lượt vào tháng 9, trùng thời điểm bắt đầu năm học. Văn học Việt Nam là thể loại được mượn nhiều nhất (11 lượt).
 
-**Report 4:** Tiền phạt theo tháng và lý do (`VW_BC_TIENPHAT_THANG`, biểu đồ tròn và bảng tổng hợp)
+**Report 4:** Tiền phạt theo tháng và lý do (`VW_BC_TIENPHAT_THANG`, biểu đồ tròn theo lý do và biểu đồ cột đã thu/chưa thu theo tháng)
 
 > *[Chèn ảnh chụp Report 4]*
 
@@ -948,7 +949,7 @@ Website demo được xây dựng để trình bày các nội dung xử lý th�
 - **Backend:** ASP.NET Core Web API (.NET 10), truy cập CSDL bằng Dapper; hầu hết endpoint gọi stored procedure với `CommandType.StoredProcedure`.
 - **CSDL và điều phối:** SQL Server 2022 chạy trong Docker; .NET Aspire khởi động đồng thời backend, frontend và trang dashboard theo dõi log.
 
-**Cách chạy:** (1) `docker compose up -d` để chạy SQL Server; (2) chạy lần lượt các script trong thư mục `db/` (hoặc `db/init_all.sql`); (3) `npm install` trong thư mục `frontend`; (4) `dotnet run --project QuanLyThuVien.AppHost`; (5) đăng nhập bằng tài khoản `admin`. Các màn hình chính gồm: đăng nhập, tổng quan, quản lý sách (kèm danh sách cuốn sách và tác giả), độc giả (kèm lịch sử mượn), mượn – trả và phiếu phạt, báo cáo (4 tab biểu đồ, nút chạy cursor) và cài đặt (sao lưu).
+**Cách chạy:** (1) `docker compose up -d` để chạy SQL Server; (2) chạy lần lượt các script trong thư mục `db/` (hoặc `db/init_all.sql`); (3) `npm install` trong thư mục `frontend`; (4) `dotnet run --project QuanLyThuVien.AppHost`; (5) đăng nhập bằng tài khoản `admin`. Các màn hình chính gồm: đăng nhập, tổng quan, quản lý sách (kèm danh sách cuốn sách và tác giả), độc giả (kèm lịch sử mượn), mượn – trả và phiếu phạt, báo cáo (4 tab biểu đồ) và cài đặt (sao lưu).
 
 | | |
 |---|---|
@@ -959,7 +960,7 @@ Website demo được xây dựng để trình bày các nội dung xử lý th�
 
 ## 5.2. Kết quả đạt được
 
-- Phân tích và cài đặt hoàn chỉnh CSDL QUANLYTHUVIEN gồm 11 bảng, 12 ràng buộc toàn vẹn (7 CHECK, 5 trigger) cùng bộ dữ liệu mẫu bao quát các tình huống nghiệp vụ.
+- Phân tích và cài đặt hoàn chỉnh CSDL QUANLYTHUVIEN gồm 11 bảng, 12 ràng buộc toàn vẹn chính (7 nhóm CHECK, 5 trigger) cùng bộ dữ liệu mẫu bao quát các tình huống nghiệp vụ.
 - Hiện thực đủ số lượng đối tượng xử lý theo yêu cầu: 5 stored procedure nghiệp vụ, 5 trigger, 3 function, 2 cursor; tất cả được kiểm chứng bằng kết quả chạy thật.
 - Hoàn thành các nội dung an toàn thông tin: xác thực hai lớp, phân quyền ba role bằng GRANT/DENY/REVOKE, import/export, sao lưu FULL/DIFF và phục hồi.
 - Xây dựng 5 report trên website, lấy dữ liệu trực tiếp từ view, và website demo cho phép thao tác các chức năng nghiệp vụ.

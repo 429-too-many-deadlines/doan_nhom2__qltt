@@ -17,7 +17,8 @@
 \definecolor{xanh}{HTML}{1F3864}
 \definecolor{xam}{HTML}{808080}
 \definecolor{nenbang}{HTML}{D9E2F3}
-\setstretch{1.15}
+\setstretch{1.1}
+\AtBeginDocument{\sloppy}
 \setlength{\parskip}{3pt}
 \setlength{\parindent}{0pt}
 \setlist{nosep,leftmargin=1.5em}
@@ -55,7 +56,8 @@
 \DefineVerbatimEnvironment{sql}{Verbatim}{frame=single,fontsize=\fontsize{9}{10.5}\selectfont,framesep=1.5mm,xleftmargin=0mm}
 
 % Khung giu cho anh chup va nhan muc
-\newcommand{\anhgiucho}[1]{\begin{center}\fcolorbox{xam}{white}{\parbox{0.85\textwidth}{\centering\color{xam}\itshape\small [Chèn ảnh chụp #1]}}\end{center}\vspace{-6pt}}
+\newcommand{\anhgiucho}[2][2.4cm]{\begin{center}\fcolorbox{xam}{white}{\parbox[c][#1]{0.85\textwidth}{\centering\color{xam}\itshape\small [Chèn ảnh chụp #2]}}\end{center}\vspace{-6pt}}
+\newcommand{\anhnho}[2][3.6cm]{\fcolorbox{xam}{white}{\parbox[c][#1]{0.9\linewidth}{\centering\color{xam}\itshape\small [Chèn ảnh chụp #2]}}}
 \newcommand{\muc}[1]{\textbf{#1:} }
 \newcommand{\pk}[1]{\underline{#1}}
 \newcommand{\fk}[1]{\textit{#1}}
@@ -245,7 +247,7 @@ Ba nhóm này được hiện thực bằng ba role \texttt{R\_QUANLY}, \texttt{
 \chapter{PHÂN TÍCH VÀ THIẾT KẾ}
 \section{Các chức năng của hệ thống}
 \begin{itemize}
-\item \textbf{Xác thực:} đăng nhập bằng tên đăng nhập và mật khẩu (so khớp giá trị băm), đổi mật khẩu, khóa/mở tài khoản.
+\item \textbf{Xác thực:} đăng nhập bằng tên đăng nhập và mật khẩu (so khớp giá trị băm), đổi mật khẩu; tài khoản bị khóa (TRANGTHAI = 0) không đăng nhập được.
 \item \textbf{Quản lý danh mục:} thêm, sửa, xóa và tìm kiếm thể loại, tác giả, nhà xuất bản; quản lý đầu sách kèm danh sách tác giả và vai trò (tác giả, đồng tác giả, dịch giả).
 \item \textbf{Quản lý kho sách:} nhập từng cuốn sách vật lý cho một đầu sách, ghi vị trí kệ, cập nhật tình trạng; số lượng và số cuốn còn sẵn của đầu sách tự cập nhật.
 \item \textbf{Quản lý độc giả:} lập thẻ, sửa thông tin, tìm theo mã hoặc họ tên, xem lịch sử mượn và công nợ hiện tại.
@@ -363,7 +365,7 @@ Khóa chính được gạch chân, khóa ngoại in nghiêng.
 
 \chapter{CÀI ĐẶT}
 \section{Tạo bảng, khóa chính, khóa ngoại và ràng buộc}
-CSDL được cài đặt trên \textbf{Microsoft SQL Server 2022}, chạy trong Docker (image \texttt{mssql/server:2022-latest}), với collation \texttt{Vietnamese\_CI\_AS} để sắp xếp và so sánh đúng tiếng Việt. {\sloppy Toàn bộ script được chia thành các tệp theo yêu cầu đồ án: \texttt{1\_TaoBang.sql} (11 bảng), \texttt{2\_DuLieuMau.sql}, \texttt{3\_Function.sql}, \texttt{4\_Trigger.sql}, \texttt{5\_StoredProcedure.sql}, \texttt{6\_Cursor.sql}, \texttt{7\_AnToanThongTin.sql} và \texttt{8\_Report.sql}. Chạy lại tệp 1 sẽ xóa và tạo lại toàn bộ CSDL.\par} Hai câu lệnh tiêu biểu:
+CSDL được cài đặt trên \textbf{Microsoft SQL Server 2022}, chạy trong Docker (image \texttt{mssql/server:2022-latest}), với collation \texttt{Vietnamese\_CI\_AS} để sắp xếp và so sánh đúng tiếng Việt. {\sloppy Toàn bộ script được chia thành các tệp theo yêu cầu đồ án: \texttt{1\_TaoBang.sql} (11 bảng), \texttt{2\_DuLieuMau.sql}, \texttt{3\_Function.sql}, \texttt{4\_Trigger.sql}, \texttt{5\_StoredProcedure.sql}, \texttt{6\_Cursor.sql}, \texttt{7\_AnToanThongTin.sql} và \texttt{8\_Report.sql}. Chạy lại tệp 1 sẽ xóa và tạo lại toàn bộ CSDL.\par} Câu lệnh tiêu biểu (bảng DAUSACH):
 
 \begin{sql}
 CREATE TABLE DAUSACH (
@@ -374,26 +376,16 @@ CREATE TABLE DAUSACH (
   NAMXB   INT NOT NULL,  SOTRANG INT NOT NULL,  GIA MONEY NOT NULL,
   SOLUONG INT NOT NULL DEFAULT 0,  SLCON INT NOT NULL DEFAULT 0,
   CONSTRAINT CK_DAUSACH_NAMXB CHECK (NAMXB BETWEEN 1900 AND YEAR(GETDATE())),
+  CONSTRAINT CK_DAUSACH_SOTRANG CHECK (SOTRANG > 0),
   CONSTRAINT CK_DAUSACH_GIA   CHECK (GIA > 0),
   CONSTRAINT CK_DAUSACH_SL    CHECK (SOLUONG >= 0
                               AND SLCON BETWEEN 0 AND SOLUONG))
-
-CREATE TABLE CTPHIEUMUON (
-  MAPM CHAR(6) FOREIGN KEY REFERENCES PHIEUMUON (MAPM),
-  MACS CHAR(5) FOREIGN KEY REFERENCES CUONSACH (MACS),
-  NGAYTRA DATE NULL,  TINHTRANGTRA NVARCHAR(20) NULL,
-  PRIMARY KEY (MAPM, MACS),
-  CONSTRAINT CK_CTPM_TINHTRANGTRA CHECK (TINHTRANGTRA IN
-             (N'Bình thường', N'Hư hỏng', N'Mất')),
-  CONSTRAINT CK_CTPM_TRASACH CHECK ((NGAYTRA IS NULL AND TINHTRANGTRA IS NULL)
-             OR (NGAYTRA IS NOT NULL AND TINHTRANGTRA IS NOT NULL)))
 \end{sql}
-Khóa chính gồm nhiều cột (\texttt{CTPHIEUMUON}, \texttt{DAUSACH\_TACGIA}) được khai báo bằng mệnh đề \texttt{PRIMARY KEY (...)}. \texttt{PHIEUPHAT} dùng khóa ngoại kép \texttt{(MAPM, MACS)} tham chiếu đến \texttt{CTPHIEUMUON}. Mật khẩu trong \texttt{TAIKHOAN} có kiểu \texttt{VARBINARY(32)} để chứa giá trị băm SHA2-256.
-\anhgiucho{cấu trúc bảng DAUSACH và CTPHIEUMUON trong SSMS / Object Explorer}
-\captionof{figure}{Cấu trúc bảng DAUSACH và CTPHIEUMUON}
+Khóa chính gồm nhiều cột (\texttt{CTPHIEUMUON}, \texttt{DAUSACH\_TACGIA}) được khai báo bằng mệnh đề \texttt{PRIMARY KEY (...)}; ràng buộc ``đã trả thì phải có tình trạng trả'' của CTPHIEUMUON là một CHECK nhiều cột. \texttt{PHIEUPHAT} dùng khóa ngoại kép \texttt{(MAPM, MACS)} tham chiếu đến \texttt{CTPHIEUMUON}. Mật khẩu trong \texttt{TAIKHOAN} có kiểu \texttt{VARBINARY(32)} để chứa giá trị băm SHA2-256.
+
 
 \section{Dữ liệu mẫu}
-Dữ liệu mẫu mô phỏng hoạt động của thư viện từ tháng 4 đến tháng 9/2026. Bảng~\ref{tab:sodong} là số dòng thực tế của từng bảng tại thời điểm chụp CSDL (ngày 11/10/2026).
+Dữ liệu mẫu mô phỏng hoạt động thư viện từ tháng 4 đến tháng 9/2026; số dòng từng bảng (ngày 11/10/2026) ở Bảng~\ref{tab:sodong}.
 \begin{table}[H]
 \centering\small
 \caption{Số dòng dữ liệu của từng bảng}\label{tab:sodong}
@@ -411,8 +403,10 @@ Dữ liệu được chọn để bao phủ các tình huống nghiệp vụ và
 \item \textbf{Sách:} cuốn bị hư (CS006, CS012), cuốn bị mất (CS015); đầu sách chưa có tác giả (DS016); thể loại chưa có sách (TL08); tác giả không rõ năm sinh (TG010); nhà xuất bản thiếu địa chỉ (NXB10).
 \item \textbf{Mượn -- trả:} phiếu trả đúng hạn, trả trễ, trả một phần (PM0012, PM0016), phiếu đang quá hạn; phiếu phạt đủ ba lý do, có phiếu đã và chưa thanh toán.
 \end{itemize}
-\anhgiucho{dữ liệu mẫu bảng DOCGIA và PHIEUMUON}
-\captionof{figure}{Dữ liệu mẫu bảng DOCGIA và PHIEUMUON}
+\begin{figure}[H]\centering
+\begin{minipage}[t]{0.48\textwidth}\centering\anhnho[2.6cm]{cấu trúc bảng DAUSACH, CTPHIEUMUON}\captionof{figure}{Cấu trúc bảng DAUSACH và CTPHIEUMUON}\end{minipage}\hfill
+\begin{minipage}[t]{0.48\textwidth}\centering\anhnho[2.6cm]{dữ liệu mẫu DOCGIA, PHIEUMUON}\captionof{figure}{Dữ liệu mẫu bảng DOCGIA và PHIEUMUON}\end{minipage}
+\end{figure}
 
 \chapter{QUẢN LÝ THÔNG TIN}
 \section{Xử lý thông tin}
@@ -473,10 +467,7 @@ AS BEGIN
     FROM STRING_SPLIT(@DSMACS, ',') WHERE LTRIM(RTRIM(value)) <> '';
     COMMIT TRANSACTION; RETURN 1;
   END TRY
-  BEGIN CATCH
-    IF @@TRANCOUNT > 0 ROLLBACK;
-    SET @MAPM = NULL; RAISERROR(...); RETURN 0;
-  END CATCH
+  BEGIN CATCH IF @@TRANCOUNT > 0 ROLLBACK; SET @MAPM = NULL; RETURN 0; END CATCH
 END
 \end{sql}
 \muc{Kết quả} Độc giả DG012 (chưa từng mượn, không nợ) mượn hai cuốn CS001 và CS002 của đầu sách DS001 ``Mắt biếc''.
@@ -617,8 +608,8 @@ BEGIN
         ROLLBACK TRANSACTION RETURN END
   IF EXISTS (SELECT * FROM inserted I JOIN DOCGIA DG ON I.MADG = DG.MADG
              WHERE DG.TONGNO > 0)
-  BEGIN RAISERROR(N'Độc giả còn nợ tiền phạt, phải thanh toán trước
-                  khi mượn.',16,1)
+  BEGIN RAISERROR(
+          N'Độc giả còn nợ tiền phạt, phải thanh toán trước khi mượn.',16,1)
         ROLLBACK TRANSACTION RETURN END
 END
 \end{sql}
@@ -694,7 +685,7 @@ Chưa có phiếu phạt cho PM0014 & PP0012 Hư hỏng 55.000đ; PP0013 Trả t
 
 \textbf{Trigger 5:} TRG\_PHIEUPHAT\_TONGNO (AFTER INSERT, UPDATE, DELETE trên PHIEUPHAT)
 
-\muc{Bài toán} Giữ DOCGIA.TONGNO bằng tổng tiền các phiếu phạt chưa thanh toán của độc giả. Tầm ảnh hưởng: PHIEUPHAT (thêm, xóa, sửa SOTIEN, DATHANHTOAN, MAPM).
+\muc{Bài toán} Giữ DOCGIA.TONGNO bằng tổng tiền các phiếu phạt chưa thanh toán của độc giả. Tầm ảnh hưởng: PHIEUPHAT (thêm, xóa, sửa SOTIEN, DATHANHTOAN, MAPM), DOCGIA (sửa TONGNO).
 
 \muc{Code}
 \begin{sql}
@@ -831,8 +822,7 @@ BEGIN
   BEGIN
     SET @SONGAYTRE = DATEDIFF(DAY, @HANTRA, @NGAYKIEMTRA)
     SET @TIENPHAT  = dbo.FN_TIENPHATTRE(@HANTRA, @NGAYKIEMTRA)
-    SET @NOIDUNG = N'Thư viện thông báo: bạn ' + @HOTEN + N' đang giữ sách "'
-      + @TENDS + N'" quá hạn ' + CAST(@SONGAYTRE AS NVARCHAR(10)) + N' ngày ...'
+    SET @NOIDUNG = N'Thư viện thông báo: bạn ' + @HOTEN + N' đang giữ sách ...'
     INSERT INTO NHACNHO_QUAHAN (...) VALUES (...)
   END
   FETCH NEXT FROM CUR_QUAHAN
@@ -863,7 +853,7 @@ Mỗi user thuộc một role; quyền được cấp cho role thay vì cho từ
 \rowcolor{nenbang}\textbf{Role} & \textbf{GRANT (được phép)} & \textbf{DENY (bị từ chối)}\\\hline
 R\_QUANLY & Thành viên db\_datareader, db\_datawriter, db\_backupoperator; EXECUTE trên schema dbo; xem cả 5 view báo cáo & --\\\hline
 R\_THUTHU & SELECT toàn schema; INSERT, UPDATE trên DOCGIA, DAUSACH, CUONSACH, PHIEUMUON, CTPHIEUMUON, PHIEUPHAT; EXECUTE các SP nghiệp vụ và cursor nhắc nhở & DELETE toàn schema; SELECT trên TAIKHOAN\\\hline
-R\_DOCGIA & SELECT trên DAUSACH, THELOAI, TACGIA, DAUSACH\_TACGIA, NHAXUATBAN; CUONSACH (chỉ 4 cột); EXECUTE SP\_TIMSACH & SELECT trên DOCGIA, TAIKHOAN; INSERT/UPDATE/DELETE toàn schema\\\hline
+R\_DOCGIA & SELECT trên DAUSACH, THELOAI, TACGIA, DAUSACH\_TACGIA, NHAXUATBAN; CUONSACH (chỉ 4 cột); EXECUTE SP\_TIMSACH; VW\_BC\_SACHMUONNHIEU (chỉ view xếp hạng sách) & SELECT trên DOCGIA, TAIKHOAN; INSERT/UPDATE/DELETE toàn schema\\\hline
 \end{tabularx}
 \end{table}
 Lệnh \texttt{GRANT SELECT ON PHIEUPHAT TO R\_DOCGIA} rồi \texttt{REVOKE} được dùng để minh họa thu hồi quyền.
@@ -872,7 +862,7 @@ Lệnh \texttt{GRANT SELECT ON PHIEUPHAT TO R\_DOCGIA} rồi \texttt{REVOKE} đ�
 \anhgiucho{thông báo ``permission was denied'' khi chạy EXECUTE AS}
 
 \subsection{Import và Export}
-\textbf{Import:} danh sách độc giả mới trong tệp \texttt{DOCGIA\_IMPORT.csv} (UTF-16, dòng đầu là tiêu đề, giữ được tiếng Việt) được nạp vào bảng tạm bằng \texttt{BULK INSERT ... WITH (FORMAT = 'CSV', DATAFILETYPE = 'widechar', FIRSTROW = 2)}, sau đó chỉ INSERT những mã chưa tồn tại vào DOCGIA để các ràng buộc CHECK vẫn được kiểm tra. \textbf{Export:} dùng công cụ dòng lệnh \texttt{bcp "SELECT MADS, TENDS, SOLUONG, SLCON FROM QUANLYTHUVIEN.dbo.DAUSACH" queryout DAUSACH.csv -c -C 65001 -t,} hoặc trình hướng dẫn Tasks $>$ Export Data của SSMS để xuất ra Excel.
+\textbf{Import:} danh sách độc giả mới trong tệp \texttt{DOCGIA\_IMPORT.csv} (UTF-16, dòng đầu là tiêu đề, giữ được tiếng Việt) được nạp vào bảng tạm bằng \texttt{BULK INSERT ... WITH (FORMAT = 'CSV', DATAFILETYPE = 'widechar', FIRSTROW = 2)}, sau đó chỉ INSERT những mã chưa tồn tại vào DOCGIA để các ràng buộc CHECK vẫn được kiểm tra. \textbf{Export:} dùng công cụ dòng lệnh \texttt{bcp \textquotedbl SELECT MADS, TENDS, SOLUONG, SLCON FROM QUANLYTHUVIEN.dbo.DAUSACH\textquotedbl\ queryout DAUSACH.csv -c -C 65001 -t,} hoặc trình hướng dẫn Tasks $>$ Export Data của SSMS để xuất ra Excel.
 \anhgiucho{các bước Import/Export và tệp kết quả}
 
 \subsection{Backup và Restore}
@@ -886,56 +876,55 @@ RESTORE DATABASE QUANLYTHUVIEN FROM DISK = N'.../QUANLYTHUVIEN_FULL.bak'
 RESTORE DATABASE QUANLYTHUVIEN FROM DISK = N'.../QUANLYTHUVIEN_DIFF.bak'
   WITH RECOVERY
 \end{sql}
-\muc{Kết quả} Một lần sao lưu FULL xử lý 818 trang dữ liệu, tệp .bak khoảng 6,46 MB; lịch sử trong msdb còn ghi nhận các bản sao lưu FULL trước đó (ngày 09/10/2026).
+\muc{Kết quả} Một lần sao lưu FULL xử lý 818 trang (dữ liệu và log), tệp .bak khoảng 6,46 MB; lịch sử trong msdb còn ghi nhận các bản sao lưu FULL trước đó (ngày 09/10/2026).
 \anhgiucho{lịch sử sao lưu và CSDL sau khi restore}
 
 \section{Trình bày thông tin (Report)}
-Báo cáo được hiển thị trên trang \textbf{Báo cáo} của website demo. Mỗi report lấy dữ liệu từ một view \texttt{VW\_BC\_*} trong CSDL thông qua API ASP.NET Core (Dapper), sau đó frontend React vẽ biểu đồ bằng thư viện Recharts. Website không lưu sẵn số liệu: mỗi lần mở trang đều truy vấn lại CSDL. Số liệu nhận xét dưới đây lấy từ bản sao CSDL ngày 11/10/2026, trước các thao tác minh họa ở mục 4.1.
+Báo cáo hiển thị trên trang \textbf{Báo cáo} của website demo: mỗi report lấy dữ liệu từ một view \texttt{VW\_BC\_*} qua API ASP.NET Core (Dapper) và được vẽ bằng Recharts; số liệu được truy vấn lại mỗi lần mở trang. Số liệu nhận xét dưới đây lấy từ bản sao CSDL ngày 11/10/2026, trước các thao tác minh họa ở mục 4.1.
 
-\textbf{Report 1:} Tình trạng kho sách theo đầu sách (\texttt{VW\_BC\_TINHTRANGKHO}, biểu đồ cột chồng)
-\anhgiucho{Report 1}\captionof{figure}{Report tình trạng kho sách}
-Kho có 26 cuốn: 13 có sẵn, 10 đang được mượn, 2 bị hư và 1 bị mất. Đầu sách ``Clean Code'' đang được mượn hết cả 2 cuốn, nên là ứng viên cần nhập thêm.
+\begin{figure}[H]\centering
+\begin{minipage}[t]{0.32\textwidth}\centering\anhnho[2.6cm]{Report 1}\captionof{figure}{Report tình trạng kho sách}\end{minipage}\hfill
+\begin{minipage}[t]{0.32\textwidth}\centering\anhnho[2.6cm]{Report 2}\captionof{figure}{Report đầu sách được mượn nhiều nhất}\end{minipage}\hfill
+\begin{minipage}[t]{0.32\textwidth}\centering\anhnho[2.6cm]{Report 3}\captionof{figure}{Report lượt mượn theo tháng}\end{minipage}\\[2mm]
+\begin{minipage}[t]{0.32\textwidth}\centering\anhnho[2.6cm]{Report 4}\captionof{figure}{Report tiền phạt theo lý do}\end{minipage}\hfill
+\begin{minipage}[t]{0.32\textwidth}\centering\anhnho[2.6cm]{Report 5}\captionof{figure}{Report độc giả giữ sách quá hạn}\end{minipage}\\[2mm]
+\end{figure}
+\textbf{Report 1:} Tình trạng kho sách theo đầu sách (\texttt{VW\_BC\_TINHTRANGKHO}, biểu đồ tròn dạng donut và bảng chi tiết). Kho có 26 cuốn: 13 có sẵn, 10 đang được mượn, 2 bị hư và 1 bị mất. ``Clean Code'' đang được mượn hết cả 2 cuốn, cần nhập thêm.
 
-\textbf{Report 2:} Xếp hạng đầu sách được mượn nhiều nhất (\texttt{VW\_BC\_SACHMUONNHIEU}, biểu đồ cột ngang)
-\anhgiucho{Report 2}\captionof{figure}{Report đầu sách được mượn nhiều nhất}
-``Mắt biếc'' dẫn đầu với 5 lượt mượn từ 5 độc giả; ba đầu sách đồng hạng 2 với 4 lượt mỗi đầu sách là ``Harry Potter và Hòn đá Phù thủy'', ``Đắc nhân tâm'' và ``Database System Concepts''.
+\textbf{Report 2:} Xếp hạng đầu sách được mượn nhiều nhất (\texttt{VW\_BC\_SACHMUONNHIEU}, biểu đồ cột ngang). ``Mắt biếc'' dẫn đầu với 5 lượt mượn từ 5 độc giả; ba đầu sách đồng hạng 2 với 4 lượt.
 
-\textbf{Report 3:} Lượt mượn theo tháng và thể loại (\texttt{VW\_BC\_LUOTMUON\_THANG}, biểu đồ đường)
-\anhgiucho{Report 3}\captionof{figure}{Report lượt mượn theo tháng}
-Lượt mượn tăng từ 3 lượt/tháng (tháng 4, 5) lên 7 lượt (tháng 6--8) và đạt 11 lượt vào tháng 9, trùng thời điểm bắt đầu năm học. Văn học Việt Nam là thể loại được mượn nhiều nhất (11 lượt).
+\textbf{Report 3:} Lượt mượn theo tháng và thể loại (\texttt{VW\_BC\_LUOTMUON\_THANG}, biểu đồ đường). Lượt mượn tăng từ 3 lượt/tháng (tháng 4, 5) lên 7 lượt (tháng 6--8) và đạt 11 lượt vào tháng 9. Văn học Việt Nam là thể loại được mượn nhiều nhất (11 lượt).
 
-\textbf{Report 4:} Tiền phạt theo tháng và lý do (\texttt{VW\_BC\_TIENPHAT\_THANG}, biểu đồ tròn và bảng tổng hợp)
-\anhgiucho{Report 4}\captionof{figure}{Report tiền phạt theo lý do}
-Tổng tiền phạt là 498.000đ từ 10 phiếu, trong đó phạt mất sách chiếm 250.000đ (khoảng 50\%). Thư viện đã thu 233.000đ; còn 265.000đ chưa thu, phần lớn là khoản mất sách của DG009.
+\textbf{Report 4:} Tiền phạt theo tháng và lý do (\texttt{VW\_BC\_TIENPHAT\_THANG}, biểu đồ tròn theo lý do và biểu đồ cột đã thu/chưa thu theo tháng). Tổng tiền phạt là 498.000đ từ 10 phiếu, trong đó phạt mất sách chiếm 250.000đ (khoảng 50\%). Thư viện đã thu 233.000đ; còn 265.000đ chưa thu, phần lớn là khoản mất sách của DG009.
 
-\textbf{Report 5:} Độc giả đang giữ sách quá hạn (\texttt{VW\_BC\_DOCGIA\_QUAHAN}, bảng cảnh báo)
-\anhgiucho{Report 5}\captionof{figure}{Report độc giả giữ sách quá hạn}
-Có 6 cuốn quá hạn thuộc 5 độc giả; trễ lâu nhất là DG001 với 26 ngày (tạm tính 130.000đ), tiếp theo là DG004 với 17 ngày (85.000đ). Danh sách này là đầu vào cho cursor nhắc nhở ở mục 4.1.4.
+\textbf{Report 5:} Độc giả đang giữ sách quá hạn (\texttt{VW\_BC\_DOCGIA\_QUAHAN}, bảng cảnh báo). Có 6 cuốn quá hạn thuộc 5 độc giả; trễ lâu nhất là DG001 với 26 ngày (tạm tính 130.000đ), tiếp theo là DG004 với 17 ngày (85.000đ).
+
+
 
 \chapter{DEMO VÀ KẾT LUẬN}
 \section{Website demo}
-Website demo được xây dựng để trình bày các nội dung xử lý thông tin; mọi dữ liệu hiển thị đều được truy vấn trực tiếp từ SQL Server qua stored procedure, function và view, không lưu sẵn ở backend.
+Mọi dữ liệu trên website demo đều được truy vấn trực tiếp từ SQL Server qua stored procedure, function và view, không lưu sẵn ở backend.
 \begin{itemize}
 \item \textbf{Frontend:} React 19, TypeScript, Vite, Tailwind CSS 4, bộ component shadcn/ui; biểu đồ báo cáo dùng Recharts.
 \item \textbf{Backend:} ASP.NET Core Web API (.NET 10), truy cập CSDL bằng Dapper; hầu hết endpoint gọi stored procedure với \texttt{CommandType.StoredProcedure}.
-\item \textbf{CSDL và điều phối:} SQL Server 2022 chạy trong Docker; .NET Aspire khởi động đồng thời backend, frontend và trang dashboard theo dõi log.
+\item \textbf{CSDL và điều phối:} SQL Server 2022 trong Docker; .NET Aspire khởi động đồng thời backend và frontend.
 \end{itemize}
-\textbf{Cách chạy:} (1) \texttt{docker compose up -d} để chạy SQL Server; (2) chạy lần lượt các script trong thư mục \texttt{db/} (hoặc \texttt{db/init\_all.sql}); (3) \texttt{npm install} trong thư mục \texttt{frontend}; (4) \texttt{dotnet run -{}-project QuanLyThuVien.AppHost}; (5) đăng nhập bằng tài khoản \texttt{admin}. Các màn hình chính gồm: đăng nhập, tổng quan, quản lý sách (kèm danh sách cuốn sách và tác giả), độc giả (kèm lịch sử mượn), mượn -- trả và phiếu phạt, báo cáo (4 tab biểu đồ, nút chạy cursor) và cài đặt (sao lưu).
+\textbf{Cách chạy:} (1) \texttt{docker compose up -d} để chạy SQL Server; (2) chạy lần lượt các script trong thư mục \texttt{db/} (hoặc \texttt{db/init\_all.sql}); (3) \texttt{npm install} trong thư mục \texttt{frontend}; (4) \texttt{dotnet run -{}-project QuanLyThuVien.AppHost}; (5) đăng nhập bằng tài khoản \texttt{admin}. Các màn hình chính: đăng nhập, tổng quan, sách, độc giả (kèm lịch sử mượn), mượn -- trả và phiếu phạt, báo cáo (4 tab biểu đồ), cài đặt (sao lưu).
 \begin{figure}[H]
 \centering
-\begin{minipage}{0.48\textwidth}\centering\fcolorbox{xam}{white}{\parbox[c][2.2cm]{0.9\textwidth}{\centering\color{xam}\itshape\small [Chèn ảnh màn hình đăng nhập]}}\end{minipage}\hfill
-\begin{minipage}{0.48\textwidth}\centering\fcolorbox{xam}{white}{\parbox[c][2.2cm]{0.9\textwidth}{\centering\color{xam}\itshape\small [Chèn ảnh màn hình quản lý sách]}}\end{minipage}\\[2mm]
-\begin{minipage}{0.48\textwidth}\centering\fcolorbox{xam}{white}{\parbox[c][2.2cm]{0.9\textwidth}{\centering\color{xam}\itshape\small [Chèn ảnh màn hình mượn -- trả]}}\end{minipage}\hfill
-\begin{minipage}{0.48\textwidth}\centering\fcolorbox{xam}{white}{\parbox[c][2.2cm]{0.9\textwidth}{\centering\color{xam}\itshape\small [Chèn ảnh màn hình báo cáo]}}\end{minipage}
+\begin{minipage}{0.48\textwidth}\centering\fcolorbox{xam}{white}{\parbox[c][2cm]{0.9\textwidth}{\centering\color{xam}\itshape\small [Chèn ảnh màn hình đăng nhập]}}\end{minipage}\hfill
+\begin{minipage}{0.48\textwidth}\centering\fcolorbox{xam}{white}{\parbox[c][2cm]{0.9\textwidth}{\centering\color{xam}\itshape\small [Chèn ảnh màn hình quản lý sách]}}\end{minipage}\\[2mm]
+\begin{minipage}{0.48\textwidth}\centering\fcolorbox{xam}{white}{\parbox[c][2cm]{0.9\textwidth}{\centering\color{xam}\itshape\small [Chèn ảnh màn hình mượn -- trả]}}\end{minipage}\hfill
+\begin{minipage}{0.48\textwidth}\centering\fcolorbox{xam}{white}{\parbox[c][2cm]{0.9\textwidth}{\centering\color{xam}\itshape\small [Chèn ảnh màn hình báo cáo]}}\end{minipage}
 \caption{Các màn hình chính của website demo}
 \end{figure}
 
 \section{Kết quả đạt được}
 \begin{itemize}
-\item Phân tích và cài đặt hoàn chỉnh CSDL QUANLYTHUVIEN gồm 11 bảng, 12 ràng buộc toàn vẹn (7 CHECK, 5 trigger) cùng bộ dữ liệu mẫu bao quát các tình huống nghiệp vụ.
+\item Phân tích và cài đặt hoàn chỉnh CSDL QUANLYTHUVIEN gồm 11 bảng, 12 ràng buộc toàn vẹn chính (7 nhóm CHECK, 5 trigger) cùng bộ dữ liệu mẫu bao quát các tình huống nghiệp vụ.
 \item Hiện thực đủ số lượng đối tượng xử lý theo yêu cầu: 5 stored procedure nghiệp vụ, 5 trigger, 3 function, 2 cursor; tất cả được kiểm chứng bằng kết quả chạy thật.
 \item Hoàn thành các nội dung an toàn thông tin: xác thực hai lớp, phân quyền ba role bằng GRANT/DENY/REVOKE, import/export, sao lưu FULL/DIFF và phục hồi.
-\item Xây dựng 5 report trên website, lấy dữ liệu trực tiếp từ view, và website demo cho phép thao tác các chức năng nghiệp vụ.
+\item Xây dựng 5 report lấy dữ liệu trực tiếp từ view và website demo cho các chức năng nghiệp vụ.
 \end{itemize}
 
 \section{Hạn chế}
@@ -943,15 +932,14 @@ Website demo được xây dựng để trình bày các nội dung xử lý th�
 \item Website demo hiện chỉ có một tài khoản quản trị; ba vai trò quản lý, thủ thư, độc giả mới được phân quyền ở mức SQL Server, chưa tách thành các giao diện riêng trên web.
 \item Mã phiếu phạt được sinh bằng \texttt{MAX + 1} trong trigger, chưa khóa bảng như khi sinh mã phiếu mượn, nên có thể trùng mã khi nhiều người trả sách đồng thời.
 \item Các script nạp dữ liệu lớn phải tạm tắt trigger; nếu script dừng giữa chừng thì trigger không được bật lại và các ràng buộc nghiệp vụ ngừng hoạt động.
-\item Chưa có cơ chế gửi nhắc nhở thật (email/SMS); dữ liệu mẫu còn nhỏ nên chưa đánh giá được hiệu năng của cursor trên dữ liệu lớn.
+\item Chưa gửi nhắc nhở thật (email/SMS); chưa đánh giá hiệu năng cursor trên dữ liệu lớn.
 \end{itemize}
 
 \section{Hướng phát triển}
 \begin{itemize}
-\item Bổ sung đăng nhập theo vai trò trên website và cổng tra cứu dành cho độc giả.
-\item Thêm nghiệp vụ gia hạn, đặt trước sách và quét mã vạch khi mượn -- trả.
+\item Đăng nhập theo vai trò trên website, cổng tra cứu cho độc giả; gia hạn, đặt trước sách, quét mã vạch.
 \item Gửi nhắc nhở quá hạn qua email hoặc SMS từ bảng NHACNHO\_QUAHAN; lập lịch sao lưu tự động bằng SQL Server Agent.
-\item Dùng \texttt{SEQUENCE} hoặc cột IDENTITY để sinh mã an toàn khi truy cập đồng thời; kiểm tra trạng thái trigger sau mỗi lần nạp dữ liệu.
+\item Sinh mã bằng \texttt{SEQUENCE}/IDENTITY; kiểm tra trạng thái trigger sau mỗi lần nạp dữ liệu.
 \end{itemize}
 
 \section{Video demo}
