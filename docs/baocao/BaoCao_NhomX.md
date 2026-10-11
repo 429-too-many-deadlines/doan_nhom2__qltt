@@ -77,15 +77,62 @@
 
 ## MỤC LỤC
 
-<!--MUCLUC-->
+- **CHƯƠNG 1: MÔ TẢ BÀI TOÁN**
+  - 1.1. Phát biểu bài toán
+  - 1.2. Mục tiêu
+  - 1.3. Đối tượng sử dụng
+  - 1.4. Quy trình nghiệp vụ thực tế
+    - 1.4.1. Quy trình lập thẻ độc giả
+    - 1.4.2. Quy trình mượn sách
+    - 1.4.3. Quy trình trả sách và xử lý phạt
+- **CHƯƠNG 2: PHÂN TÍCH VÀ THIẾT KẾ**
+  - 2.1. Các chức năng của hệ thống
+  - 2.2. Các thực thể, thuộc tính và mối quan hệ
+  - 2.3. Ràng buộc toàn vẹn
+  - 2.4. Sơ đồ ERD (mức quan niệm)
+  - 2.5. Mô hình logic và tân từ
+- **CHƯƠNG 3: CÀI ĐẶT**
+  - 3.1. Tạo bảng, khóa chính, khóa ngoại và ràng buộc
+  - 3.2. Dữ liệu mẫu
+- **CHƯƠNG 4: QUẢN LÝ THÔNG TIN**
+  - 4.1. Xử lý thông tin
+    - 4.1.1. Stored Procedure
+    - 4.1.2. Trigger
+    - 4.1.3. Function
+    - 4.1.4. Cursor
+  - 4.2. An toàn thông tin
+    - 4.2.1. Xác thực
+    - 4.2.2. Phân quyền
+    - 4.2.3. Import và Export
+    - 4.2.4. Backup và Restore
+  - 4.3. Trình bày thông tin (Report)
+- **CHƯƠNG 5: DEMO VÀ KẾT LUẬN**
+  - 5.1. Website demo
+  - 5.2. Kết quả đạt được
+  - 5.3. Hạn chế
+  - 5.4. Hướng phát triển
+  - 5.5. Video demo
+- **TÀI LIỆU THAM KHẢO**
 
 ## DANH MỤC BẢNG
 
-<!--DMBANG-->
+- Bảng 2.1: Danh sách thực thể và thuộc tính
+- Bảng 2.2: Danh sách ràng buộc toàn vẹn
+- Bảng 3.1: Số dòng dữ liệu của từng bảng
+- Bảng 4.1: Phân quyền theo role
 
 ## DANH MỤC HÌNH VẼ
 
-<!--DMHINH-->
+- Hình 1.1: Sơ đồ quy trình mượn – trả sách và xử lý phạt
+- Hình 2.1: Sơ đồ ERD của CSDL QUANLYTHUVIEN
+- Hình 3.1: Cấu trúc bảng DAUSACH và CTPHIEUMUON
+- Hình 3.2: Dữ liệu mẫu bảng DOCGIA và PHIEUMUON
+- Hình 4.1: Report tình trạng kho sách
+- Hình 4.2: Report đầu sách được mượn nhiều nhất
+- Hình 4.3: Report lượt mượn theo tháng
+- Hình 4.4: Report tiền phạt theo lý do
+- Hình 4.5: Report độc giả giữ sách quá hạn
+- Hình 5.1: Các màn hình chính của website demo
 
 ---
 
@@ -308,6 +355,7 @@ Dữ liệu mẫu mô phỏng hoạt động của thư viện từ tháng 4 đ�
 | DAUSACH | 16 | DAUSACH_TACGIA | 17 |  |  |
 
 Dữ liệu được chọn để bao phủ các tình huống nghiệp vụ và các giá trị biên:
+
 - **Độc giả:** thẻ đã hết hạn (DG006, hết hạn 31/08/2026); đang nợ phạt (DG009 nợ 250.000đ do làm mất sách); chưa từng mượn (DG012); không có email (DG013, DG015) hoặc không có địa chỉ (DG015).
 - **Sách:** cuốn bị hư (CS006, CS012), cuốn bị mất (CS015); đầu sách chưa có tác giả (DS016); thể loại chưa có sách (TL08); tác giả không rõ năm sinh (TG010); nhà xuất bản thiếu địa chỉ (NXB10).
 - **Mượn – trả:** phiếu trả đúng hạn, trả trễ, trả một phần (PM0012, PM0016), phiếu đang quá hạn; phiếu phạt đủ ba lý do, có phiếu đã và chưa thanh toán.
@@ -799,6 +847,7 @@ CLOSE CUR_QUAHAN  DEALLOCATE CUR_QUAHAN
 ### 4.2.1. Xác thực
 
 Hệ thống có hai lớp xác thực:
+
 - **SQL Server Authentication:** ba login `LG_QUANLY`, `LG_THUTHU`, `LG_DOCGIA` được tạo bằng `CREATE LOGIN ... WITH PASSWORD = ..., CHECK_POLICY = ON` (bắt buộc mật khẩu đủ mạnh), CSDL mặc định là QUANLYTHUVIEN. Mỗi login được ánh xạ tới một user trong CSDL bằng `CREATE USER U_... FOR LOGIN LG_...`.
 - **Đăng nhập website:** bảng TAIKHOAN không lưu mật khẩu gốc mà lưu `HASHBYTES('SHA2_256', matkhau)`. Thủ tục `SP_DANGNHAP` băm mật khẩu người dùng nhập rồi so sánh; tham số ra @KETQUA bằng 0 (sai), 1 (tài khoản bị khóa) hoặc 2 (thành công).
 **Kết quả:** Cột MATKHAU của tài khoản `admin` có dạng `0xEC278A38901287B277...`; `SP_DANGNHAP 'admin', '123456'` trả @KETQUA = 2, nhập sai mật khẩu trả @KETQUA = 0.
@@ -891,8 +940,54 @@ Có 6 cuốn quá hạn thuộc 5 độc giả; trễ lâu nhất là DG001 vớ
 
 # CHƯƠNG 5: DEMO VÀ KẾT LUẬN
 
-<!--CH5-->
+## 5.1. Website demo
+
+Website demo được xây dựng để trình bày các nội dung xử lý thông tin; mọi dữ liệu hiển thị đều được truy vấn trực tiếp từ SQL Server qua stored procedure, function và view, không lưu sẵn ở backend.
+
+- **Frontend:** React 19, TypeScript, Vite, Tailwind CSS 4, bộ component shadcn/ui; biểu đồ báo cáo dùng Recharts.
+- **Backend:** ASP.NET Core Web API (.NET 10), truy cập CSDL bằng Dapper; hầu hết endpoint gọi stored procedure với `CommandType.StoredProcedure`.
+- **CSDL và điều phối:** SQL Server 2022 chạy trong Docker; .NET Aspire khởi động đồng thời backend, frontend và trang dashboard theo dõi log.
+
+**Cách chạy:** (1) `docker compose up -d` để chạy SQL Server; (2) chạy lần lượt các script trong thư mục `db/` (hoặc `db/init_all.sql`); (3) `npm install` trong thư mục `frontend`; (4) `dotnet run --project QuanLyThuVien.AppHost`; (5) đăng nhập bằng tài khoản `admin`. Các màn hình chính gồm: đăng nhập, tổng quan, quản lý sách (kèm danh sách cuốn sách và tác giả), độc giả (kèm lịch sử mượn), mượn – trả và phiếu phạt, báo cáo (4 tab biểu đồ, nút chạy cursor) và cài đặt (sao lưu).
+
+| | |
+|---|---|
+| *[Chèn ảnh màn hình đăng nhập]* | *[Chèn ảnh màn hình quản lý sách]* |
+| *[Chèn ảnh màn hình mượn – trả]* | *[Chèn ảnh màn hình báo cáo]* |
+
+*Hình 5.1: Các màn hình chính của website demo*
+
+## 5.2. Kết quả đạt được
+
+- Phân tích và cài đặt hoàn chỉnh CSDL QUANLYTHUVIEN gồm 11 bảng, 12 ràng buộc toàn vẹn (7 CHECK, 5 trigger) cùng bộ dữ liệu mẫu bao quát các tình huống nghiệp vụ.
+- Hiện thực đủ số lượng đối tượng xử lý theo yêu cầu: 5 stored procedure nghiệp vụ, 5 trigger, 3 function, 2 cursor; tất cả được kiểm chứng bằng kết quả chạy thật.
+- Hoàn thành các nội dung an toàn thông tin: xác thực hai lớp, phân quyền ba role bằng GRANT/DENY/REVOKE, import/export, sao lưu FULL/DIFF và phục hồi.
+- Xây dựng 5 report trên website, lấy dữ liệu trực tiếp từ view, và website demo cho phép thao tác các chức năng nghiệp vụ.
+
+## 5.3. Hạn chế
+
+- Website demo hiện chỉ có một tài khoản quản trị; ba vai trò quản lý, thủ thư, độc giả mới được phân quyền ở mức SQL Server, chưa tách thành các giao diện riêng trên web.
+- Mã phiếu phạt được sinh bằng `MAX + 1` trong trigger, chưa khóa bảng như khi sinh mã phiếu mượn, nên có thể trùng mã khi nhiều người trả sách đồng thời.
+- Các script nạp dữ liệu lớn phải tạm tắt trigger; nếu script dừng giữa chừng thì trigger không được bật lại và các ràng buộc nghiệp vụ ngừng hoạt động.
+- Chưa có cơ chế gửi nhắc nhở thật (email/SMS); dữ liệu mẫu còn nhỏ nên chưa đánh giá được hiệu năng của cursor trên dữ liệu lớn.
+
+## 5.4. Hướng phát triển
+
+- Bổ sung đăng nhập theo vai trò trên website và cổng tra cứu dành cho độc giả.
+- Thêm nghiệp vụ gia hạn, đặt trước sách và quét mã vạch khi mượn – trả.
+- Gửi nhắc nhở quá hạn qua email hoặc SMS từ bảng NHACNHO_QUAHAN; lập lịch sao lưu tự động bằng SQL Server Agent.
+- Dùng `SEQUENCE` hoặc cột IDENTITY để sinh mã an toàn khi truy cập đồng thời; kiểm tra trạng thái trigger sau mỗi lần nạp dữ liệu.
+
+## 5.5. Video demo
+
+**Link video:** [Dán link Google Drive, chế độ công khai]
 
 # TÀI LIỆU THAM KHẢO
 
-<!--TLTK-->
+[1] Nguyễn Gia Tuấn Anh, Trương Châu Long, *Bài tập và bài giải SQL Server*. TP. HCM: NXB Thanh niên, 2005.  
+[2] Đỗ Phúc, Nguyễn Đăng Tỵ, *Cơ sở dữ liệu*. TP. HCM: NXB Đại học Quốc gia TP. HCM, 2010.  
+[3] Nguyễn Gia Tuấn Anh, Mai Văn Cường, Bùi Danh Hường, *Cơ sở dữ liệu nâng cao*. TP. HCM: NXB Đại học Quốc gia TP. HCM, 2019.  
+[4] I. Ben-Gan, *Microsoft SQL Server 2012 T-SQL Fundamentals*. Redmond, WA: Microsoft Press, 2012.  
+[5] Khoa Khoa học và Kỹ thuật Thông tin, "Slide bài giảng IE103 – Quản lý thông tin," Trường ĐH Công nghệ Thông tin, ĐHQG-HCM, 2026.  
+[6] Microsoft, "CREATE TRIGGER (Transact-SQL)," *Microsoft Learn*. [Online]. Available: https://learn.microsoft.com/sql/t-sql/statements/create-trigger-transact-sql  
+[7] Microsoft, "Back up and restore of SQL Server databases," *Microsoft Learn*. [Online]. Available: https://learn.microsoft.com/sql/relational-databases/backup-restore/back-up-and-restore-of-sql-server-databases  

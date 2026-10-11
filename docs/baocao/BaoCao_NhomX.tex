@@ -913,12 +913,64 @@ Tổng tiền phạt là 498.000đ từ 10 phiếu, trong đó phạt mất sác
 Có 6 cuốn quá hạn thuộc 5 độc giả; trễ lâu nhất là DG001 với 26 ngày (tạm tính 130.000đ), tiếp theo là DG004 với 17 ngày (85.000đ). Danh sách này là đầu vào cho cursor nhắc nhở ở mục 4.1.4.
 
 \chapter{DEMO VÀ KẾT LUẬN}
-%%CH5%%
+\section{Website demo}
+Website demo được xây dựng để trình bày các nội dung xử lý thông tin; mọi dữ liệu hiển thị đều được truy vấn trực tiếp từ SQL Server qua stored procedure, function và view, không lưu sẵn ở backend.
+\begin{itemize}
+\item \textbf{Frontend:} React 19, TypeScript, Vite, Tailwind CSS 4, bộ component shadcn/ui; biểu đồ báo cáo dùng Recharts.
+\item \textbf{Backend:} ASP.NET Core Web API (.NET 10), truy cập CSDL bằng Dapper; hầu hết endpoint gọi stored procedure với \texttt{CommandType.StoredProcedure}.
+\item \textbf{CSDL và điều phối:} SQL Server 2022 chạy trong Docker; .NET Aspire khởi động đồng thời backend, frontend và trang dashboard theo dõi log.
+\end{itemize}
+\textbf{Cách chạy:} (1) \texttt{docker compose up -d} để chạy SQL Server; (2) chạy lần lượt các script trong thư mục \texttt{db/} (hoặc \texttt{db/init\_all.sql}); (3) \texttt{npm install} trong thư mục \texttt{frontend}; (4) \texttt{dotnet run -{}-project QuanLyThuVien.AppHost}; (5) đăng nhập bằng tài khoản \texttt{admin}. Các màn hình chính gồm: đăng nhập, tổng quan, quản lý sách (kèm danh sách cuốn sách và tác giả), độc giả (kèm lịch sử mượn), mượn -- trả và phiếu phạt, báo cáo (4 tab biểu đồ, nút chạy cursor) và cài đặt (sao lưu).
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.48\textwidth}\centering\fcolorbox{xam}{white}{\parbox[c][2.2cm]{0.9\textwidth}{\centering\color{xam}\itshape\small [Chèn ảnh màn hình đăng nhập]}}\end{minipage}\hfill
+\begin{minipage}{0.48\textwidth}\centering\fcolorbox{xam}{white}{\parbox[c][2.2cm]{0.9\textwidth}{\centering\color{xam}\itshape\small [Chèn ảnh màn hình quản lý sách]}}\end{minipage}\\[2mm]
+\begin{minipage}{0.48\textwidth}\centering\fcolorbox{xam}{white}{\parbox[c][2.2cm]{0.9\textwidth}{\centering\color{xam}\itshape\small [Chèn ảnh màn hình mượn -- trả]}}\end{minipage}\hfill
+\begin{minipage}{0.48\textwidth}\centering\fcolorbox{xam}{white}{\parbox[c][2.2cm]{0.9\textwidth}{\centering\color{xam}\itshape\small [Chèn ảnh màn hình báo cáo]}}\end{minipage}
+\caption{Các màn hình chính của website demo}
+\end{figure}
+
+\section{Kết quả đạt được}
+\begin{itemize}
+\item Phân tích và cài đặt hoàn chỉnh CSDL QUANLYTHUVIEN gồm 11 bảng, 12 ràng buộc toàn vẹn (7 CHECK, 5 trigger) cùng bộ dữ liệu mẫu bao quát các tình huống nghiệp vụ.
+\item Hiện thực đủ số lượng đối tượng xử lý theo yêu cầu: 5 stored procedure nghiệp vụ, 5 trigger, 3 function, 2 cursor; tất cả được kiểm chứng bằng kết quả chạy thật.
+\item Hoàn thành các nội dung an toàn thông tin: xác thực hai lớp, phân quyền ba role bằng GRANT/DENY/REVOKE, import/export, sao lưu FULL/DIFF và phục hồi.
+\item Xây dựng 5 report trên website, lấy dữ liệu trực tiếp từ view, và website demo cho phép thao tác các chức năng nghiệp vụ.
+\end{itemize}
+
+\section{Hạn chế}
+\begin{itemize}
+\item Website demo hiện chỉ có một tài khoản quản trị; ba vai trò quản lý, thủ thư, độc giả mới được phân quyền ở mức SQL Server, chưa tách thành các giao diện riêng trên web.
+\item Mã phiếu phạt được sinh bằng \texttt{MAX + 1} trong trigger, chưa khóa bảng như khi sinh mã phiếu mượn, nên có thể trùng mã khi nhiều người trả sách đồng thời.
+\item Các script nạp dữ liệu lớn phải tạm tắt trigger; nếu script dừng giữa chừng thì trigger không được bật lại và các ràng buộc nghiệp vụ ngừng hoạt động.
+\item Chưa có cơ chế gửi nhắc nhở thật (email/SMS); dữ liệu mẫu còn nhỏ nên chưa đánh giá được hiệu năng của cursor trên dữ liệu lớn.
+\end{itemize}
+
+\section{Hướng phát triển}
+\begin{itemize}
+\item Bổ sung đăng nhập theo vai trò trên website và cổng tra cứu dành cho độc giả.
+\item Thêm nghiệp vụ gia hạn, đặt trước sách và quét mã vạch khi mượn -- trả.
+\item Gửi nhắc nhở quá hạn qua email hoặc SMS từ bảng NHACNHO\_QUAHAN; lập lịch sao lưu tự động bằng SQL Server Agent.
+\item Dùng \texttt{SEQUENCE} hoặc cột IDENTITY để sinh mã an toàn khi truy cập đồng thời; kiểm tra trạng thái trigger sau mỗi lần nạp dữ liệu.
+\end{itemize}
+
+\section{Video demo}
+\textbf{Link video:} [Dán link Google Drive, chế độ công khai]
 
 \clearpage
 \phantomsection
 \addcontentsline{toc}{chapter}{TÀI LIỆU THAM KHẢO}
 \begin{center}{\bfseries\Large\color{xanh} TÀI LIỆU THAM KHẢO}\end{center}
-%%TLTK%%
+{\sloppy
+\begin{enumerate}[label={[\arabic*]},leftmargin=2.5em,itemsep=2pt]
+\item Nguyễn Gia Tuấn Anh, Trương Châu Long, \textit{Bài tập và bài giải SQL Server}. TP. HCM: NXB Thanh niên, 2005.
+\item Đỗ Phúc, Nguyễn Đăng Tỵ, \textit{Cơ sở dữ liệu}. TP. HCM: NXB Đại học Quốc gia TP. HCM, 2010.
+\item Nguyễn Gia Tuấn Anh, Mai Văn Cường, Bùi Danh Hường, \textit{Cơ sở dữ liệu nâng cao}. TP. HCM: NXB Đại học Quốc gia TP. HCM, 2019.
+\item I. Ben-Gan, \textit{Microsoft SQL Server 2012 T-SQL Fundamentals}. Redmond, WA: Microsoft Press, 2012.
+\item Khoa Khoa học và Kỹ thuật Thông tin, ``Slide bài giảng IE103 -- Quản lý thông tin,'' Trường ĐH Công nghệ Thông tin, ĐHQG-HCM, 2026.
+\item Microsoft, ``CREATE TRIGGER (Transact-SQL),'' \textit{Microsoft Learn}. [Online]. Available: https://learn.microsoft.com/sql/t-sql/statements/create-trigger-transact-sql
+\item Microsoft, ``Back up and restore of SQL Server databases,'' \textit{Microsoft Learn}. [Online]. Available: https://learn.microsoft.com/sql/relational-databases/backup-restore/back-up-and-restore-of-sql-server-databases
+\end{enumerate}
+\par}
 
 \end{document}
