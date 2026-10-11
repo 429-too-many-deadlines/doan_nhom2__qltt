@@ -4,7 +4,7 @@ set -uo pipefail
 cd "$(dirname "$0")"
 latexmk -pdf -interaction=nonstopmode -halt-on-error BaoCao_NhomX.tex >/dev/null 2>&1
 rc=$?
-echo "Errors: $(grep -c '^!' BaoCao_NhomX.log 2>/dev/null)"
+echo "Errors: $(grep -a -c '^!' BaoCao_NhomX.log 2>/dev/null)  Overfull: $(grep -a -c 'Overfull' BaoCao_NhomX.log 2>/dev/null)"
 [ -f BaoCao_NhomX.pdf ] && pdfinfo BaoCao_NhomX.pdf | grep Pages
 # Trang so (dem tu Chuong 1 = trang 1) cua tung chuong / muc lon
 python3 - <<'PY' 2>/dev/null

@@ -51,7 +51,8 @@
 \setlength{\cftfignumwidth}{4.5em}
 
 % Code: Courier co 11, khung don (fancyvrb + inputenc utf8 + T5)
-\DefineVerbatimEnvironment{sql}{Verbatim}{frame=single,fontsize=\fontsize{10.5}{12}\selectfont,framesep=2mm,xleftmargin=0mm}
+\usepackage{upquote}
+\DefineVerbatimEnvironment{sql}{Verbatim}{frame=single,fontsize=\fontsize{9}{10.5}\selectfont,framesep=1.5mm,xleftmargin=0mm}
 
 % Khung giu cho anh chup va nhan muc
 \newcommand{\anhgiucho}[1]{\begin{center}\fcolorbox{xam}{white}{\parbox{0.85\textwidth}{\centering\color{xam}\itshape\small [Chèn ảnh chụp #1]}}\end{center}\vspace{-6pt}}
@@ -361,10 +362,359 @@ Khóa chính được gạch chân, khóa ngoại in nghiêng.
 \end{enumerate}}
 
 \chapter{CÀI ĐẶT}
-%%CH3%%
+\section{Tạo bảng, khóa chính, khóa ngoại và ràng buộc}
+CSDL được cài đặt trên \textbf{Microsoft SQL Server 2022}, chạy trong Docker (image \texttt{mssql/server:2022-latest}), với collation \texttt{Vietnamese\_CI\_AS} để sắp xếp và so sánh đúng tiếng Việt. {\sloppy Toàn bộ script được chia thành các tệp theo yêu cầu đồ án: \texttt{1\_TaoBang.sql} (11 bảng), \texttt{2\_DuLieuMau.sql}, \texttt{3\_Function.sql}, \texttt{4\_Trigger.sql}, \texttt{5\_StoredProcedure.sql}, \texttt{6\_Cursor.sql}, \texttt{7\_AnToanThongTin.sql} và \texttt{8\_Report.sql}. Chạy lại tệp 1 sẽ xóa và tạo lại toàn bộ CSDL.\par} Hai câu lệnh tiêu biểu:
+
+\begin{sql}
+CREATE TABLE DAUSACH (
+  MADS    CHAR(5)       PRIMARY KEY,
+  TENDS   NVARCHAR(100) NOT NULL,
+  MATL    CHAR(4) NOT NULL FOREIGN KEY REFERENCES THELOAI (MATL),
+  MANXB   CHAR(5) NOT NULL FOREIGN KEY REFERENCES NHAXUATBAN (MANXB),
+  NAMXB   INT NOT NULL,  SOTRANG INT NOT NULL,  GIA MONEY NOT NULL,
+  SOLUONG INT NOT NULL DEFAULT 0,  SLCON INT NOT NULL DEFAULT 0,
+  CONSTRAINT CK_DAUSACH_NAMXB CHECK (NAMXB BETWEEN 1900 AND YEAR(GETDATE())),
+  CONSTRAINT CK_DAUSACH_GIA   CHECK (GIA > 0),
+  CONSTRAINT CK_DAUSACH_SL    CHECK (SOLUONG >= 0
+                              AND SLCON BETWEEN 0 AND SOLUONG))
+
+CREATE TABLE CTPHIEUMUON (
+  MAPM CHAR(6) FOREIGN KEY REFERENCES PHIEUMUON (MAPM),
+  MACS CHAR(5) FOREIGN KEY REFERENCES CUONSACH (MACS),
+  NGAYTRA DATE NULL,  TINHTRANGTRA NVARCHAR(20) NULL,
+  PRIMARY KEY (MAPM, MACS),
+  CONSTRAINT CK_CTPM_TINHTRANGTRA CHECK (TINHTRANGTRA IN
+             (N'Bình thường', N'Hư hỏng', N'Mất')),
+  CONSTRAINT CK_CTPM_TRASACH CHECK ((NGAYTRA IS NULL AND TINHTRANGTRA IS NULL)
+             OR (NGAYTRA IS NOT NULL AND TINHTRANGTRA IS NOT NULL)))
+\end{sql}
+Khóa chính gồm nhiều cột (\texttt{CTPHIEUMUON}, \texttt{DAUSACH\_TACGIA}) được khai báo bằng mệnh đề \texttt{PRIMARY KEY (...)}. \texttt{PHIEUPHAT} dùng khóa ngoại kép \texttt{(MAPM, MACS)} tham chiếu đến \texttt{CTPHIEUMUON}. Mật khẩu trong \texttt{TAIKHOAN} có kiểu \texttt{VARBINARY(32)} để chứa giá trị băm SHA2-256.
+\anhgiucho{cấu trúc bảng DAUSACH và CTPHIEUMUON trong SSMS / Object Explorer}
+\captionof{figure}{Cấu trúc bảng DAUSACH và CTPHIEUMUON}
+
+\section{Dữ liệu mẫu}
+Dữ liệu mẫu mô phỏng hoạt động của thư viện từ tháng 4 đến tháng 9/2026. Bảng~\ref{tab:sodong} là số dòng thực tế của từng bảng tại thời điểm chụp CSDL (ngày 11/10/2026).
+\begin{table}[H]
+\centering\small
+\caption{Số dòng dữ liệu của từng bảng}\label{tab:sodong}
+\begin{tabular}{|l|c||l|c||l|c|}\hline
+\rowcolor{nenbang}\textbf{Bảng} & \textbf{Dòng} & \textbf{Bảng} & \textbf{Dòng} & \textbf{Bảng} & \textbf{Dòng}\\\hline
+THELOAI & 9 & CUONSACH & 26 & CTPHIEUMUON & 38\\\hline
+TACGIA & 16 & DOCGIA & 118 & PHIEUPHAT & 10\\\hline
+NHAXUATBAN & 10 & PHIEUMUON & 23 & TAIKHOAN & 1\\\hline
+DAUSACH & 16 & DAUSACH\_TACGIA & 17 & & \\\hline
+\end{tabular}
+\end{table}
+Dữ liệu được chọn để bao phủ các tình huống nghiệp vụ và các giá trị biên:
+\begin{itemize}
+\item \textbf{Độc giả:} thẻ đã hết hạn (DG006, hết hạn 31/08/2026); đang nợ phạt (DG009 nợ 250.000đ do làm mất sách); chưa từng mượn (DG012); không có email (DG013, DG015) hoặc không có địa chỉ (DG015).
+\item \textbf{Sách:} cuốn bị hư (CS006, CS012), cuốn bị mất (CS015); đầu sách chưa có tác giả (DS016); thể loại chưa có sách (TL08); tác giả không rõ năm sinh (TG010); nhà xuất bản thiếu địa chỉ (NXB10).
+\item \textbf{Mượn -- trả:} phiếu trả đúng hạn, trả trễ, trả một phần (PM0012, PM0016), phiếu đang quá hạn; phiếu phạt đủ ba lý do, có phiếu đã và chưa thanh toán.
+\end{itemize}
+\anhgiucho{dữ liệu mẫu bảng DOCGIA và PHIEUMUON}
+\captionof{figure}{Dữ liệu mẫu bảng DOCGIA và PHIEUMUON}
 
 \chapter{QUẢN LÝ THÔNG TIN}
-%%CH4%%
+\section{Xử lý thông tin}
+Tất cả kết quả trong chương này được chạy trên \textbf{bản sao} \texttt{QUANLYTHUVIEN\_BAOCAO} của CSDL vào ngày 11/10/2026, nên các giá trị phụ thuộc ngày hiện tại (số ngày trễ, hạn trả, hạn thẻ) được tính theo ngày này. Script và kết quả đầy đủ nằm trong thư mục \texttt{docs/baocao/ketqua/}.
+
+\subsection{Stored Procedure}
+
+\textbf{Procedure 1:} SP\_THEMDOCGIA (tham số vào)
+
+\muc{Bài toán} Lập thẻ cho độc giả mới. Nếu mã độc giả đã tồn tại thì trả về 0; ngược lại thêm độc giả với ngày lập thẻ là hôm nay, thẻ có hạn 2 năm, và trả về 2.
+
+\muc{Code}
+\begin{sql}
+CREATE OR ALTER PROCEDURE SP_THEMDOCGIA @MADG CHAR(5), @HOTEN NVARCHAR(40),
+  @NGSINH DATE, @GIOITINH NVARCHAR(3), @DIACHI NVARCHAR(100),
+  @SODT VARCHAR(15), @EMAIL VARCHAR(50)
+AS BEGIN
+  IF EXISTS (SELECT * FROM DOCGIA WHERE MADG = @MADG)
+  BEGIN PRINT N'Mã độc giả đã tồn tại.'; RETURN 0; END
+  DECLARE @NGAYLAP DATE = GETDATE();
+  INSERT INTO DOCGIA (MADG, HOTEN, NGSINH, GIOITINH, DIACHI, SODT, EMAIL,
+                      NGAYLAPTHE, NGAYHETHAN)
+  VALUES (@MADG, @HOTEN, @NGSINH, @GIOITINH, @DIACHI, @SODT, @EMAIL,
+          @NGAYLAP, DATEADD(YEAR, 2, @NGAYLAP));
+  RETURN 2;
+END
+\end{sql}
+\muc{Kết quả} Gọi \texttt{EXEC @kq = SP\_THEMDOCGIA 'DG999', N'Trần Thị Mai', '2004-03-15', ...} hai lần liên tiếp.
+\begin{center}\footnotesize\begin{tabular}{|l|l|}\hline
+\rowcolor{nenbang}\textbf{Trước} & \textbf{Sau}\\\hline
+Số độc giả: 118 & Số độc giả: 119; lần 1 trả về 2, lần 2 trả về 0 (``Mã độc giả đã tồn tại.'')\\
+ & DG999 -- Trần Thị Mai, lập thẻ 2026-10-11, hết hạn 2028-10-11, TONGNO = 0\\\hline
+\end{tabular}\end{center}
+\anhgiucho{trước và sau khi chạy SP\_THEMDOCGIA}
+
+\muc{Giải thích} Thủ tục kiểm tra trùng khóa trước khi thêm để trả mã lỗi rõ ràng thay vì để SQL Server báo lỗi vi phạm khóa chính. Ngày hết hạn được tính bằng \texttt{DATEADD}. Ràng buộc tuổi và email vẫn do CHECK của bảng \texttt{DOCGIA} kiểm tra.
+
+\textbf{Procedure 2:} SP\_LAPPHIEUMUON (tham số vào và ra)
+
+\muc{Bài toán} Lập phiếu mượn cho một độc giả với danh sách mã cuốn sách cách nhau bởi dấu phẩy. Mã phiếu tự tăng và được trả ra qua tham số OUTPUT; hạn trả là 14 ngày. Nếu một cuốn bất kỳ không hợp lệ thì hủy toàn bộ phiếu.
+
+\muc{Code}
+\begin{sql}
+CREATE OR ALTER PROCEDURE SP_LAPPHIEUMUON
+  @MADG CHAR(5), @DSMACS VARCHAR(200), @MAPM CHAR(6) OUTPUT
+AS BEGIN
+  ...  -- kiem tra doc gia ton tai va danh sach khong rong
+  BEGIN TRY
+    BEGIN TRANSACTION;
+    SELECT @MAX = ISNULL(MAX(CAST(SUBSTRING(MAPM, 3, 4) AS INT)), 0)
+    FROM PHIEUMUON WITH (UPDLOCK, HOLDLOCK);
+    SET @MAPM = 'PM' + RIGHT('0000' + CAST(@MAX + 1 AS VARCHAR(4)), 4);
+    INSERT INTO PHIEUMUON (MAPM, MADG, NGAYMUON, HANTRA, TINHTRANG)
+    VALUES (@MAPM, @MADG, CAST(GETDATE() AS DATE),
+            DATEADD(DAY, 14, CAST(GETDATE() AS DATE)), N'Đang mượn');
+    INSERT INTO CTPHIEUMUON (MAPM, MACS)
+    SELECT DISTINCT @MAPM, LTRIM(RTRIM(value))
+    FROM STRING_SPLIT(@DSMACS, ',') WHERE LTRIM(RTRIM(value)) <> '';
+    COMMIT TRANSACTION; RETURN 1;
+  END TRY
+  BEGIN CATCH
+    IF @@TRANCOUNT > 0 ROLLBACK;
+    SET @MAPM = NULL; RAISERROR(...); RETURN 0;
+  END CATCH
+END
+\end{sql}
+\muc{Kết quả} Độc giả DG012 (chưa từng mượn, không nợ) mượn hai cuốn CS001 và CS002 của đầu sách DS001 ``Mắt biếc''.
+\begin{center}\footnotesize\begin{tabular}{|l|l|}\hline
+\rowcolor{nenbang}\textbf{Trước} & \textbf{Sau}\\\hline
+CS001, CS002: Có sẵn; DS001.SLCON = 2 & Trả về 1, @MAPM = PM0329; phiếu ngày mượn 2026-10-11, hạn 2026-10-25\\
+ & CS001, CS002: Đang mượn; DS001.SLCON = 0\\\hline
+\end{tabular}\end{center}
+\anhgiucho{trước và sau khi chạy SP\_LAPPHIEUMUON}
+
+\muc{Giải thích} Toàn bộ thao tác nằm trong một transaction: lỗi ở bất kỳ cuốn nào (do trigger chặn) sẽ rollback cả phiếu. \texttt{UPDLOCK, HOLDLOCK} ngăn hai người lập phiếu cùng lúc sinh trùng mã. Việc kiểm tra thẻ, công nợ và tình trạng sách được giao cho trigger (mục 4.1.2), nên tình trạng cuốn sách và SLCON tự đổi theo.
+
+\textbf{Procedure 3:} SP\_TRASACH (tham số vào và ra)
+
+\muc{Bài toán} Ghi nhận trả một cuốn sách của một phiếu với tình trạng khi trả, và trả ra tổng tiền phạt phát sinh. Trả về 0 nếu không tìm thấy, 1 nếu sách đã được trả trước đó, 2 nếu thành công.
+
+\muc{Code}
+\begin{sql}
+CREATE OR ALTER PROCEDURE SP_TRASACH @MAPM CHAR(6), @MACS CHAR(5),
+  @TINHTRANGTRA NVARCHAR(20) = N'Bình thường', @TIENPHAT MONEY OUTPUT
+AS BEGIN
+  SET @TIENPHAT = 0;
+  IF NOT EXISTS (SELECT * FROM CTPHIEUMUON WHERE MAPM = @MAPM AND MACS = @MACS)
+    RETURN 0;
+  IF EXISTS (SELECT * FROM CTPHIEUMUON WHERE MAPM = @MAPM AND MACS = @MACS
+             AND NGAYTRA IS NOT NULL) RETURN 1;
+  UPDATE CTPHIEUMUON SET NGAYTRA = CAST(GETDATE() AS DATE),
+         TINHTRANGTRA = @TINHTRANGTRA
+  WHERE MAPM = @MAPM AND MACS = @MACS;
+  SELECT @TIENPHAT = ISNULL(SUM(SOTIEN), 0) FROM PHIEUPHAT
+  WHERE MAPM = @MAPM AND MACS = @MACS AND DATHANHTOAN = 0;
+  RETURN 2;
+END
+\end{sql}
+\muc{Kết quả} Trả cuốn CS011 của phiếu PM0011 (độc giả DG001, hạn trả 2026-09-15) với tình trạng bình thường.
+\begin{center}\footnotesize\begin{tabular}{|l|l|}\hline
+\rowcolor{nenbang}\textbf{Trước} & \textbf{Sau}\\\hline
+CS011: Đang mượn, chưa trả & Trả về 2, @TIENPHAT = 130.000; CS011: Có sẵn; PM0011: Đã trả\\
+DG001.TONGNO = 0 & Phiếu phạt PP0011 ``Trả trễ'' 130.000đ; DG001.TONGNO = 130.000\\\hline
+\end{tabular}\end{center}
+\anhgiucho{trước và sau khi chạy SP\_TRASACH}
+
+\muc{Giải thích} Thủ tục chỉ cập nhật ngày trả và tình trạng; việc đổi trạng thái cuốn sách, lập phiếu phạt (26 ngày $\times$ 5.000đ) và đóng phiếu do trigger \texttt{TRG\_CTPM\_TRASACH} đảm nhận. Sau đó thủ tục đọc lại bảng PHIEUPHAT để trả về số tiền phạt cho giao diện.
+
+\textbf{Procedure 4:} SP\_THANHTOANPHAT (tham số vào và ra)
+
+\muc{Bài toán} Thanh toán toàn bộ tiền phạt chưa trả của một độc giả, trả ra số tiền đã thu. Trả về 0 nếu độc giả không tồn tại, 1 nếu không có khoản nợ, 2 nếu thành công.
+
+\muc{Code}
+\begin{sql}
+CREATE OR ALTER PROCEDURE SP_THANHTOANPHAT @MADG CHAR(5), @SOTIEN MONEY OUTPUT
+AS BEGIN
+  SET @SOTIEN = 0;
+  IF NOT EXISTS (SELECT * FROM DOCGIA WHERE MADG = @MADG) RETURN 0;
+  SELECT @SOTIEN = ISNULL(SUM(PP.SOTIEN), 0)
+  FROM PHIEUPHAT PP JOIN PHIEUMUON PM ON PP.MAPM = PM.MAPM
+  WHERE PM.MADG = @MADG AND PP.DATHANHTOAN = 0;
+  IF @SOTIEN = 0 RETURN 1;
+  UPDATE PHIEUPHAT SET DATHANHTOAN = 1
+  WHERE DATHANHTOAN = 0
+    AND MAPM IN (SELECT MAPM FROM PHIEUMUON WHERE MADG = @MADG);
+  RETURN 2;
+END
+\end{sql}
+\muc{Kết quả} Độc giả DG010 có phiếu phạt PP0008 (15.000đ) chưa thanh toán.
+\begin{center}\footnotesize\begin{tabular}{|l|l|}\hline
+\rowcolor{nenbang}\textbf{Trước} & \textbf{Sau}\\\hline
+PP0008: DATHANHTOAN = 0 & Lần 1: trả về 2, @SOTIEN = 15.000; PP0008: DATHANHTOAN = 1\\
+DG010.TONGNO = 15.000 & DG010.TONGNO = 0; lần 2: trả về 1 (không còn khoản nợ)\\\hline
+\end{tabular}\end{center}
+\anhgiucho{trước và sau khi chạy SP\_THANHTOANPHAT}
+
+\muc{Giải thích} Số tiền được tính trước khi cập nhật để trả ra đúng số đã thu. Thủ tục không tự sửa TONGNO mà để trigger \texttt{TRG\_PHIEUPHAT\_TONGNO} tính lại, nên công nợ luôn khớp với các phiếu phạt.
+
+\textbf{Procedure 5:} SP\_THONGKETHANG (tham số vào và ra)
+
+\muc{Bài toán} Thống kê hoạt động của một tháng: trả ra số phiếu mượn, số lượt sách được mượn, tổng tiền phạt phát sinh; đồng thời trả về bảng 5 đầu sách được mượn nhiều nhất trong tháng.
+
+\muc{Code}
+\begin{sql}
+CREATE OR ALTER PROCEDURE SP_THONGKETHANG @THANG INT, @NAM INT,
+  @SOPHIEU INT OUTPUT, @SOLUOTSACH INT OUTPUT, @TIENPHAT MONEY OUTPUT
+AS BEGIN
+  SELECT @SOPHIEU = COUNT(*) FROM PHIEUMUON
+  WHERE MONTH(NGAYMUON) = @THANG AND YEAR(NGAYMUON) = @NAM;
+  SELECT @SOLUOTSACH = COUNT(*) FROM CTPHIEUMUON CT
+    JOIN PHIEUMUON PM ON CT.MAPM = PM.MAPM
+  WHERE MONTH(PM.NGAYMUON) = @THANG AND YEAR(PM.NGAYMUON) = @NAM;
+  SELECT @TIENPHAT = ISNULL(SUM(SOTIEN), 0) FROM PHIEUPHAT
+  WHERE MONTH(NGAYLAP) = @THANG AND YEAR(NGAYLAP) = @NAM;
+  SELECT TOP 5 DS.MADS, DS.TENDS, COUNT(*) AS SOLUOTMUON
+  FROM CTPHIEUMUON CT JOIN PHIEUMUON PM ON CT.MAPM = PM.MAPM
+    JOIN CUONSACH CS ON CT.MACS = CS.MACS JOIN DAUSACH DS ON CS.MADS = DS.MADS
+  WHERE MONTH(PM.NGAYMUON) = @THANG AND YEAR(PM.NGAYMUON) = @NAM
+  GROUP BY DS.MADS, DS.TENDS ORDER BY SOLUOTMUON DESC, DS.MADS;
+END
+\end{sql}
+\muc{Kết quả} \texttt{EXEC SP\_THONGKETHANG 9, 2026, ...}: @SOPHIEU = 6, @SOLUOTSACH = 11, @TIENPHAT = 0. Top 5: Clean Code (2 lượt), Mắt biếc, Dế Mèn phiêu lưu ký, Nhà giả kim, Đắc nhân tâm (1 lượt mỗi đầu sách).
+\anhgiucho{kết quả SP\_THONGKETHANG tháng 9/2026}
+
+\muc{Giải thích} Thủ tục kết hợp hai cách trả kết quả: ba chỉ số tổng hợp qua tham số OUTPUT và một bảng chi tiết qua câu SELECT. Tiền phạt tháng 9 bằng 0 vì các phiếu phạt trong dữ liệu mẫu được lập từ tháng 6 đến tháng 8/2026.
+
+\subsection{Trigger}
+
+\textbf{Trigger 1:} TRG\_CUONSACH\_CAPNHATSL (AFTER INSERT, UPDATE, DELETE trên CUONSACH)
+
+\muc{Bài toán} Giữ cho hai thuộc tính dẫn xuất DAUSACH.SOLUONG (tổng số cuốn) và DAUSACH.SLCON (số cuốn ``Có sẵn'') luôn đúng mỗi khi thêm, xóa cuốn sách hoặc đổi tình trạng của nó. Tầm ảnh hưởng: CUONSACH (thêm +, xóa +, sửa MADS, TINHTRANG +).
+
+\muc{Code}
+\begin{sql}
+CREATE TRIGGER TRG_CUONSACH_CAPNHATSL ON CUONSACH
+AFTER INSERT, UPDATE, DELETE AS
+BEGIN
+  UPDATE DAUSACH
+  SET SOLUONG = (SELECT COUNT(*) FROM CUONSACH CS WHERE CS.MADS = DAUSACH.MADS),
+      SLCON   = (SELECT COUNT(*) FROM CUONSACH CS WHERE CS.MADS = DAUSACH.MADS
+                 AND CS.TINHTRANG = N'Có sẵn')
+  WHERE MADS IN (SELECT MADS FROM inserted UNION SELECT MADS FROM deleted)
+END
+\end{sql}
+\muc{Kết quả} Đầu sách DS009 ``Clean Code'': ban đầu SOLUONG = 2, SLCON = 0. Thêm cuốn CS999 $\Rightarrow$ 3 / 1. Đổi CS999 sang ``Hư hỏng'' $\Rightarrow$ 3 / 0.
+\anhgiucho{SOLUONG, SLCON của DS009 trước và sau khi thêm/sửa CS999}
+
+\muc{Giải thích} Trigger tính lại từ đầu thay vì cộng trừ, nên vẫn đúng khi một lệnh tác động nhiều dòng hoặc chuyển cuốn sách sang đầu sách khác. Hợp \texttt{inserted} và \texttt{deleted} giúp xử lý chung cả ba thao tác.
+
+\textbf{Trigger 2:} TRG\_PHIEUMUON\_KIEMTRA (AFTER INSERT, UPDATE trên PHIEUMUON)
+
+\muc{Bài toán} Chỉ cho lập phiếu mượn khi thẻ độc giả còn hạn tại ngày mượn và độc giả không còn nợ phạt. Tầm ảnh hưởng: PHIEUMUON (thêm +, sửa MADG, NGAYMUON, HANTRA +).
+
+\muc{Code}
+\begin{sql}
+CREATE TRIGGER TRG_PHIEUMUON_KIEMTRA ON PHIEUMUON AFTER INSERT, UPDATE AS
+BEGIN
+  IF NOT (UPDATE(MADG) OR UPDATE(NGAYMUON) OR UPDATE(HANTRA)) RETURN
+  IF EXISTS (SELECT * FROM inserted I JOIN DOCGIA DG ON I.MADG = DG.MADG
+             WHERE I.NGAYMUON > DG.NGAYHETHAN)
+  BEGIN RAISERROR(N'Thẻ độc giả đã hết hạn, không thể lập phiếu mượn.',16,1)
+        ROLLBACK TRANSACTION RETURN END
+  IF EXISTS (SELECT * FROM inserted I JOIN DOCGIA DG ON I.MADG = DG.MADG
+             WHERE DG.TONGNO > 0)
+  BEGIN RAISERROR(N'Độc giả còn nợ tiền phạt, phải thanh toán trước
+                  khi mượn.',16,1)
+        ROLLBACK TRANSACTION RETURN END
+END
+\end{sql}
+\muc{Kết quả} Thử lập phiếu cho DG006 (thẻ hết hạn 2026-08-31) và DG009 (TONGNO = 250.000): cả hai bị từ chối với đúng thông báo trên, không có phiếu nào được tạo.
+\anhgiucho{thông báo lỗi khi lập phiếu cho DG006 và DG009}
+
+\muc{Giải thích} \texttt{IF UPDATE(...)} giúp bỏ qua kiểm tra khi chỉ cập nhật cột TINHTRANG của phiếu (lúc trả sách). Ràng buộc chỉ áp dụng tại thời điểm lập phiếu, không áp dụng hồi tố cho các phiếu cũ.
+
+\textbf{Trigger 3:} TRG\_CTPM\_MUONSACH (AFTER INSERT trên CTPHIEUMUON)
+
+\muc{Bài toán} Khi thêm sách vào phiếu: cuốn sách phải ``Có sẵn'', không nằm trong hai phiếu chưa trả, phiếu phải đang mở; nếu hợp lệ thì chuyển cuốn sách sang ``Đang mượn''. Tầm ảnh hưởng: CTPHIEUMUON (thêm +), CUONSACH (sửa TINHTRANG).
+
+\muc{Code}
+\begin{sql}
+CREATE TRIGGER TRG_CTPM_MUONSACH ON CTPHIEUMUON AFTER INSERT AS
+BEGIN
+  IF EXISTS (SELECT * FROM inserted I JOIN CUONSACH CS ON I.MACS = CS.MACS
+             WHERE I.NGAYTRA IS NULL AND CS.TINHTRANG <> N'Có sẵn')
+  BEGIN RAISERROR(N'Có cuốn sách không ở tình trạng "Có sẵn", ...', 16, 1)
+        ROLLBACK TRANSACTION RETURN END
+  ...  -- kiem tra trung phieu chua tra, phieu da dong
+  UPDATE CUONSACH SET TINHTRANG = N'Đang mượn'
+  WHERE MACS IN (SELECT MACS FROM inserted WHERE NGAYTRA IS NULL)
+END
+\end{sql}
+\muc{Kết quả} Thêm CS015 (Mất) vào phiếu PM0329 và thêm CS001 (đang được mượn ở PM0329) vào một phiếu mới: cả hai bị chặn với thông báo ``Có cuốn sách không ở tình trạng "Có sẵn", không thể cho mượn.''; PM0329 vẫn giữ 2 dòng chi tiết.
+\anhgiucho{thông báo lỗi khi mượn CS015 và CS001}
+
+\muc{Giải thích} Đây là chốt chặn cuối cùng ở tầng CSDL: kể cả khi ứng dụng gửi lệnh INSERT trực tiếp, sách hư, mất hoặc đang được mượn vẫn không thể cho mượn. Rollback trong trigger hủy cả transaction của SP\_LAPPHIEUMUON.
+
+\textbf{Trigger 4:} TRG\_CTPM\_TRASACH (AFTER UPDATE trên CTPHIEUMUON)
+
+\muc{Bài toán} Khi ghi nhận trả sách: cập nhật tình trạng cuốn sách, tự động lập phiếu phạt (trễ 5.000đ/ngày, hư 50\% giá, mất 100\% giá) và đóng phiếu khi trả hết; không cho sửa lại thông tin trả. Tầm ảnh hưởng: CTPHIEUMUON (sửa NGAYTRA, TINHTRANGTRA), CUONSACH, PHIEUMUON (sửa TINHTRANG), PHIEUPHAT (thêm).
+
+\muc{Code}
+\begin{sql}
+CREATE TRIGGER TRG_CTPM_TRASACH ON CTPHIEUMUON AFTER UPDATE AS
+BEGIN
+  ...  -- chan sua lai sach da tra, chan ngay tra truoc ngay muon
+  UPDATE CS SET TINHTRANG = CASE I.TINHTRANGTRA WHEN N'Bình thường'
+                THEN N'Có sẵn' ELSE I.TINHTRANGTRA END
+  FROM CUONSACH CS JOIN inserted I ON CS.MACS = I.MACS
+  WHERE I.NGAYTRA IS NOT NULL
+  ;WITH TRA AS (...),   -- dong vua tra kem HANTRA, GIA
+  PHAT AS (
+    SELECT MAPM, MACS, NGAYTRA, N'Trả trễ' AS LYDO,
+           dbo.FN_TIENPHATTRE(HANTRA, NGAYTRA) AS SOTIEN
+    FROM TRA WHERE NGAYTRA > HANTRA
+    UNION ALL SELECT MAPM, MACS, NGAYTRA, N'Hư hỏng', GIA * 0.5 FROM TRA
+              WHERE TINHTRANGTRA = N'Hư hỏng'
+    UNION ALL SELECT MAPM, MACS, NGAYTRA, N'Mất sách', GIA FROM TRA
+              WHERE TINHTRANGTRA = N'Mất')
+  INSERT INTO PHIEUPHAT (MAPP, MAPM, MACS, NGAYLAP, LYDO, SOTIEN, DATHANHTOAN)
+  SELECT 'PP' + RIGHT('0000' + CAST(@MAX + ROW_NUMBER() OVER (ORDER BY MAPM,
+         MACS, LYDO) AS VARCHAR(4)), 4), MAPM, MACS, NGAYTRA, LYDO, SOTIEN, 0
+  FROM PHAT
+  UPDATE PHIEUMUON SET TINHTRANG = N'Đã trả'
+  WHERE MAPM IN (SELECT MAPM FROM inserted)
+    AND NOT EXISTS (SELECT * FROM CTPHIEUMUON CT
+                    WHERE CT.MAPM = PHIEUMUON.MAPM AND CT.NGAYTRA IS NULL)
+END
+\end{sql}
+\muc{Kết quả} Trả cuốn CS003 (giá 110.000đ) của phiếu PM0014 (hạn 2026-10-04) vào ngày 2026-10-11 với tình trạng ``Hư hỏng''.
+\begin{center}\footnotesize\begin{tabular}{|l|l|}\hline
+\rowcolor{nenbang}\textbf{Trước} & \textbf{Sau}\\\hline
+CS003: Đang mượn; PM0014: Đang mượn & CS003: Hư hỏng; PM0014 vẫn ``Đang mượn'' (CS007 chưa trả)\\
+Chưa có phiếu phạt cho PM0014 & PP0012 Hư hỏng 55.000đ; PP0013 Trả trễ 35.000đ (7 ngày)\\
+ & Sửa lại thông tin trả: ``Sách đã được trả, không thể cập nhật lại thông tin trả.''\\\hline
+\end{tabular}\end{center}
+\anhgiucho{trước và sau khi trả CS003 của PM0014}
+
+\muc{Giải thích} Một lần trả có thể sinh nhiều phiếu phạt nhờ \texttt{UNION ALL} ba trường hợp. Mã phiếu phạt được đánh số tiếp theo bằng \texttt{ROW\_NUMBER()}, nên trigger đúng cả khi một lệnh UPDATE trả nhiều cuốn cùng lúc.
+
+\textbf{Trigger 5:} TRG\_PHIEUPHAT\_TONGNO (AFTER INSERT, UPDATE, DELETE trên PHIEUPHAT)
+
+\muc{Bài toán} Giữ DOCGIA.TONGNO bằng tổng tiền các phiếu phạt chưa thanh toán của độc giả. Tầm ảnh hưởng: PHIEUPHAT (thêm, xóa, sửa SOTIEN, DATHANHTOAN, MAPM).
+
+\muc{Code}
+\begin{sql}
+CREATE TRIGGER TRG_PHIEUPHAT_TONGNO ON PHIEUPHAT
+AFTER INSERT, UPDATE, DELETE AS
+BEGIN
+  UPDATE DOCGIA
+  SET TONGNO = ISNULL((SELECT SUM(PP.SOTIEN) FROM PHIEUPHAT PP
+                       JOIN PHIEUMUON PM ON PP.MAPM = PM.MAPM
+                       WHERE PM.MADG = DOCGIA.MADG AND PP.DATHANHTOAN = 0), 0)
+  WHERE MADG IN (SELECT PM.MADG FROM PHIEUMUON PM WHERE PM.MAPM IN
+                 (SELECT MAPM FROM inserted UNION SELECT MAPM FROM deleted))
+END
+\end{sql}
+\muc{Kết quả} Sau khi trả CS003, DG014 có TONGNO = 90.000 (55.000 + 35.000). Đánh dấu PP0013 đã thanh toán $\Rightarrow$ TONGNO = 55.000.
+\anhgiucho{TONGNO của DG014 trước và sau khi thanh toán PP0013}
+
+\muc{Giải thích} Trigger này được kích hoạt dây chuyền từ TRG\_CTPM\_TRASACH (khi lập phiếu phạt) và từ SP\_THANHTOANPHAT (khi thanh toán), nhờ đó TONGNO luôn đồng bộ mà không thủ tục nào phải tự cập nhật.
+
+%%CH4B%%
 
 \chapter{DEMO VÀ KẾT LUẬN}
 %%CH5%%
