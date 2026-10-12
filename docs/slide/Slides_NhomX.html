@@ -287,6 +287,123 @@ pre .o { color: var(--primary); font-weight: 600; } pre .v { color: #0369A1; } p
   </div>
 </section>
 
+<!-- ===== Slide 4: 1.1–1.3 ===== -->
+<section class="slide">
+  <header><span class="chip">Chương 1 · Mô tả bài toán</span><h2>Bài toán, mục tiêu và đối tượng sử dụng</h2></header>
+  <div class="body grid g3">
+    <div class="card">
+      <h3><span class="ico red"><svg><use href="#i-alert"/></svg></span>Khó khăn khi quản lý thủ công</h3>
+      <ul class="list">
+        <li>Không biết một cuốn sách đang trên kệ, đang được mượn hay đã hư, mất; số lượng phải đếm tay.</li>
+        <li>Tiền phạt tính tay, dễ sai; độc giả còn nợ vẫn mượn tiếp.</li>
+        <li>Nhắc trả sách quá hạn và thống kê cuối tháng tốn công.</li>
+        <li>Dữ liệu rải rác nhiều tệp, không phân quyền, không sao lưu.</li>
+      </ul>
+      <p class="note-box">Phạm vi: danh mục sách, độc giả và thẻ thư viện, mượn – trả, tiền phạt, báo cáo, an toàn dữ liệu.</p>
+    </div>
+    <div class="card">
+      <h3><span class="ico"><svg><use href="#i-target"/></svg></span>Mục tiêu hệ thống</h3>
+      <ul class="list check">
+        <li>Theo dõi từng cuốn sách; <b>SOLUONG</b>, <b>SLCON</b> tự cập nhật.</li>
+        <li>Kiểm tra điều kiện mượn ngay tại CSDL: thẻ còn hạn, không nợ, sách “Có sẵn”.</li>
+        <li>Tự lập phiếu phạt khi trễ, hư, mất và tự cộng dồn công nợ.</li>
+        <li>Phân quyền theo vai trò, mật khẩu lưu dạng băm, sao lưu và phục hồi.</li>
+        <li>Báo cáo trực quan lấy trực tiếp từ CSDL.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3><span class="ico green"><svg><use href="#i-users"/></svg></span>Đối tượng sử dụng</h3>
+      <div class="role" style="margin-top:0"><div class="role-h"><b>Quản lý thư viện</b><span class="tag mono">R_QUANLY</span></div>
+        <p>Toàn quyền dữ liệu, chạy mọi thủ tục, xem báo cáo, sao lưu. Trên web: tài khoản <span class="mono">admin</span>.</p></div>
+      <div class="role"><div class="role-h"><b>Thủ thư</b><span class="tag sky mono">R_THUTHU</span></div>
+        <p>Lập thẻ, lập phiếu mượn, nhận trả, thu phạt, nhắc quá hạn; không được xóa, không xem tài khoản.</p></div>
+      <div class="role"><div class="role-h"><b>Độc giả</b><span class="tag green mono">R_DOCGIA</span></div>
+        <p>Chỉ tra cứu danh mục sách và tình trạng sẵn có.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Slide 5: 1.4 Quy trình ===== -->
+<section class="slide">
+  <header><span class="chip">Chương 1 · Mô tả bài toán</span><h2>Quy trình nghiệp vụ: lập thẻ, mượn, trả và xử lý phạt</h2></header>
+  <div class="body grid" style="grid-template-columns:1.35fr 1fr;gap:18px">
+    <div class="card" style="padding:12px">
+      <svg viewBox="0 0 720 520" width="100%" aria-label="Sơ đồ quy trình mượn trả" font-family="Be Vietnam Pro, Segoe UI, sans-serif" font-size="13">
+        <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="#64748B"/></marker></defs>
+        <g fill="none" stroke="#64748B" stroke-width="1.6" marker-end="url(#ar)">
+          <path d="M360 48V62"/><path d="M360 132V150"/><path d="M480 98H628V120"/><path d="M480 186H628V172"/>
+          <path d="M360 220V238"/><path d="M360 280V304"/><path d="M360 346V356"/><path d="M360 426V458"/>
+          <path d="M240 392H192"/><path d="M100 412V458"/><path d="M175 412L236 462"/>
+        </g>
+        <g font-size="12" fill="#475569" font-weight="600">
+          <text x="368" y="146">Có</text><text x="500" y="90">Không</text><text x="500" y="178">Không</text>
+          <text x="368" y="234">Có</text><text x="368" y="448">Không</text><text x="206" y="384">Có</text>
+        </g>
+        <g stroke-width="1.5">
+          <rect x="230" y="8" width="260" height="40" rx="10" fill="#fff" stroke="#CBD5E1"/>
+          <polygon points="240,98 360,64 480,98 360,132" fill="#EFF6FF" stroke="#93C5FD"/>
+          <polygon points="240,186 360,152 480,186 360,220" fill="#EFF6FF" stroke="#93C5FD"/>
+          <rect x="548" y="120" width="160" height="52" rx="10" fill="#FEF2F2" stroke="#FCA5A5"/>
+          <rect x="230" y="240" width="260" height="40" rx="10" fill="#EFF6FF" stroke="#93C5FD"/>
+          <rect x="230" y="306" width="260" height="40" rx="10" fill="#fff" stroke="#CBD5E1"/>
+          <polygon points="240,392 360,358 480,392 360,426" fill="#FFFBEB" stroke="#FCD34D"/>
+          <rect x="10" y="372" width="180" height="40" rx="10" fill="#FFFBEB" stroke="#FCD34D"/>
+          <rect x="230" y="460" width="260" height="40" rx="10" fill="#ECFDF5" stroke="#6EE7B7"/>
+          <rect x="10" y="460" width="180" height="40" rx="10" fill="#ECFDF5" stroke="#6EE7B7"/>
+        </g>
+        <g text-anchor="middle" fill="#0F172A">
+          <text x="360" y="33">Độc giả đưa thẻ và sách muốn mượn</text>
+          <text x="360" y="103">Thẻ còn hạn, không nợ?</text>
+          <text x="360" y="191">Cuốn sách “Có sẵn”?</text>
+          <text x="628" y="142" fill="#B91C1C" font-weight="600">Từ chối:</text>
+          <text x="628" y="160" fill="#B91C1C">gia hạn thẻ / trả nợ</text>
+          <text x="360" y="265" font-weight="600" fill="#1D4ED8">Lập phiếu mượn, hạn trả 14 ngày</text>
+          <text x="360" y="331">Trả sách: ghi ngày trả, tình trạng</text>
+          <text x="360" y="397">Trễ hạn, hư hoặc mất?</text>
+          <text x="100" y="397" fill="#B45309" font-weight="600">Tự lập phiếu phạt, tăng nợ</text>
+          <text x="360" y="485" fill="#047857" font-weight="600">Cập nhật cuốn sách, đóng phiếu</text>
+          <text x="100" y="485" fill="#047857">Thanh toán, công nợ về 0</text>
+        </g>
+      </svg>
+    </div>
+    <div class="stack" style="gap:12px">
+      <div class="card" style="padding:14px 16px">
+        <h3 style="margin-bottom:4px"><span class="ico"><svg><use href="#i-user"/></svg></span>Lập thẻ độc giả</h3>
+        <div class="small muted">Kiểm tra tuổi và email, cấp mã độc giả, công nợ ban đầu bằng 0.</div>
+        <span class="pill">Đủ 16 tuổi</span><span class="pill">Thẻ có hạn 2 năm</span><span class="pill green">TONGNO = 0</span>
+      </div>
+      <div class="card" style="padding:14px 16px">
+        <h3 style="margin-bottom:4px"><span class="ico sky"><svg><use href="#i-book"/></svg></span>Mượn sách</h3>
+        <div class="small muted">Kiểm tra thẻ, công nợ và từng cuốn; các cuốn chuyển sang “Đang mượn”.</div>
+        <span class="pill">Thẻ còn hạn</span><span class="pill">Không nợ phạt</span><span class="pill green">Cuốn “Có sẵn”</span><span class="pill sky">Hạn trả 14 ngày</span>
+      </div>
+      <div class="card" style="padding:14px 16px">
+        <h3 style="margin-bottom:4px"><span class="ico amber"><svg><use href="#i-alert"/></svg></span>Trả sách và xử lý phạt</h3>
+        <div class="small muted">Một lần trả có thể sinh nhiều phiếu phạt; trả hết thì phiếu “Đã trả”.</div>
+        <span class="pill amber">Trễ: 5.000đ/ngày</span><span class="pill amber">Hư: 50% giá</span><span class="pill red">Mất: 100% giá</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Slide 6: 2.1 Chức năng ===== -->
+<section class="slide">
+  <header><span class="chip">Chương 2 · Phân tích và thiết kế</span><h2>Các chức năng của hệ thống</h2></header>
+  <div class="body">
+    <div class="grid g4" style="gap:16px">
+      <div class="card"><h3><span class="ico"><svg><use href="#i-key"/></svg></span>Xác thực</h3><p class="muted small" style="margin:0;line-height:1.5">Đăng nhập so khớp mật khẩu băm, đổi mật khẩu; tài khoản bị khóa (TRANGTHAI = 0) không vào được.</p></div>
+      <div class="card"><h3><span class="ico sky"><svg><use href="#i-layers"/></svg></span>Quản lý danh mục</h3><p class="muted small" style="margin:0;line-height:1.5">Thể loại, tác giả, nhà xuất bản; đầu sách kèm tác giả và vai trò (tác giả, đồng tác giả, dịch giả).</p></div>
+      <div class="card"><h3><span class="ico green"><svg><use href="#i-box"/></svg></span>Quản lý kho sách</h3><p class="muted small" style="margin:0;line-height:1.5">Nhập từng cuốn, ghi vị trí kệ, cập nhật tình trạng; số lượng và số cuốn còn sẵn tự tính.</p></div>
+      <div class="card"><h3><span class="ico amber"><svg><use href="#i-users"/></svg></span>Quản lý độc giả</h3><p class="muted small" style="margin:0;line-height:1.5">Lập thẻ, sửa thông tin, tìm theo mã hoặc họ tên; xem lịch sử mượn và công nợ.</p></div>
+      <div class="card"><h3><span class="ico"><svg><use href="#i-swap"/></svg></span>Mượn – trả</h3><p class="muted small" style="margin:0;line-height:1.5">Phiếu mượn nhiều cuốn, trả từng cuốn, tự lập phiếu phạt và thanh toán phạt.</p></div>
+      <div class="card"><h3><span class="ico sky"><svg><use href="#i-bell"/></svg></span>Nhắc nhở và xếp loại</h3><p class="muted small" style="margin:0;line-height:1.5">Danh sách nhắc độc giả giữ sách quá hạn; xếp loại mức độ uy tín của độc giả.</p></div>
+      <div class="card"><h3><span class="ico green"><svg><use href="#i-chart"/></svg></span>Báo cáo</h3><p class="muted small" style="margin:0;line-height:1.5">Tình trạng kho, sách mượn nhiều, lượt mượn và tiền phạt theo tháng, độc giả quá hạn.</p></div>
+      <div class="card"><h3><span class="ico amber"><svg><use href="#i-shield"/></svg></span>Quản trị CSDL</h3><p class="muted small" style="margin:0;line-height:1.5">Phân quyền theo role, import/export dữ liệu, sao lưu và phục hồi.</p></div>
+    </div>
+    <p class="note-box" style="margin-top:18px;display:flex;gap:10px;align-items:center"><span class="ico"><svg><use href="#i-db"/></svg></span>Mỗi chức năng trên website gọi trực tiếp stored procedure, function hoặc view trong CSDL <b class="mono">QUANLYTHUVIEN</b>; website không lưu sẵn dữ liệu.</p>
+  </div>
+</section>
+
 <!-- /slides -->
 </main>
 
@@ -369,6 +486,8 @@ pre .o { color: var(--primary); font-weight: 600; } pre .v { color: #0369A1; } p
   }
   if (new URLSearchParams(location.search).has('check')) {
     document.body.classList.add('checking');
+    removeEventListener('resize', fit);
+    document.documentElement.style.setProperty('--s', 1);  // đo ở kích thước gốc 1280×720
     document.fonts.ready.then(function () {
       var bad = measure();
       document.body.setAttribute('data-overflow', bad.length ? bad.join(',') : 'none');
