@@ -236,11 +236,8 @@ pre .o { color: var(--primary); font-weight: 600; } pre .v { color: #0369A1; } p
         <ul class="list" style="font-size:14px"><li>Bảng, khóa chính, khóa ngoại, ràng buộc</li><li>Dữ liệu mẫu</li></ul></div>
       <div class="card"><div class="gradient-text" style="font-size:40px;font-weight:800">04</div><h3>Quản lý thông tin</h3>
         <ul class="list" style="font-size:14px"><li>Xử lý thông tin: SP, trigger, function, cursor</li><li>An toàn thông tin</li><li>Trình bày thông tin (report)</li></ul></div>
-      <div class="card"><div class="gradient-text" style="font-size:40px;font-weight:800">05</div><h3>Demo và kết luận</h3>
-        <ul class="list" style="font-size:14px"><li>Website demo</li><li>Kết quả đạt được</li><li>Hạn chế, hướng phát triển</li><li>Video demo</li></ul></div>
-    </div>
-    <div class="muted" style="margin-top:20px;font-size:15px;display:flex;align-items:center;gap:10px">
-      <span class="ico sky"><svg><use href="#i-file"/></svg></span>Tài liệu tham khảo: giáo trình môn học, slide IE103 và tài liệu Microsoft SQL Server
+      <div class="card"><div class="gradient-text" style="font-size:40px;font-weight:800">05</div><h3>Kết luận</h3>
+        <ul class="list" style="font-size:14px"><li>Kết quả đạt được</li><li>Hạn chế, hướng phát triển</li><li>Tài liệu tham khảo</li></ul></div>
     </div>
   </div>
 </section>
@@ -825,50 +822,9 @@ RESTORE DATABASE QUANLYTHUVIEN FROM DISK = N'..._DIFF.bak'
   </div>
 </section>
 
-<!-- ===== Slide 15: 5.1 Website demo ===== -->
+<!-- ===== Slide 15: 5.2–5.4 ===== -->
 <section class="slide">
-  <header><span class="chip">Chương 5 · Demo và kết luận</span><h2>Website demo</h2></header>
-  <div class="body grid" style="grid-template-columns:1.1fr 1fr;gap:18px">
-    <div class="stack">
-      <div class="card">
-        <h3><span class="ico"><svg><use href="#i-layers"/></svg></span>Kiến trúc <span class="pill sky" style="margin:0 0 0 auto;font-size:12.5px">Điều phối bằng .NET Aspire</span></h3>
-        <div style="display:grid;grid-template-columns:1fr 22px 1fr 22px 1fr;align-items:stretch;gap:4px">
-          <div class="stat" style="padding:10px"><b>Frontend</b><div class="l">React 19, Vite, Tailwind, shadcn/ui, Recharts</div></div>
-          <div style="display:grid;place-items:center;color:#94A3B8;font-weight:800">→</div>
-          <div class="stat" style="padding:10px"><b>Backend</b><div class="l">ASP.NET Core (.NET 10), Dapper, gọi SP</div></div>
-          <div style="display:grid;place-items:center;color:#94A3B8;font-weight:800">→</div>
-          <div class="stat" style="padding:10px"><b>CSDL</b><div class="l">SQL Server 2022 trong Docker</div></div>
-        </div>
-      </div>
-      <div class="card">
-        <h3><span class="ico sky"><svg><use href="#i-monitor"/></svg></span>Luồng demo cho mỗi đối tượng</h3>
-        <div class="flow">
-          <span class="step">B1 Bài toán</span><span class="to">→</span><span class="step">B2 Câu SQL</span><span class="to">→</span><span class="step">B3 Bảng trước</span><span class="to">→</span><span class="step">B4 Thực thi</span><span class="to">→</span><span class="step">B5 Bảng sau</span>
-        </div>
-      </div>
-      <div class="card">
-        <h3><span class="ico green"><svg><use href="#i-code"/></svg></span>Cách chạy</h3>
-        <ol style="margin:0;padding-left:20px;font-size:13px;line-height:1.5" class="muted">
-          <li><span class="mono">docker compose up -d</span> – chạy SQL Server</li>
-          <li>Chạy <span class="mono">db/init_all.sql</span> (hoặc lần lượt các script trong db/)</li>
-          <li><span class="mono">npm install</span> trong thư mục <span class="mono">frontend</span></li>
-          <li><span class="mono">dotnet run --project QuanLyThuVien.AppHost</span></li>
-          <li>Đăng nhập bằng tài khoản <span class="mono">admin</span></li>
-        </ol>
-      </div>
-    </div>
-    <div class="grid g2" style="gap:14px;grid-template-rows:1fr 1fr">
-      <div class="ph"><div><svg class="i"><use href="#i-monitor"/></svg>[Chèn ảnh màn hình đăng nhập]</div></div>
-      <div class="ph"><div><svg class="i"><use href="#i-monitor"/></svg>[Chèn ảnh màn hình quản lý sách]</div></div>
-      <div class="ph"><div><svg class="i"><use href="#i-monitor"/></svg>[Chèn ảnh màn hình mượn – trả]</div></div>
-      <div class="ph"><div><svg class="i"><use href="#i-monitor"/></svg>[Chèn ảnh màn hình báo cáo]</div></div>
-    </div>
-  </div>
-</section>
-
-<!-- ===== Slide 16: 5.2–5.4 ===== -->
-<section class="slide">
-  <header><span class="chip">Chương 5 · Demo và kết luận</span><h2>Kết quả, hạn chế và hướng phát triển</h2></header>
+  <header><span class="chip">Chương 5 · Kết luận</span><h2>Kết quả, hạn chế và hướng phát triển</h2></header>
   <div class="body grid g3">
     <div class="card">
       <h3><span class="ico green"><svg><use href="#i-check"/></svg></span>Kết quả đạt được</h3>
@@ -876,7 +832,7 @@ RESTORE DATABASE QUANLYTHUVIEN FROM DISK = N'..._DIFF.bak'
         <li>CSDL 11 bảng, 17 ràng buộc toàn vẹn (18 CHECK, 2 UNIQUE, 5 trigger), dữ liệu mẫu bao quát tình huống.</li>
         <li>5 SP nghiệp vụ, 5 trigger, 3 function, 2 cursor, kiểm chứng bằng kết quả chạy thật.</li>
         <li>Xác thực hai lớp, 3 role với GRANT/DENY/REVOKE, import/export, sao lưu FULL/DIFF.</li>
-        <li>5 report và website demo lấy dữ liệu trực tiếp từ CSDL.</li>
+        <li>5 report lấy dữ liệu trực tiếp từ CSDL qua view.</li>
       </ul>
     </div>
     <div class="card">
@@ -900,32 +856,25 @@ RESTORE DATABASE QUANLYTHUVIEN FROM DISK = N'..._DIFF.bak'
   </div>
 </section>
 
-<!-- ===== Slide 17: 5.5 + TLTK ===== -->
+<!-- ===== Slide 16: TLTK ===== -->
 <section class="slide">
-  <header><span class="chip">Chương 5 · Demo và kết luận</span><h2>Video demo và tài liệu tham khảo</h2></header>
-  <div class="body grid" style="grid-template-columns:380px 1fr;gap:18px">
-    <div class="card" style="display:flex;flex-direction:column;justify-content:center;text-align:center;gap:10px">
-      <span class="ico" style="width:72px;height:72px;border-radius:20px;margin:0 auto"><svg style="width:38px;height:38px"><use href="#i-video"/></svg></span>
-      <b style="font-size:20px">Video demo 15 – 20 phút</b>
-      <div class="muted small">Chạy website, minh họa SP, trigger, function, cursor, phân quyền và 5 report.</div>
-      <div class="ph" style="padding:14px;margin-top:6px">[Dán link Google Drive, chế độ công khai]</div>
-    </div>
+  <header><span class="chip">Chương 5 · Kết luận</span><h2>Tài liệu tham khảo</h2></header>
+  <div class="body">
     <div class="card">
-      <h3><span class="ico sky"><svg><use href="#i-file"/></svg></span>Tài liệu tham khảo</h3>
-      <ol style="margin:0;padding:0;list-style:none;font-size:14px;line-height:1.5" class="muted">
-        <li style="margin-bottom:7px">[1] Nguyễn Gia Tuấn Anh, Trương Châu Long, <i>Bài tập và bài giải SQL Server</i>. TP. HCM: NXB Thanh niên, 2005.</li>
-        <li style="margin-bottom:7px">[2] Đỗ Phúc, Nguyễn Đăng Tỵ, <i>Cơ sở dữ liệu</i>. TP. HCM: NXB Đại học Quốc gia TP. HCM, 2010.</li>
-        <li style="margin-bottom:7px">[3] Nguyễn Gia Tuấn Anh, Mai Văn Cường, Bùi Danh Hường, <i>Cơ sở dữ liệu nâng cao</i>. TP. HCM: NXB Đại học Quốc gia TP. HCM, 2019.</li>
-        <li style="margin-bottom:7px">[4] I. Ben-Gan, <i>Microsoft SQL Server 2012 T-SQL Fundamentals</i>. Redmond, WA: Microsoft Press, 2012.</li>
-        <li style="margin-bottom:7px">[5] Khoa Khoa học và Kỹ thuật Thông tin, “Slide bài giảng IE103 – Quản lý thông tin,” Trường ĐH Công nghệ Thông tin, ĐHQG-HCM, 2026.</li>
-        <li style="margin-bottom:7px">[6] Microsoft, “CREATE TRIGGER (Transact-SQL),” <i>Microsoft Learn</i>. [Online]. Available: learn.microsoft.com/sql/t-sql/statements/create-trigger-transact-sql</li>
+      <ol style="margin:0;padding:0;list-style:none;font-size:17px;line-height:1.55" class="muted">
+        <li style="margin-bottom:14px">[1] Nguyễn Gia Tuấn Anh, Trương Châu Long, <i>Bài tập và bài giải SQL Server</i>. TP. HCM: NXB Thanh niên, 2005.</li>
+        <li style="margin-bottom:14px">[2] Đỗ Phúc, Nguyễn Đăng Tỵ, <i>Cơ sở dữ liệu</i>. TP. HCM: NXB Đại học Quốc gia TP. HCM, 2010.</li>
+        <li style="margin-bottom:14px">[3] Nguyễn Gia Tuấn Anh, Mai Văn Cường, Bùi Danh Hường, <i>Cơ sở dữ liệu nâng cao</i>. TP. HCM: NXB Đại học Quốc gia TP. HCM, 2019.</li>
+        <li style="margin-bottom:14px">[4] I. Ben-Gan, <i>Microsoft SQL Server 2012 T-SQL Fundamentals</i>. Redmond, WA: Microsoft Press, 2012.</li>
+        <li style="margin-bottom:14px">[5] Khoa Khoa học và Kỹ thuật Thông tin, “Slide bài giảng IE103 – Quản lý thông tin,” Trường ĐH Công nghệ Thông tin, ĐHQG-HCM, 2026.</li>
+        <li style="margin-bottom:14px">[6] Microsoft, “CREATE TRIGGER (Transact-SQL),” <i>Microsoft Learn</i>. [Online]. Available: learn.microsoft.com/sql/t-sql/statements/create-trigger-transact-sql</li>
         <li>[7] Microsoft, “Back up and restore of SQL Server databases,” <i>Microsoft Learn</i>. [Online]. Available: learn.microsoft.com/sql/relational-databases/backup-restore/back-up-and-restore-of-sql-server-databases</li>
       </ol>
     </div>
   </div>
 </section>
 
-<!-- ===== Slide 18: Cảm ơn ===== -->
+<!-- ===== Slide 17: Cảm ơn ===== -->
 <section class="slide hero">
   <div class="body" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
     <span class="chip">IE103 – Quản lý thông tin · Nhóm X</span>

@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Kiem tra tinh docs/slide/Slides_NhomX.html.
 
-- So slide: dung 18 (hoac it nhat N khi dung --upto N).
+- So slide: dung 17 (hoac it nhat N khi dung --upto N).
 - Moi slide 1..N chua cac chuoi bat buoc trong REQUIRED.
+- Khong con phan demo web (FORBIDDEN).
 - Khong dung <script src>, chi cho phep <link> toi Google Fonts.
 - Khong co the HTML nam ben trong <pre> (dau '<' trong code phai viet &lt;).
 """
@@ -13,7 +14,8 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 HTML = Path(__file__).resolve().parent.parent / "Slides_NhomX.html"
-TOTAL = 18
+TOTAL = 17
+FORBIDDEN = ["Website demo", "Video demo", "Demo và kết luận", "website demo"]
 FONT_HOSTS = ("https://fonts.googleapis.com", "https://fonts.gstatic.com")
 
 REQUIRED = {
@@ -21,7 +23,7 @@ REQUIRED = {
         "XÂY DỰNG HỆ THỐNG", "QUẢN LÝ THƯ VIỆN", "Nhóm thực hiện", "Nhóm 2", "GVHD",
         "Nguyễn Thành Luân", "tháng 10 năm 2026"],
     2: ["Mô tả bài toán", "Phân tích và thiết kế", "Cài đặt", "Quản lý thông tin",
-        "Demo và kết luận", "Tài liệu tham khảo"],
+        "Kết luận", "Tài liệu tham khảo"],
     3: ["R_QUANLY", "R_THUTHU", "R_DOCGIA", "admin"],
     4: ["16 tuổi", "2 năm", "14 ngày", "5.000đ", "50%", "100%", "Có sẵn"],
     5: ["Xác thực", "Quản lý danh mục", "Quản lý kho sách", "Quản lý độc giả", "Mượn – trả",
@@ -42,11 +44,9 @@ REQUIRED = {
          "LG_THUTHU"],
     14: ["VW_BC_TINHTRANGKHO", "VW_BC_SACHMUONNHIEU", "VW_BC_LUOTMUON_THANG",
          "VW_BC_TIENPHAT_THANG", "VW_BC_DOCGIA_QUAHAN", "498.000", "Mắt biếc"],
-    15: ["React", "ASP.NET Core", "Dapper", ".NET Aspire", "B1", "B5", "[Chèn ảnh",
-         "lần lượt các script trong"],
-    16: ["Kết quả đạt được", "Hạn chế", "Hướng phát triển"],
-    17: ["[Dán link Google Drive", "[1]", "[7]"],
-    18: ["Cảm ơn"],
+    15: ["Chương 5 · Kết luận", "Kết quả đạt được", "Hạn chế", "Hướng phát triển"],
+    16: ["Chương 5 · Kết luận", "Tài liệu tham khảo", "[1]", "[7]"],
+    17: ["Cảm ơn"],
 }
 
 
@@ -105,6 +105,10 @@ def main():
         for s in REQUIRED[i]:
             if s not in text:
                 errors.append(f"slide {i}: thieu '{s}'")
+    for i, raw in enumerate(p.slides, 1):
+        for s in FORBIDDEN:
+            if s in raw:
+                errors.append(f"slide {i}: con '{s}'")
     for src in p.scripts:
         errors.append(f"khong duoc dung script ngoai: {src}")
     for href in p.links:
