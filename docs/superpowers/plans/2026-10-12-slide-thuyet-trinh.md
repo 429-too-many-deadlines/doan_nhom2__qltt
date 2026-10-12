@@ -1,0 +1,1635 @@
+# Slide thuyết trình đồ án IE103 – Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Tạo bộ slide 19 trang `docs/slide/Slides_NhomX.html`, nền sáng, bám cấu trúc `BaoCao_NhomX_khung.pdf`, và xuất ra `docs/slide/Slides_NhomX.pdf`.
+
+**Architecture:**
+- Một file HTML tự chứa. Mỗi slide là một `<section class="slide">` kích thước 1280×720.
+- CSS và JS viết trong file: JS lo điều hướng, co giãn theo cửa sổ, chèn footer và thanh tiến độ, tô màu SQL; khi URL có `?check` thì JS đo xem slide nào bị tràn.
+- Kiểm thử gồm hai lớp:
+  - `check_slides.py` (chỉ dùng Python stdlib) kiểm tra tĩnh: số slide và các chuỗi nội dung bắt buộc của từng slide.
+  - `render.sh` gọi Microsoft Edge (bản Windows, chạy từ WSL) ở chế độ headless để kiểm tra tràn chữ, chụp ảnh từng slide và in PDF.
+
+**Tech Stack:** HTML5, CSS, JavaScript thuần (không thư viện), SVG inline, Google Fonts (Be Vietnam Pro, JetBrains Mono), Python 3 stdlib, Microsoft Edge headless, poppler `pdfinfo`.
+
+**Spec:** `docs/superpowers/specs/2026-10-12-slide-thuyet-trinh-design.md`
+
+## Global Constraints
+
+- Đúng **19 slide**. Thứ tự và nội dung theo bảng "Dàn ý" trong spec.
+- Số liệu lấy từ `docs/baocao/BaoCao_NhomX.md` (bản sao CSDL ngày 11/10/2026); không truy vấn CSDL, không chạy lệnh ghi nào trên CSDL.
+- Họ tên, MSSV, số nhóm, link video để dạng `[...]`. Giảng viên: ThS. Nguyễn Thành Luân.
+- Không dùng thẻ `<script src>`. Thẻ `<link>` duy nhất được phép trỏ tới `https://fonts.googleapis.com` / `https://fonts.gstatic.com`.
+- Màu: nền `#F8FAFC`; thẻ nền trắng, viền `#E2E8F0`; màu chính `#2563EB`; màu phụ `#0EA5E9`, `#10B981`; màu nhấn `#F59E0B`; màu lỗi `#EF4444`; chữ `#0F172A` / `#475569`.
+- Font: `'Be Vietnam Pro', 'Segoe UI', system-ui, sans-serif`; code dùng `'JetBrains Mono', Consolas, 'Courier New', monospace`.
+- Footer mọi slide (trừ bìa và slide cảm ơn): `Nhóm X · IE103 – Quản lý thông tin` và `n / 19`; mọi slide có thanh tiến độ.
+- In: `@page { size: 1280px 720px; margin: 0 }`, mỗi slide một trang, giữ nguyên màu nền.
+- Code SQL trên slide là phần lõi, tối đa khoảng 18 dòng. Mọi ký tự `<` trong code viết thành `&lt;`, ký tự `>` viết thành `&gt;`.
+- Phải chạy Edge từ thư mục trên ổ `D:` (repo nằm ở `/mnt/d/...`). Ảnh chụp lưu ở `docs/slide/.shots/` (đã gitignore).
+
+## Review Focus
+
+1. **Hash ngoài phạm vi** (`#0`, `#99`, `#abc`): phải về slide gần nhất hợp lệ (1 hoặc 19), không bị trang trắng. Kiểm bằng bước "kiểm tra điều hướng" ở Task 6.
+2. **Ký tự `<` trong code SQL** (`<>`, `<=`): nếu quên escape, trình duyệt hiểu thành thẻ HTML và code bị mất chữ. `check_slides.py` báo lỗi khi gặp thẻ con bên trong `<pre>` (có từ Task 1).
+3. **Mất mạng nên không tải được Google Fonts**: font dự phòng rộng hơn có thể làm tràn chữ. Bộ đo tràn chạy với đúng font đã tải trong môi trường dựng PDF, nên PDF luôn khớp với kết quả đo; mỗi khối nội dung chừa khoảng 8px dư.
+4. **Cửa sổ trình duyệt không phải 16:9** (ví dụ 1366×768, màn hình dọc): slide phải co giãn giữ nguyên tỉ lệ, nằm giữa, không bị cắt. Có bước kiểm tra ảnh chụp ở 1366×768 trong Task 6.
+5. **In bằng Ctrl+P trên trình duyệt** (không qua headless): phải ra 19 trang, đủ footer và đủ màu. Do `@media print` đảm bảo; kiểm bằng PDF in qua Edge ở Task 6, cùng một engine.
+
+---
+
+## File Structure
+
+| File | Trách nhiệm |
+|---|---|
+| `docs/slide/Slides_NhomX.html` | Bộ slide: CSS, sprite icon SVG, 19 `<section class="slide">`, JS điều hướng / co giãn / tô màu SQL / đo tràn |
+| `docs/slide/tools/check_slides.py` | Kiểm tra tĩnh: số slide, chuỗi bắt buộc từng slide, không tài nguyên ngoài, không có thẻ trong `<pre>` |
+| `docs/slide/tools/render.sh` | Edge headless: `check` (đo tràn), `shots` (ảnh từng slide), `pdf` (xuất PDF) |
+| `docs/slide/.gitignore` | Bỏ qua `.shots/` |
+| `docs/slide/Slides_NhomX.pdf` | Sinh ra ở Task 6 |
+
+Các slide mới được chèn ngay **trước** dòng đánh dấu `<!-- /slides -->` trong file HTML.
+
+---
+
+### Task 1: Bộ công cụ kiểm thử, khung HTML và slide 1–3
+
+**Files:**
+- Create: `docs/slide/tools/check_slides.py`
+- Create: `docs/slide/tools/render.sh`
+- Create: `docs/slide/.gitignore`
+- Create: `docs/slide/Slides_NhomX.html`
+
+**Interfaces:**
+- Produces:
+  - `python3 docs/slide/tools/check_slides.py [--upto N]`: thoát mã 0 nếu đạt, mã 1 và in danh sách lỗi nếu không đạt.
+  - `bash docs/slide/tools/render.sh check|shots|pdf`.
+  - Các lớp CSS dùng ở các task sau: `.slide`, `.hero`, `header`, `.chip`, `.note`, `.body`, `.grid`, `.g2` … `.g6`, `.card`, `.ico` (cùng biến thể `.red`, `.green`, `.amber`, `.sky`), `ul.list`, `ul.list.check`, `.note-box`, `.pill` (cùng biến thể `.green`, `.amber`, `.red`, `.sky`), `.tag` (cùng biến thể), `table.t`, `pre.sql`, `pre.sql.sm`, `pre.code`, `.mono`, `.muted`, `.small`, `.stat`, `.ba`/`.before`/`.after`/`.arrow`, `.flow`/`.step`/`.to`, `.obj`/`.obj-h`/`.name`/`.res`, `.role`/`.role-h`, `.schema`/`.r`/`.d`, `.ph`, `.hbar`, `.legend`, `.dot`.
+  - Icon dùng qua `<svg><use href="#i-NAME"/></svg>`, với NAME ∈ {book, user, users, lock, shield, db, chart, swap, bell, layers, box, key, upload, save, code, zap, fn, loop, alert, target, check, x, search, server, monitor, video, trend, file}.
+
+- [ ] **Step 1: Viết script kiểm tra tĩnh (test)**
+
+Tạo `docs/slide/tools/check_slides.py`:
+
+```python
+#!/usr/bin/env python3
+"""Kiem tra tinh docs/slide/Slides_NhomX.html.
+
+- So slide: dung 19 (hoac it nhat N khi dung --upto N).
+- Moi slide 1..N chua cac chuoi bat buoc trong REQUIRED.
+- Khong dung <script src>, chi cho phep <link> toi Google Fonts.
+- Khong co the HTML nam ben trong <pre> (dau '<' trong code phai viet &lt;).
+"""
+import argparse
+import re
+import sys
+from html.parser import HTMLParser
+from pathlib import Path
+
+HTML = Path(__file__).resolve().parent.parent / "Slides_NhomX.html"
+TOTAL = 19
+FONT_HOSTS = ("https://fonts.googleapis.com", "https://fonts.gstatic.com")
+
+REQUIRED = {
+    1: ["XÂY DỰNG HỆ THỐNG", "QUẢN LÝ THƯ VIỆN", "ThS. Nguyễn Thành Luân", "[MSSV 1]",
+        "tháng 10 năm 2026", "TRƯỜNG ĐẠI HỌC CÔNG NGHỆ THÔNG TIN"],
+    2: ["Nhóm trưởng", "Chương 1; Chương 2; mục 5.2 – 5.4", "Chương 3; mục 4.1.1 – 4.1.2",
+        "Mục 4.1.3 – 4.1.4; mục 4.2", "Mục 4.3; mục 5.1, 5.5", "38"],
+    3: ["Mô tả bài toán", "Phân tích và thiết kế", "Cài đặt", "Quản lý thông tin",
+        "Demo và kết luận", "Tài liệu tham khảo"],
+    4: ["R_QUANLY", "R_THUTHU", "R_DOCGIA", "admin"],
+    5: ["16 tuổi", "2 năm", "14 ngày", "5.000đ", "50%", "100%", "Có sẵn"],
+    6: ["Xác thực", "Quản lý danh mục", "Quản lý kho sách", "Quản lý độc giả", "Mượn – trả",
+        "Nhắc nhở", "Báo cáo", "Quản trị CSDL"],
+    7: ["THELOAI", "TACGIA", "NHAXUATBAN", "DAUSACH", "DAUSACH_TACGIA", "CUONSACH",
+        "DOCGIA", "PHIEUMUON", "CTPHIEUMUON", "PHIEUPHAT", "TAIKHOAN"],
+    8: ["18 CHECK", "2 UNIQUE", "TRG_CUONSACH_CAPNHATSL", "TRG_PHIEUMUON_KIEMTRA",
+        "TRG_CTPM_MUONSACH", "TRG_CTPM_TRASACH", "TRG_PHIEUPHAT_TONGNO"],
+    9: ["TENDANGNHAP", "SHA2-256", "NGAYHETHAN", "TINHTRANGTRA", "DATHANHTOAN"],
+    10: ["Vietnamese_CI_AS", "SQL Server 2022", "CREATE TABLE DAUSACH", "118", "DG009", "CS015"],
+    11: ["SP_THEMDOCGIA", "SP_LAPPHIEUMUON", "SP_TRASACH", "SP_THANHTOANPHAT",
+         "SP_THONGKETHANG", "PM0329", "38"],
+    12: ["TRG_CTPM_TRASACH", "TRG_PHIEUPHAT_TONGNO", "55.000", "35.000", "90.000", "DG006"],
+    13: ["FN_SOSACHDANGMUON", "FN_TIENPHATTRE", "FN_LICHSUMUON", "SP_CURSOR_XEPLOAIDOCGIA",
+         "SP_CURSOR_NHACNHOQUAHAN", "DOCGIA_XEPLOAI", "NHACNHO_QUAHAN", "119"],
+    14: ["SHA2_256", "SP_DANGNHAP", "BULK INSERT", "bcp", "NORECOVERY", "SP_SAOLUU",
+         "LG_THUTHU"],
+    15: ["VW_BC_TINHTRANGKHO", "VW_BC_SACHMUONNHIEU", "VW_BC_LUOTMUON_THANG",
+         "VW_BC_TIENPHAT_THANG", "VW_BC_DOCGIA_QUAHAN", "498.000", "Mắt biếc"],
+    16: ["React", "ASP.NET Core", "Dapper", ".NET Aspire", "B1", "B5", "[Chèn ảnh"],
+    17: ["Kết quả đạt được", "Hạn chế", "Hướng phát triển"],
+    18: ["[Dán link Google Drive", "[1]", "[7]"],
+    19: ["Cảm ơn"],
+}
+
+
+class SlideText(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.slides, self.links, self.scripts, self.pre_tags = [], [], [], []
+        self.depth = 0
+        self.in_pre = False
+
+    def handle_starttag(self, tag, attrs):
+        a = dict(attrs)
+        if tag == "link":
+            self.links.append(a.get("href") or "")
+        if tag == "script" and a.get("src"):
+            self.scripts.append(a["src"])
+        if self.in_pre:
+            self.pre_tags.append((len(self.slides), tag))
+        if tag == "pre":
+            self.in_pre = True
+        if tag == "section":
+            if self.depth:
+                self.depth += 1
+            elif "slide" in (a.get("class") or "").split():
+                self.slides.append("")
+                self.depth = 1
+
+    def handle_endtag(self, tag):
+        if tag == "pre":
+            self.in_pre = False
+        if tag == "section" and self.depth:
+            self.depth -= 1
+
+    def handle_data(self, data):
+        if self.depth:
+            self.slides[-1] += data + " "
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--upto", type=int, default=TOTAL)
+    upto = ap.parse_args().upto
+    if not HTML.exists():
+        print(f"FAIL: khong tim thay {HTML}")
+        sys.exit(1)
+    p = SlideText()
+    p.feed(HTML.read_text(encoding="utf-8"))
+    errors = []
+    count = len(p.slides)
+    if upto == TOTAL and count != TOTAL:
+        errors.append(f"can dung {TOTAL} slide, hien co {count}")
+    if count < upto:
+        errors.append(f"can it nhat {upto} slide, hien co {count}")
+    for i in range(1, min(upto, count) + 1):
+        text = re.sub(r"\s+", " ", p.slides[i - 1])
+        for s in REQUIRED[i]:
+            if s not in text:
+                errors.append(f"slide {i}: thieu '{s}'")
+    for src in p.scripts:
+        errors.append(f"khong duoc dung script ngoai: {src}")
+    for href in p.links:
+        if not href.startswith(FONT_HOSTS):
+            errors.append(f"link ngoai khong hop le: {href}")
+    for slide_no, tag in p.pre_tags:
+        errors.append(f"slide {slide_no}: co the <{tag}> trong <pre> (escape '<' thanh &lt;)")
+    if errors:
+        print("FAIL")
+        for e in errors:
+            print(" -", e)
+        sys.exit(1)
+    print(f"OK: {count} slide, da kiem tra noi dung slide 1-{min(upto, count)}")
+
+
+if __name__ == "__main__":
+    main()
+```
+
+- [ ] **Step 2: Chạy test, xác nhận đang lỗi**
+
+Run: `python3 docs/slide/tools/check_slides.py --upto 3`
+Expected: `FAIL: khong tim thay .../docs/slide/Slides_NhomX.html`, mã thoát 1.
+
+- [ ] **Step 3: Viết script render bằng Edge headless**
+
+Tạo `docs/slide/tools/render.sh`:
+
+```bash
+#!/usr/bin/env bash
+# Dung Microsoft Edge (Windows) o che do headless tu WSL de:
+#   check : do tran chu (mo ?check, doc thuoc tinh data-overflow)
+#   shots : chup anh tung slide vao docs/slide/.shots/ (tuy chon kich thuoc WxH)
+#   pdf   : in ra docs/slide/Slides_NhomX.pdf
+set -euo pipefail
+DIR="$(cd "$(dirname "$0")/.." && pwd)"
+HTML="$DIR/Slides_NhomX.html"
+EDGE="${EDGE:-/mnt/c/Program Files (x86)/Microsoft/Edge/Application/msedge.exe}"
+
+win() { wslpath -w "$1"; }
+url() { echo "file:///$(win "$HTML" | sed 's#\\#/#g')"; }
+edge() {
+  timeout 120 "$EDGE" --headless=new --disable-gpu --hide-scrollbars \
+    --run-all-compositor-stages-before-draw --virtual-time-budget=8000 "$@" 2>/dev/null
+}
+
+case "${1:-}" in
+  check)
+    out="$(edge --window-size=1280,720 --dump-dom "$(url)?check")"
+    res="$(grep -o 'data-overflow="[^"]*"' <<<"$out" | head -1 || true)"
+    echo "${res:-data-overflow chua duoc ghi}"
+    [[ "$res" == 'data-overflow="none"' ]]
+    ;;
+  shots)
+    size="${2:-1280,720}"
+    dest="$DIR/.shots"
+    mkdir -p "$dest"
+    n="$(grep -c '<section class="slide' "$HTML")"
+    for i in $(seq 1 "$n"); do
+      edge --window-size="$size" \
+        --screenshot="$(win "$dest")\\slide-$(printf %02d "$i").png" "$(url)#$i" >/dev/null
+    done
+    ls "$dest"
+    ;;
+  pdf)
+    edge --no-pdf-header-footer --print-to-pdf="$(win "$DIR/Slides_NhomX.pdf")" "$(url)" >/dev/null
+    pdfinfo "$DIR/Slides_NhomX.pdf" | grep -E 'Pages|Page size'
+    ;;
+  *)
+    echo "Dung: render.sh check | shots [W,H] | pdf"
+    exit 2
+    ;;
+esac
+```
+
+Tạo `docs/slide/.gitignore` với nội dung đúng một dòng:
+
+```
+.shots/
+```
+
+- [ ] **Step 4: Viết khung HTML và slide 1–3**
+
+Tạo `docs/slide/Slides_NhomX.html`:
+
+```html
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quản lý thư viện – Nhóm X</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root {
+  --bg: #F8FAFC; --card: #FFFFFF; --line: #E2E8F0; --ink: #0F172A; --muted: #475569; --soft: #94A3B8;
+  --primary: #2563EB; --primary-50: #EFF6FF; --primary-100: #DBEAFE; --primary-700: #1D4ED8;
+  --sky: #0EA5E9; --sky-50: #F0F9FF; --green: #10B981; --green-50: #ECFDF5;
+  --amber: #F59E0B; --amber-50: #FFFBEB; --red: #EF4444; --red-50: #FEF2F2; --code-bg: #F1F5F9;
+  --font: 'Be Vietnam Pro', 'Segoe UI', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', Consolas, 'Courier New', monospace;
+  --s: 1;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: #CBD5E1; font-family: var(--font); color: var(--ink); }
+#deck { position: fixed; inset: 0; overflow: hidden; }
+.slide {
+  position: absolute; left: 50%; top: 50%; width: 1280px; height: 720px; margin: -360px 0 0 -640px;
+  transform: scale(var(--s)); display: none; overflow: hidden;
+  background-color: var(--bg);
+  background-image: radial-gradient(#CBD5E1 1px, transparent 1px); background-size: 24px 24px;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, .25);
+}
+.slide.active, body.checking .slide { display: block; }
+.slide::before {
+  content: ""; position: absolute; width: 560px; height: 560px; right: -200px; top: -260px; pointer-events: none;
+  background: radial-gradient(circle, rgba(37, 99, 235, .16), rgba(14, 165, 233, .07) 45%, transparent 70%);
+}
+.slide > header { position: absolute; left: 56px; right: 56px; top: 34px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px; border-radius: 999px;
+  background: var(--primary-50); color: var(--primary); border: 1px solid var(--primary-100);
+  font-size: 14px; font-weight: 600;
+}
+.slide h2 { margin: 10px 0 0; font-size: 34px; line-height: 1.2; font-weight: 700; letter-spacing: -.01em; }
+.slide > header .note { position: absolute; right: 0; top: 2px; max-width: 560px; text-align: right; font-size: 13px; color: var(--muted); line-height: 1.5; }
+.body { position: absolute; left: 56px; right: 56px; top: 132px; bottom: 64px; }
+.slide > footer {
+  position: absolute; left: 56px; right: 56px; bottom: 22px; display: flex; justify-content: space-between;
+  font-size: 13px; color: var(--soft); font-weight: 500;
+}
+.progress { position: absolute; left: 0; bottom: 0; height: 4px; width: calc(var(--p) * 100%); background: linear-gradient(90deg, var(--primary), var(--sky)); }
+
+/* lưới và thẻ */
+.grid { display: grid; gap: 20px; }
+.g2 { grid-template-columns: 1fr 1fr; } .g3 { grid-template-columns: repeat(3, 1fr); }
+.g4 { grid-template-columns: repeat(4, 1fr); } .g5 { grid-template-columns: repeat(5, 1fr); }
+.g6 { grid-template-columns: repeat(6, 1fr); }
+.stack { display: flex; flex-direction: column; gap: 14px; min-height: 0; }
+.card {
+  background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px 20px; overflow: hidden;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 8px 24px rgba(15, 23, 42, .06);
+}
+.card h3 { margin: 0 0 10px; font-size: 18px; line-height: 1.3; display: flex; align-items: center; gap: 10px; }
+.ico { width: 34px; height: 34px; border-radius: 10px; display: inline-grid; place-items: center; background: var(--primary-50); color: var(--primary); flex: none; }
+.ico svg { width: 19px; height: 19px; }
+.ico.red { background: var(--red-50); color: var(--red); } .ico.green { background: var(--green-50); color: var(--green); }
+.ico.amber { background: var(--amber-50); color: #D97706; } .ico.sky { background: var(--sky-50); color: var(--sky); }
+svg.i, .ico svg, .res svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+ul.list { margin: 0; padding-left: 18px; font-size: 15px; line-height: 1.5; color: var(--muted); }
+ul.list li { margin-bottom: 6px; } ul.list li::marker { color: var(--primary); }
+ul.list.check { list-style: none; padding-left: 0; }
+ul.list.check li { position: relative; padding-left: 24px; }
+ul.list.check li::before { content: "✓"; position: absolute; left: 2px; color: var(--green); font-weight: 700; }
+ul.list b, .muted b { color: var(--ink); }
+.note-box { margin: 12px 0 0; padding: 10px 12px; border-radius: 10px; background: var(--primary-50); color: #1E3A8A; font-size: 14px; line-height: 1.45; }
+.pill { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 13px; font-weight: 600; background: var(--primary-50); color: var(--primary); border: 1px solid var(--primary-100); margin: 6px 6px 0 0; white-space: nowrap; }
+.pill.green { background: var(--green-50); color: #047857; border-color: #A7F3D0; }
+.pill.amber { background: var(--amber-50); color: #B45309; border-color: #FDE68A; }
+.pill.red { background: var(--red-50); color: #B91C1C; border-color: #FECACA; }
+.pill.sky { background: var(--sky-50); color: #0369A1; border-color: #BAE6FD; }
+.tag { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; background: var(--primary-50); color: var(--primary); white-space: nowrap; }
+.tag.green { background: var(--green-50); color: #047857; } .tag.amber { background: var(--amber-50); color: #B45309; }
+.tag.red { background: var(--red-50); color: #B91C1C; } .tag.sky { background: var(--sky-50); color: #0369A1; }
+.mono { font-family: var(--mono); } .muted { color: var(--muted); } .small { font-size: 13px; }
+
+/* bảng */
+table.t { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; line-height: 1.4; }
+table.t th { background: var(--primary-50); color: var(--primary); text-align: left; font-weight: 600; padding: 7px 10px; }
+table.t th:first-child { border-radius: 8px 0 0 8px; } table.t th:last-child { border-radius: 0 8px 8px 0; }
+table.t td { padding: 6px 10px; border-top: 1px solid var(--line); vertical-align: top; }
+table.t tr:first-child td { border-top: 0; }
+table.t.sm { font-size: 13px; } table.t.sm td, table.t.sm th { padding: 5px 8px; }
+
+/* code */
+pre.sql, pre.code {
+  margin: 0; background: var(--code-bg); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px;
+  font: 12.5px/1.45 var(--mono); color: #334155; white-space: pre; overflow: hidden;
+}
+pre.sql.sm, pre.code.sm { font-size: 12px; }
+pre .k { color: #7C3AED; font-weight: 600; } pre .s { color: #059669; } pre .c { color: #94A3B8; font-style: italic; }
+pre .o { color: var(--primary); font-weight: 600; } pre .v { color: #0369A1; } pre .n { color: #D97706; }
+
+/* thành phần */
+.stat { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; }
+.stat .v { font-size: 28px; font-weight: 800; color: var(--primary); line-height: 1.1; }
+.stat .l { font-size: 13px; color: var(--muted); margin-top: 4px; line-height: 1.35; }
+.ba { display: grid; grid-template-columns: 1fr 26px 1fr; gap: 6px; font-size: 13px; line-height: 1.45; }
+.ba > .before, .ba > .after { border-radius: 12px; padding: 8px 12px; }
+.before { background: #F1F5F9; border: 1px solid var(--line); }
+.after { background: var(--green-50); border: 1px solid #A7F3D0; }
+.ba .arrow { display: grid; place-items: center; color: var(--primary); font-weight: 800; font-size: 18px; }
+.ba b.h { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 2px; }
+.flow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.flow .step { padding: 5px 10px; border-radius: 8px; background: #fff; border: 1px solid var(--primary-100); font-size: 12.5px; font-weight: 600; color: var(--primary-700); }
+.flow .to { color: var(--soft); font-weight: 700; }
+.obj p { margin: 6px 0 8px; font-size: 13.5px; color: var(--muted); line-height: 1.45; }
+.obj-h { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.obj .name { font-family: var(--mono); font-weight: 700; color: var(--primary); font-size: 14.5px; }
+.res { margin-top: 8px; font-size: 13px; line-height: 1.45; background: var(--green-50); border: 1px solid #A7F3D0; border-radius: 10px; padding: 6px 10px; color: #065F46; }
+.res.red { background: var(--red-50); border-color: #FECACA; color: #991B1B; }
+.role { border: 1px solid var(--line); border-radius: 12px; padding: 9px 12px; margin-top: 10px; }
+.role-h { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.role p { margin: 4px 0 0; font-size: 13.5px; color: var(--muted); line-height: 1.45; }
+.schema { padding: 7px 0; border-top: 1px dashed var(--line); }
+.schema:first-child { border-top: 0; padding-top: 0; }
+.schema .r { font-family: var(--mono); font-size: 12.5px; line-height: 1.45; }
+.schema .r b { color: var(--primary); }
+.schema .r u { text-decoration-thickness: 2px; text-underline-offset: 3px; }
+.schema .d { font-size: 13px; color: var(--muted); line-height: 1.4; margin-top: 2px; }
+.ph {
+  border: 2px dashed #93C5FD; border-radius: 14px; display: grid; place-items: center; text-align: center; padding: 12px;
+  background: repeating-linear-gradient(45deg, #F8FAFC, #F8FAFC 10px, #EFF6FF 10px, #EFF6FF 20px);
+  color: var(--primary); font-size: 14px; font-weight: 600;
+}
+.ph svg { width: 34px; height: 34px; display: block; margin: 0 auto 6px; }
+.hbar { display: grid; grid-template-columns: 1fr 120px 22px; align-items: center; gap: 8px; font-size: 12.5px; margin-top: 7px; }
+.hbar .track { height: 12px; border-radius: 6px; background: #F1F5F9; overflow: hidden; }
+.hbar .fill { height: 100%; border-radius: 6px; background: linear-gradient(90deg, var(--primary), var(--sky)); }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12.5px; color: var(--muted); margin-top: 6px; }
+.dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+
+/* bìa và slide kết */
+.slide.hero { background-color: #fff; background-image: radial-gradient(#DBEAFE 1px, transparent 1px); }
+.slide.hero::before { width: 780px; height: 780px; right: -260px; top: -280px; background: radial-gradient(circle, rgba(37, 99, 235, .22), rgba(14, 165, 233, .10) 45%, transparent 70%); }
+.slide.hero::after { content: ""; position: absolute; left: -220px; bottom: -280px; width: 600px; height: 600px; pointer-events: none; background: radial-gradient(circle, rgba(16, 185, 129, .14), transparent 65%); }
+.hero .body { top: 52px; bottom: 52px; left: 64px; right: 64px; }
+.gradient-text { background: linear-gradient(90deg, var(--primary-700), var(--sky)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.uni { font-size: 15px; font-weight: 700; color: #1E3A8A; line-height: 1.55; letter-spacing: .02em; }
+.hero h1 { margin: 16px 0 8px; font-size: 54px; line-height: 1.1; font-weight: 800; letter-spacing: -.02em; }
+.lead { margin: 0; font-size: 18px; color: var(--muted); }
+
+@page { size: 1280px 720px; margin: 0; }
+@media print {
+  html, body { background: none; height: auto; }
+  #deck { position: static; }
+  .slide { position: relative; left: 0; top: 0; margin: 0; display: block !important; transform: none !important; box-shadow: none; break-after: page; page-break-after: always; }
+  .slide:last-child { break-after: auto; page-break-after: auto; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 19.5V5a2 2 0 0 1 2-2h14v16H6.5A2.5 2.5 0 0 0 4 19.5zM4 19.5A2.5 2.5 0 0 0 6.5 22H20"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 3.5 6"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></symbol>
+  <symbol id="i-db" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></symbol>
+  <symbol id="i-swap" viewBox="0 0 24 24"><path d="M4 7h16l-4-4M20 17H4l4 4"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><path d="M12 2 2 7l10 5 10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></symbol>
+  <symbol id="i-box" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="4.5"/><path d="M11 12l9-9M16 7l3 3"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 15V3M7 8l5-5 5 5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></symbol>
+  <symbol id="i-save" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></symbol>
+  <symbol id="i-code" viewBox="0 0 24 24"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></symbol>
+  <symbol id="i-zap" viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></symbol>
+  <symbol id="i-fn" viewBox="0 0 24 24"><path d="M9 21c2 0 3-2 3-5V8c0-3 1-5 3-5"/><path d="M8 11h7"/></symbol>
+  <symbol id="i-loop" viewBox="0 0 24 24"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a3 3 0 0 1 3-3h15M7 22l-4-4 4-4"/><path d="M21 13v2a3 3 0 0 1-3 3H3"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3 2 21h20z"/><path d="M12 10v4M12 17.5v.5"/></symbol>
+  <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-5-5"/></symbol>
+  <symbol id="i-server" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="7" rx="2"/><rect x="3" y="14" width="18" height="7" rx="2"/><path d="M7 6.5h.01M7 17.5h.01"/></symbol>
+  <symbol id="i-monitor" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></symbol>
+  <symbol id="i-video" viewBox="0 0 24 24"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="m16 10 6-4v12l-6-4"/></symbol>
+  <symbol id="i-trend" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/></symbol>
+</svg>
+
+<main id="deck">
+
+<!-- ===== Slide 1: Bìa ===== -->
+<section class="slide hero">
+  <div class="body" style="display:grid;grid-template-columns:1fr 380px;gap:32px;align-items:center">
+    <div>
+      <div class="uni">ĐẠI HỌC QUỐC GIA THÀNH PHỐ HỒ CHÍ MINH<br>TRƯỜNG ĐẠI HỌC CÔNG NGHỆ THÔNG TIN<br>KHOA KHOA HỌC VÀ KỸ THUẬT THÔNG TIN</div>
+      <div style="margin-top:22px"><span class="chip">BÁO CÁO ĐỒ ÁN QUẢN LÝ THÔNG TIN · IE103</span></div>
+      <h1 class="gradient-text">XÂY DỰNG HỆ THỐNG<br>QUẢN LÝ THƯ VIỆN</h1>
+      <p class="lead">CSDL <span class="mono">QUANLYTHUVIEN</span> trên SQL Server 2022 và website demo React + ASP.NET Core</p>
+      <div class="grid" style="grid-template-columns:1.4fr 1fr;gap:16px;margin-top:22px">
+        <div class="card">
+          <h3><span class="ico"><svg><use href="#i-users"/></svg></span>Sinh viên thực hiện</h3>
+          <ul class="list" style="font-size:14.5px">
+            <li>[Họ tên SV1] – [MSSV 1] (nhóm trưởng)</li>
+            <li>[Họ tên SV2] – [MSSV 2]</li>
+            <li>[Họ tên SV3] – [MSSV 3]</li>
+            <li>[Họ tên SV4] – [MSSV 4]</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3><span class="ico green"><svg><use href="#i-user"/></svg></span>Giảng viên</h3>
+          <p style="margin:0;font-size:16px;font-weight:600">ThS. Nguyễn Thành Luân</p>
+          <p class="muted small" style="margin:14px 0 0">Thành phố Hồ Chí Minh, tháng 10 năm 2026</p>
+        </div>
+      </div>
+    </div>
+    <svg viewBox="0 0 360 360" width="380" height="380" aria-hidden="true">
+      <defs><linearGradient id="gB" x1="0" x2="1"><stop offset="0" stop-color="#2563EB"/><stop offset="1" stop-color="#0EA5E9"/></linearGradient></defs>
+      <circle cx="180" cy="180" r="170" fill="#EFF6FF"/>
+      <g stroke="#93C5FD" stroke-width="3" fill="none" stroke-linecap="round"><path d="M40 120h60l20 20"/><path d="M320 200h-40"/><path d="M330 260h-60"/><path d="M30 260h60"/></g>
+      <g fill="#93C5FD"><circle cx="40" cy="120" r="6"/><circle cx="320" cy="200" r="6"/><circle cx="330" cy="260" r="6"/><circle cx="30" cy="260" r="6"/></g>
+      <rect x="95" y="232" width="170" height="30" rx="6" fill="#2563EB"/>
+      <rect x="108" y="202" width="150" height="30" rx="6" fill="#0EA5E9"/>
+      <rect x="88" y="172" width="160" height="30" rx="6" fill="#10B981"/>
+      <g stroke="#fff" stroke-width="3" opacity=".7"><path d="M110 247h140M122 217h120M103 187h130"/></g>
+      <g transform="translate(200 44)">
+        <path d="M0 18v80c0 10 22 18 50 18s50-8 50-18V18" fill="url(#gB)"/>
+        <ellipse cx="50" cy="18" rx="50" ry="18" fill="#60A5FA"/>
+        <path d="M0 50c0 10 22 18 50 18s50-8 50-18M0 78c0 10 22 18 50 18s50-8 50-18" fill="none" stroke="#fff" stroke-width="3" opacity=".6"/>
+      </g>
+      <rect x="60" y="276" width="240" height="14" rx="7" fill="#DBEAFE"/>
+    </svg>
+  </div>
+</section>
+
+<!-- ===== Slide 2: Báo cáo tóm tắt ===== -->
+<section class="slide">
+  <header><span class="chip">Báo cáo tóm tắt</span><h2>Thành viên và phân công công việc</h2></header>
+  <div class="body stack" style="gap:18px">
+    <div class="card">
+      <table class="t">
+        <thead><tr><th style="width:130px">MSSV</th><th style="width:220px">Họ tên</th><th style="width:130px">Ghi chú</th><th>Nội dung được phân công</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">[MSSV 1]</td><td>[Họ tên SV1]</td><td><span class="tag">Nhóm trưởng</span></td><td>Chương 1; Chương 2; mục 5.2 – 5.4</td></tr>
+          <tr><td class="mono">[MSSV 2]</td><td>[Họ tên SV2]</td><td></td><td>Chương 3; mục 4.1.1 – 4.1.2</td></tr>
+          <tr><td class="mono">[MSSV 3]</td><td>[Họ tên SV3]</td><td></td><td>Mục 4.1.3 – 4.1.4; mục 4.2</td></tr>
+          <tr><td class="mono">[MSSV 4]</td><td>[Họ tên SV4]</td><td></td><td>Mục 4.3; mục 5.1, 5.5</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card" style="display:flex;gap:16px;align-items:center">
+      <span class="ico"><svg><use href="#i-book"/></svg></span>
+      <div><b>Đề tài: XÂY DỰNG HỆ THỐNG QUẢN LÝ THƯ VIỆN</b>
+        <div class="muted small" style="margin-top:2px">CSDL QUANLYTHUVIEN · SQL Server 2022 (Docker) · Website demo React + ASP.NET Core · .NET Aspire</div></div>
+    </div>
+    <div class="grid g6" style="gap:14px">
+      <div class="stat"><div class="v">11</div><div class="l">bảng dữ liệu</div></div>
+      <div class="stat"><div class="v">17</div><div class="l">ràng buộc toàn vẹn</div></div>
+      <div class="stat"><div class="v">38</div><div class="l">stored procedure</div></div>
+      <div class="stat"><div class="v">5</div><div class="l">trigger</div></div>
+      <div class="stat"><div class="v">3 + 2</div><div class="l">function + cursor</div></div>
+      <div class="stat"><div class="v">5</div><div class="l">report từ view</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Slide 3: Mục lục ===== -->
+<section class="slide">
+  <header><span class="chip">Nội dung trình bày</span><h2>Mục lục</h2></header>
+  <div class="body">
+    <div class="grid g5" style="gap:16px;height:440px">
+      <div class="card"><div class="gradient-text" style="font-size:40px;font-weight:800">01</div><h3>Mô tả bài toán</h3>
+        <ul class="list" style="font-size:14px"><li>Phát biểu bài toán</li><li>Mục tiêu</li><li>Đối tượng sử dụng</li><li>Quy trình nghiệp vụ</li></ul></div>
+      <div class="card"><div class="gradient-text" style="font-size:40px;font-weight:800">02</div><h3>Phân tích và thiết kế</h3>
+        <ul class="list" style="font-size:14px"><li>Chức năng hệ thống</li><li>Thực thể và ERD</li><li>Ràng buộc toàn vẹn</li><li>Mô hình logic, tân từ</li></ul></div>
+      <div class="card"><div class="gradient-text" style="font-size:40px;font-weight:800">03</div><h3>Cài đặt</h3>
+        <ul class="list" style="font-size:14px"><li>Bảng, khóa chính, khóa ngoại, ràng buộc</li><li>Dữ liệu mẫu</li></ul></div>
+      <div class="card"><div class="gradient-text" style="font-size:40px;font-weight:800">04</div><h3>Quản lý thông tin</h3>
+        <ul class="list" style="font-size:14px"><li>Xử lý thông tin: SP, trigger, function, cursor</li><li>An toàn thông tin</li><li>Trình bày thông tin (report)</li></ul></div>
+      <div class="card"><div class="gradient-text" style="font-size:40px;font-weight:800">05</div><h3>Demo và kết luận</h3>
+        <ul class="list" style="font-size:14px"><li>Website demo</li><li>Kết quả đạt được</li><li>Hạn chế, hướng phát triển</li><li>Video demo</li></ul></div>
+    </div>
+    <div class="muted" style="margin-top:20px;font-size:15px;display:flex;align-items:center;gap:10px">
+      <span class="ico sky"><svg><use href="#i-file"/></svg></span>Tài liệu tham khảo: giáo trình môn học, slide IE103 và tài liệu Microsoft SQL Server
+    </div>
+  </div>
+</section>
+
+<!-- /slides -->
+</main>
+
+<script>
+(function () {
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var total = slides.length;
+  var cur = 0;
+
+  slides.forEach(function (s, i) {
+    var p = document.createElement('div');
+    p.className = 'progress';
+    p.style.setProperty('--p', (i + 1) / total);
+    s.appendChild(p);
+    if (!s.classList.contains('hero')) {
+      var f = document.createElement('footer');
+      f.innerHTML = '<span>Nhóm X · IE103 – Quản lý thông tin</span><span>' + (i + 1) + ' / ' + total + '</span>';
+      s.appendChild(f);
+    }
+  });
+
+  function esc(t) { return t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  var KW = 'CREATE|OR|ALTER|PROCEDURE|FUNCTION|TRIGGER|TABLE|VIEW|AS|BEGIN|END|TRY|CATCH|TRANSACTION|COMMIT|ROLLBACK|' +
+    'RETURN|RETURNS|SELECT|FROM|WHERE|JOIN|ON|INSERT|INTO|VALUES|UPDATE|SET|DELETE|DECLARE|CURSOR|FOR|OPEN|FETCH|' +
+    'NEXT|CLOSE|DEALLOCATE|WHILE|IF|NOT|EXISTS|AND|IN|IS|NULL|CASE|WHEN|THEN|ELSE|UNION|ALL|DISTINCT|AFTER|OUTPUT|' +
+    'WITH|PRIMARY|KEY|FOREIGN|REFERENCES|CONSTRAINT|CHECK|DEFAULT|BETWEEN|GROUP|BY|ORDER|DESC|TOP|BACKUP|RESTORE|' +
+    'DATABASE|TO|DISK|NORECOVERY|RECOVERY|REPLACE|INIT|NAME|GRANT|DENY|REVOKE|EXECUTE|LOGIN|USER|ROLE|PASSWORD|' +
+    'RAISERROR|PRINT|LIKE|BULK|DIFFERENTIAL|INT|CHAR|VARCHAR|NVARCHAR|MONEY|DATE|VARBINARY';
+  var RE = new RegExp("(--[^\\n]*)|(N?'(?:[^']|'')*')|(@@?\\w+)|\\b((?:SP|TRG|FN|VW)_[A-Z0-9_]+)\\b|\\b(" + KW + ")\\b|\\b(\\d+(?:\\.\\d+)?)\\b", 'g');
+  document.querySelectorAll('pre.sql').forEach(function (pre) {
+    var src = pre.textContent, out = '', last = 0, m;
+    RE.lastIndex = 0;
+    while ((m = RE.exec(src)) !== null) {
+      var cls = m[1] ? 'c' : m[2] ? 's' : m[3] ? 'v' : m[4] ? 'o' : m[5] ? 'k' : 'n';
+      out += esc(src.slice(last, m.index)) + '<span class="' + cls + '">' + esc(m[0]) + '</span>';
+      last = m.index + m[0].length;
+    }
+    pre.innerHTML = out + esc(src.slice(last));
+  });
+
+  function show(n) {
+    cur = Math.max(0, Math.min(total - 1, isNaN(n) ? 0 : n));
+    slides.forEach(function (s, i) { s.classList.toggle('active', i === cur); });
+    if (location.hash !== '#' + (cur + 1)) history.replaceState(null, '', location.pathname + location.search + '#' + (cur + 1));
+  }
+  function fromHash() { return parseInt(location.hash.slice(1), 10) - 1; }
+  function fit() { document.documentElement.style.setProperty('--s', Math.min(innerWidth / 1280, innerHeight / 720)); }
+
+  addEventListener('resize', fit);
+  addEventListener('hashchange', function () { show(fromHash()); });
+  addEventListener('keydown', function (e) {
+    var k = e.key;
+    if (k === 'ArrowRight' || k === 'PageDown' || k === ' ') { e.preventDefault(); show(cur + 1); }
+    else if (k === 'ArrowLeft' || k === 'PageUp') { e.preventDefault(); show(cur - 1); }
+    else if (k === 'Home') show(0);
+    else if (k === 'End') show(total - 1);
+    else if (k === 'f' || k === 'F') {
+      if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen();
+    }
+  });
+  fit();
+  show(fromHash());
+
+  // ?check: đo tràn chữ trên mọi slide, ghi kết quả vào body[data-overflow]
+  function measure() {
+    var bad = [];
+    slides.forEach(function (s, i) {
+      var sr = s.getBoundingClientRect(), hero = s.classList.contains('hero');
+      var maxR = sr.right - (hero ? 40 : 48), maxB = sr.bottom - (hero ? 40 : 56), over = false;
+      s.querySelectorAll('.body, .card, pre, .stat, .ph, td, th').forEach(function (el) {
+        if (el.scrollHeight > el.clientHeight + 2 || el.scrollWidth > el.clientWidth + 2) over = true;
+      });
+      s.querySelectorAll('.body *').forEach(function (el) {
+        var r = el.getBoundingClientRect();
+        if (r.width && (r.right > maxR || r.bottom > maxB)) over = true;
+      });
+      if (over) bad.push(i + 1);
+    });
+    return bad;
+  }
+  if (new URLSearchParams(location.search).has('check')) {
+    document.body.classList.add('checking');
+    document.fonts.ready.then(function () {
+      var bad = measure();
+      document.body.setAttribute('data-overflow', bad.length ? bad.join(',') : 'none');
+    });
+  }
+})();
+</script>
+</body>
+</html>
+```
+
+- [ ] **Step 5: Chạy kiểm tra tĩnh, xác nhận đạt**
+
+Run: `python3 docs/slide/tools/check_slides.py --upto 3`
+Expected: `OK: 3 slide, da kiem tra noi dung slide 1-3`
+
+- [ ] **Step 6: Đo tràn chữ và xem ảnh chụp**
+
+Run: `bash docs/slide/tools/render.sh check && bash docs/slide/tools/render.sh shots`
+Expected:
+- Lệnh `check` in `data-overflow="none"`.
+- Lệnh `shots` liệt kê `slide-01.png` … `slide-03.png`.
+
+Mở 3 ảnh bằng công cụ Read và kiểm tra bằng mắt:
+- Chữ tiếng Việt hiển thị đủ dấu.
+- Có footer `2 / 3` ở slide 2 và thanh tiến độ ở đáy.
+- Bìa không có footer; hình minh họa nằm bên phải, không đè lên chữ.
+
+Nếu `check` báo số slide bị tràn: giảm cỡ chữ hoặc khoảng cách của slide đó rồi chạy lại.
+
+- [ ] **Step 7: Commit**
+
+```bash
+git add docs/slide/.gitignore docs/slide/tools/check_slides.py docs/slide/tools/render.sh docs/slide/Slides_NhomX.html
+git commit -m "feat(slide): add slide deck skeleton, checks and slides 1-3"
+```
+
+---
+
+### Task 2: Slide 4–6 (Chương 1 và mục 2.1)
+
+**Files:**
+- Modify: `docs/slide/Slides_NhomX.html` (chèn trước `<!-- /slides -->`)
+
+**Interfaces:**
+- Consumes: các lớp CSS và icon đã liệt kê ở Task 1; `check_slides.py --upto N`; `render.sh check|shots`.
+- Produces: slide 4, 5, 6.
+
+- [ ] **Step 1: Chạy test, xác nhận đang lỗi**
+
+Run: `python3 docs/slide/tools/check_slides.py --upto 6`
+Expected: `FAIL` với dòng `can it nhat 6 slide, hien co 3`.
+
+- [ ] **Step 2: Chèn slide 4–6**
+
+Chèn ngay trước dòng `<!-- /slides -->`:
+
+```html
+<!-- ===== Slide 4: 1.1–1.3 ===== -->
+<section class="slide">
+  <header><span class="chip">Chương 1 · Mô tả bài toán</span><h2>Bài toán, mục tiêu và đối tượng sử dụng</h2></header>
+  <div class="body grid g3">
+    <div class="card">
+      <h3><span class="ico red"><svg><use href="#i-alert"/></svg></span>Khó khăn khi quản lý thủ công</h3>
+      <ul class="list">
+        <li>Không biết một cuốn sách đang trên kệ, đang được mượn hay đã hư, mất; số lượng phải đếm tay.</li>
+        <li>Tiền phạt tính tay, dễ sai; độc giả còn nợ vẫn mượn tiếp.</li>
+        <li>Nhắc trả sách quá hạn và thống kê cuối tháng tốn công.</li>
+        <li>Dữ liệu rải rác nhiều tệp, không phân quyền, không sao lưu.</li>
+      </ul>
+      <p class="note-box">Phạm vi: danh mục sách, độc giả và thẻ thư viện, mượn – trả, tiền phạt, báo cáo, an toàn dữ liệu.</p>
+    </div>
+    <div class="card">
+      <h3><span class="ico"><svg><use href="#i-target"/></svg></span>Mục tiêu hệ thống</h3>
+      <ul class="list check">
+        <li>Theo dõi từng cuốn sách; <b>SOLUONG</b>, <b>SLCON</b> tự cập nhật.</li>
+        <li>Kiểm tra điều kiện mượn ngay tại CSDL: thẻ còn hạn, không nợ, sách “Có sẵn”.</li>
+        <li>Tự lập phiếu phạt khi trễ, hư, mất và tự cộng dồn công nợ.</li>
+        <li>Phân quyền theo vai trò, mật khẩu lưu dạng băm, sao lưu và phục hồi.</li>
+        <li>Báo cáo trực quan lấy trực tiếp từ CSDL.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3><span class="ico green"><svg><use href="#i-users"/></svg></span>Đối tượng sử dụng</h3>
+      <div class="role" style="margin-top:0"><div class="role-h"><b>Quản lý thư viện</b><span class="tag mono">R_QUANLY</span></div>
+        <p>Toàn quyền dữ liệu, chạy mọi thủ tục, xem báo cáo, sao lưu. Trên web: tài khoản <span class="mono">admin</span>.</p></div>
+      <div class="role"><div class="role-h"><b>Thủ thư</b><span class="tag sky mono">R_THUTHU</span></div>
+        <p>Lập thẻ, lập phiếu mượn, nhận trả, thu phạt, nhắc quá hạn; không được xóa, không xem tài khoản.</p></div>
+      <div class="role"><div class="role-h"><b>Độc giả</b><span class="tag green mono">R_DOCGIA</span></div>
+        <p>Chỉ tra cứu danh mục sách và tình trạng sẵn có.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Slide 5: 1.4 Quy trình ===== -->
+<section class="slide">
+  <header><span class="chip">Chương 1 · Mô tả bài toán</span><h2>Quy trình nghiệp vụ: lập thẻ, mượn, trả và xử lý phạt</h2></header>
+  <div class="body grid" style="grid-template-columns:1.35fr 1fr;gap:18px">
+    <div class="card" style="padding:12px">
+      <svg viewBox="0 0 720 520" width="100%" aria-label="Sơ đồ quy trình mượn trả" font-family="Be Vietnam Pro, Segoe UI, sans-serif" font-size="13">
+        <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="#64748B"/></marker></defs>
+        <g fill="none" stroke="#64748B" stroke-width="1.6" marker-end="url(#ar)">
+          <path d="M360 48V62"/><path d="M360 132V150"/><path d="M480 98H628V120"/><path d="M480 186H628V172"/>
+          <path d="M360 220V238"/><path d="M360 280V304"/><path d="M360 346V356"/><path d="M360 426V458"/>
+          <path d="M240 392H192"/><path d="M100 412V458"/><path d="M175 412L236 462"/>
+        </g>
+        <g font-size="12" fill="#475569" font-weight="600">
+          <text x="368" y="146">Có</text><text x="500" y="90">Không</text><text x="500" y="178">Không</text>
+          <text x="368" y="234">Có</text><text x="368" y="448">Không</text><text x="206" y="384">Có</text>
+        </g>
+        <g stroke-width="1.5">
+          <rect x="230" y="8" width="260" height="40" rx="10" fill="#fff" stroke="#CBD5E1"/>
+          <polygon points="240,98 360,64 480,98 360,132" fill="#EFF6FF" stroke="#93C5FD"/>
+          <polygon points="240,186 360,152 480,186 360,220" fill="#EFF6FF" stroke="#93C5FD"/>
+          <rect x="548" y="120" width="160" height="52" rx="10" fill="#FEF2F2" stroke="#FCA5A5"/>
+          <rect x="230" y="240" width="260" height="40" rx="10" fill="#EFF6FF" stroke="#93C5FD"/>
+          <rect x="230" y="306" width="260" height="40" rx="10" fill="#fff" stroke="#CBD5E1"/>
+          <polygon points="240,392 360,358 480,392 360,426" fill="#FFFBEB" stroke="#FCD34D"/>
+          <rect x="10" y="372" width="180" height="40" rx="10" fill="#FFFBEB" stroke="#FCD34D"/>
+          <rect x="230" y="460" width="260" height="40" rx="10" fill="#ECFDF5" stroke="#6EE7B7"/>
+          <rect x="10" y="460" width="180" height="40" rx="10" fill="#ECFDF5" stroke="#6EE7B7"/>
+        </g>
+        <g text-anchor="middle" fill="#0F172A">
+          <text x="360" y="33">Độc giả đưa thẻ và sách muốn mượn</text>
+          <text x="360" y="103">Thẻ còn hạn, không nợ?</text>
+          <text x="360" y="191">Cuốn sách “Có sẵn”?</text>
+          <text x="628" y="142" fill="#B91C1C" font-weight="600">Từ chối:</text>
+          <text x="628" y="160" fill="#B91C1C">gia hạn thẻ / trả nợ</text>
+          <text x="360" y="265" font-weight="600" fill="#1D4ED8">Lập phiếu mượn, hạn trả 14 ngày</text>
+          <text x="360" y="331">Trả sách: ghi ngày trả, tình trạng</text>
+          <text x="360" y="397">Trễ hạn, hư hoặc mất?</text>
+          <text x="100" y="397" fill="#B45309" font-weight="600">Tự lập phiếu phạt, tăng nợ</text>
+          <text x="360" y="485" fill="#047857" font-weight="600">Cập nhật cuốn sách, đóng phiếu</text>
+          <text x="100" y="485" fill="#047857">Thanh toán, công nợ về 0</text>
+        </g>
+      </svg>
+    </div>
+    <div class="stack" style="gap:12px">
+      <div class="card" style="padding:14px 16px">
+        <h3 style="margin-bottom:4px"><span class="ico"><svg><use href="#i-user"/></svg></span>Lập thẻ độc giả</h3>
+        <div class="small muted">Kiểm tra tuổi và email, cấp mã độc giả, công nợ ban đầu bằng 0.</div>
+        <span class="pill">Đủ 16 tuổi</span><span class="pill">Thẻ có hạn 2 năm</span><span class="pill green">TONGNO = 0</span>
+      </div>
+      <div class="card" style="padding:14px 16px">
+        <h3 style="margin-bottom:4px"><span class="ico sky"><svg><use href="#i-book"/></svg></span>Mượn sách</h3>
+        <div class="small muted">Kiểm tra thẻ, công nợ và từng cuốn; các cuốn chuyển sang “Đang mượn”.</div>
+        <span class="pill">Thẻ còn hạn</span><span class="pill">Không nợ phạt</span><span class="pill green">Cuốn “Có sẵn”</span><span class="pill sky">Hạn trả 14 ngày</span>
+      </div>
+      <div class="card" style="padding:14px 16px">
+        <h3 style="margin-bottom:4px"><span class="ico amber"><svg><use href="#i-alert"/></svg></span>Trả sách và xử lý phạt</h3>
+        <div class="small muted">Một lần trả có thể sinh nhiều phiếu phạt; trả hết thì phiếu “Đã trả”.</div>
+        <span class="pill amber">Trễ: 5.000đ/ngày</span><span class="pill amber">Hư: 50% giá</span><span class="pill red">Mất: 100% giá</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Slide 6: 2.1 Chức năng ===== -->
+<section class="slide">
+  <header><span class="chip">Chương 2 · Phân tích và thiết kế</span><h2>Các chức năng của hệ thống</h2></header>
+  <div class="body">
+    <div class="grid g4" style="gap:16px">
+      <div class="card"><h3><span class="ico"><svg><use href="#i-key"/></svg></span>Xác thực</h3><p class="muted small" style="margin:0;line-height:1.5">Đăng nhập so khớp mật khẩu băm, đổi mật khẩu; tài khoản bị khóa (TRANGTHAI = 0) không vào được.</p></div>
+      <div class="card"><h3><span class="ico sky"><svg><use href="#i-layers"/></svg></span>Quản lý danh mục</h3><p class="muted small" style="margin:0;line-height:1.5">Thể loại, tác giả, nhà xuất bản; đầu sách kèm tác giả và vai trò (tác giả, đồng tác giả, dịch giả).</p></div>
+      <div class="card"><h3><span class="ico green"><svg><use href="#i-box"/></svg></span>Quản lý kho sách</h3><p class="muted small" style="margin:0;line-height:1.5">Nhập từng cuốn, ghi vị trí kệ, cập nhật tình trạng; số lượng và số cuốn còn sẵn tự tính.</p></div>
+      <div class="card"><h3><span class="ico amber"><svg><use href="#i-users"/></svg></span>Quản lý độc giả</h3><p class="muted small" style="margin:0;line-height:1.5">Lập thẻ, sửa thông tin, tìm theo mã hoặc họ tên; xem lịch sử mượn và công nợ.</p></div>
+      <div class="card"><h3><span class="ico"><svg><use href="#i-swap"/></svg></span>Mượn – trả</h3><p class="muted small" style="margin:0;line-height:1.5">Phiếu mượn nhiều cuốn, trả từng cuốn, tự lập phiếu phạt và thanh toán phạt.</p></div>
+      <div class="card"><h3><span class="ico sky"><svg><use href="#i-bell"/></svg></span>Nhắc nhở và xếp loại</h3><p class="muted small" style="margin:0;line-height:1.5">Danh sách nhắc độc giả giữ sách quá hạn; xếp loại mức độ uy tín của độc giả.</p></div>
+      <div class="card"><h3><span class="ico green"><svg><use href="#i-chart"/></svg></span>Báo cáo</h3><p class="muted small" style="margin:0;line-height:1.5">Tình trạng kho, sách mượn nhiều, lượt mượn và tiền phạt theo tháng, độc giả quá hạn.</p></div>
+      <div class="card"><h3><span class="ico amber"><svg><use href="#i-shield"/></svg></span>Quản trị CSDL</h3><p class="muted small" style="margin:0;line-height:1.5">Phân quyền theo role, import/export dữ liệu, sao lưu và phục hồi.</p></div>
+    </div>
+    <p class="note-box" style="margin-top:18px;display:flex;gap:10px;align-items:center"><span class="ico"><svg><use href="#i-db"/></svg></span>Mỗi chức năng trên website gọi trực tiếp stored procedure, function hoặc view trong CSDL <b class="mono">QUANLYTHUVIEN</b>; website không lưu sẵn dữ liệu.</p>
+  </div>
+</section>
+```
+
+- [ ] **Step 3: Chạy test, xác nhận đạt**
+
+Run: `python3 docs/slide/tools/check_slides.py --upto 6`
+Expected: `OK: 6 slide, da kiem tra noi dung slide 1-6`
+
+- [ ] **Step 4: Đo tràn chữ và xem ảnh chụp**
+
+Run: `bash docs/slide/tools/render.sh check && bash docs/slide/tools/render.sh shots`
+Expected: `data-overflow="none"`.
+
+Mở `slide-04.png` … `slide-06.png` bằng Read và kiểm tra:
+- Sơ đồ ở slide 5: các mũi tên nối đúng khối, nhãn "Có/Không" không đè lên khối nào.
+- Lưới 8 thẻ ở slide 6 cân đối.
+
+Nếu có tràn: giảm `font-size` của `ul.list` trong slide đó xuống 14px hoặc rút ngắn câu, rồi chạy lại.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add docs/slide/Slides_NhomX.html
+git commit -m "feat(slide): add chapter 1 and system functions slides"
+```
+
+---
+
+### Task 3: Slide 7–9 (ERD, ràng buộc, mô hình logic)
+
+**Files:**
+- Modify: `docs/slide/Slides_NhomX.html` (chèn trước `<!-- /slides -->`)
+
+**Interfaces:**
+- Consumes: lớp CSS `.card`, `table.t.sm`, `.pill`, `.tag`, `.schema`, `.note-box`; `check_slides.py`; `render.sh`.
+- Produces: slide 7, 8, 9.
+
+- [ ] **Step 1: Chạy test, xác nhận đang lỗi**
+
+Run: `python3 docs/slide/tools/check_slides.py --upto 9`
+Expected: `FAIL` với dòng `can it nhat 9 slide, hien co 6`.
+
+- [ ] **Step 2: Chèn slide 7–9**
+
+Chèn ngay trước dòng `<!-- /slides -->`:
+
+```html
+<!-- ===== Slide 7: 2.2 + 2.4 ERD ===== -->
+<section class="slide">
+  <header><span class="chip">Chương 2 · Phân tích và thiết kế</span><h2>Thực thể, mối quan hệ và sơ đồ ERD</h2></header>
+  <div class="body grid" style="grid-template-columns:830px 1fr;gap:18px">
+    <div class="card" style="padding:10px">
+      <svg viewBox="0 0 830 470" width="100%" aria-label="Sơ đồ ERD QUANLYTHUVIEN" font-family="Be Vietnam Pro, Segoe UI, sans-serif">
+        <g stroke="#94A3B8" stroke-width="1.6" fill="none">
+          <path d="M210 46L320 150"/><path d="M210 160H320"/><path d="M510 160H620"/><path d="M715 76V130"/>
+          <path d="M415 190V250"/><path d="M115 310V370"/><path d="M210 400H320"/><path d="M415 310V370"/><path d="M510 400H620"/>
+        </g>
+        <g font-size="11.5" fill="#1D4ED8" font-weight="600">
+          <text x="236" y="86">thuộc · 1:n</text>
+          <text x="222" y="152">phát hành · 1:n</text>
+          <text x="532" y="152">viết · 1:n</text>
+          <text x="724" y="108">1:n</text>
+          <text x="424" y="226">gồm · 1:n</text>
+          <text x="124" y="346">lập · 1:n</text>
+          <text x="226" y="392">có · 1:1..n</text>
+          <text x="424" y="346">được mượn · 1:n</text>
+          <text x="530" y="392">phát sinh · 1:n</text>
+        </g>
+        <g font-size="14" font-weight="700" fill="#0F172A" text-anchor="middle">
+          <rect x="20" y="16" width="190" height="60" rx="10" fill="#fff" stroke="#93C5FD"/><text x="115" y="40">THELOAI</text>
+          <rect x="20" y="130" width="190" height="60" rx="10" fill="#fff" stroke="#93C5FD"/><text x="115" y="154">NHAXUATBAN</text>
+          <rect x="320" y="130" width="190" height="60" rx="10" fill="#EFF6FF" stroke="#2563EB" stroke-width="2"/><text x="415" y="154">DAUSACH</text>
+          <rect x="620" y="16" width="190" height="60" rx="10" fill="#fff" stroke="#93C5FD"/><text x="715" y="40">TACGIA</text>
+          <rect x="620" y="130" width="190" height="60" rx="10" fill="#F0F9FF" stroke="#0EA5E9"/><text x="715" y="154">DAUSACH_TACGIA</text>
+          <rect x="320" y="250" width="190" height="60" rx="10" fill="#fff" stroke="#93C5FD"/><text x="415" y="274">CUONSACH</text>
+          <rect x="620" y="250" width="190" height="60" rx="10" fill="#F8FAFC" stroke="#94A3B8" stroke-dasharray="5 4"/><text x="715" y="274">TAIKHOAN</text>
+          <rect x="20" y="250" width="190" height="60" rx="10" fill="#fff" stroke="#93C5FD"/><text x="115" y="274">DOCGIA</text>
+          <rect x="20" y="370" width="190" height="60" rx="10" fill="#fff" stroke="#93C5FD"/><text x="115" y="394">PHIEUMUON</text>
+          <rect x="320" y="370" width="190" height="60" rx="10" fill="#F0F9FF" stroke="#0EA5E9"/><text x="415" y="394">CTPHIEUMUON</text>
+          <rect x="620" y="370" width="190" height="60" rx="10" fill="#FFFBEB" stroke="#F59E0B"/><text x="715" y="394">PHIEUPHAT</text>
+        </g>
+        <g font-family="JetBrains Mono, Consolas, monospace" font-size="11" fill="#475569" text-anchor="middle">
+          <text x="115" y="62">PK MATL</text><text x="115" y="176">PK MANXB</text><text x="415" y="176">PK MADS · FK MATL, MANXB</text>
+          <text x="715" y="62">PK MATG</text><text x="715" y="176">PK MADS, MATG · VAITRO</text><text x="415" y="296">PK MACS · FK MADS</text>
+          <text x="715" y="296">độc lập – đăng nhập web</text><text x="115" y="296">PK MADG · TONGNO</text><text x="115" y="416">PK MAPM · FK MADG</text>
+          <text x="415" y="416">PK MAPM, MACS</text><text x="715" y="416">PK MAPP · FK (MAPM, MACS)</text>
+        </g>
+      </svg>
+    </div>
+    <div class="card">
+      <h3><span class="ico"><svg><use href="#i-db"/></svg></span>Mối quan hệ, bản số</h3>
+      <ul class="list" style="font-size:13.5px">
+        <li>Thể loại, NXB 1 – n đầu sách; mỗi đầu sách thuộc đúng một thể loại, một NXB.</li>
+        <li>Đầu sách n – n tác giả qua <b>DAUSACH_TACGIA</b> (VAITRO).</li>
+        <li>Đầu sách 1 – n cuốn sách vật lý.</li>
+        <li>Độc giả 1 – n phiếu mượn.</li>
+        <li>Phiếu mượn n – n cuốn sách qua <b>CTPHIEUMUON</b>; mỗi phiếu ít nhất 1 cuốn.</li>
+        <li>Mỗi dòng chi tiết phát sinh 0..n phiếu phạt (vừa trễ vừa hư).</li>
+        <li><b>TAIKHOAN</b> độc lập với nghiệp vụ.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Slide 8: 2.3 Ràng buộc toàn vẹn ===== -->
+<section class="slide">
+  <header><span class="chip">Chương 2 · Phân tích và thiết kế</span><h2>17 ràng buộc toàn vẹn</h2>
+    <div class="note"><span class="pill">18 CHECK</span><span class="pill sky">2 UNIQUE</span><span class="pill amber">5 trigger</span></div></header>
+  <div class="body grid" style="grid-template-columns:1.15fr 1fr;gap:18px">
+    <div class="card">
+      <h3><span class="ico"><svg><use href="#i-check"/></svg></span>Bối cảnh một quan hệ → CHECK / UNIQUE</h3>
+      <table class="t sm">
+        <thead><tr><th style="width:30px">#</th><th>Nội dung</th><th style="width:132px">Bảng</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Giá &gt; 0, số trang &gt; 0, năm XB từ 1900 đến nay</td><td class="mono">DAUSACH</td></tr>
+          <tr><td>2</td><td>0 ≤ SLCON ≤ SOLUONG</td><td class="mono">DAUSACH</td></tr>
+          <tr><td>3</td><td>Tên thể loại, tên NXB không trùng (UNIQUE)</td><td class="mono">THELOAI, NXB</td></tr>
+          <tr><td>4</td><td>Năm sinh tác giả rỗng hoặc từ 1000 đến nay</td><td class="mono">TACGIA</td></tr>
+          <tr><td>5</td><td>Vai trò ∈ {Tác giả, Đồng tác giả, Dịch giả}</td><td class="mono">DAUSACH_TACGIA</td></tr>
+          <tr><td>6</td><td>Tình trạng ∈ {Có sẵn, Đang mượn, Hư hỏng, Mất}</td><td class="mono">CUONSACH</td></tr>
+          <tr><td>7</td><td>Giới tính ∈ {Nam, Nữ}; TONGNO ≥ 0</td><td class="mono">DOCGIA</td></tr>
+          <tr><td>8</td><td>Hết hạn sau ngày lập; đủ 16 tuổi; email đúng mẫu</td><td class="mono">DOCGIA</td></tr>
+          <tr><td>9</td><td>Hạn trả sau ngày mượn; tình trạng ∈ {Đang mượn, Đã trả}</td><td class="mono">PHIEUMUON</td></tr>
+          <tr><td>10</td><td>Tình trạng trả ∈ {Bình thường, Hư hỏng, Mất}</td><td class="mono">CTPHIEUMUON</td></tr>
+          <tr><td>11</td><td>Có ngày trả ⇔ có tình trạng trả</td><td class="mono">CTPHIEUMUON</td></tr>
+          <tr><td>12</td><td>Lý do ∈ {Trả trễ, Hư hỏng, Mất sách}; số tiền &gt; 0</td><td class="mono">PHIEUPHAT</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h3><span class="ico amber"><svg><use href="#i-zap"/></svg></span>Liên quan hệ, thuộc tính dẫn xuất → trigger</h3>
+      <table class="t sm">
+        <thead><tr><th style="width:30px">#</th><th>Nội dung và trigger cài đặt</th></tr></thead>
+        <tbody>
+          <tr><td>13</td><td>SOLUONG, SLCON = số cuốn / số cuốn “Có sẵn”<br><span class="tag amber mono">TRG_CUONSACH_CAPNHATSL</span></td></tr>
+          <tr><td>14</td><td>Chỉ lập phiếu khi thẻ còn hạn và không nợ<br><span class="tag amber mono">TRG_PHIEUMUON_KIEMTRA</span></td></tr>
+          <tr><td>15</td><td>Chỉ mượn cuốn “Có sẵn”, không nằm trong hai phiếu chưa trả<br><span class="tag amber mono">TRG_CTPM_MUONSACH</span></td></tr>
+          <tr><td>16</td><td>Trả sách: cập nhật cuốn, tự lập phiếu phạt, đóng phiếu<br><span class="tag amber mono">TRG_CTPM_TRASACH</span></td></tr>
+          <tr><td>17</td><td>TONGNO = tổng tiền phạt chưa thanh toán<br><span class="tag amber mono">TRG_PHIEUPHAT_TONGNO</span></td></tr>
+        </tbody>
+      </table>
+      <p class="note-box">RB 1–12 khai báo ngay trong <span class="mono">CREATE TABLE</span>; RB 13–17 vượt ra ngoài một quan hệ nên dùng trigger (mục 4.1.2).</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Slide 9: 2.5 Mô hình logic ===== -->
+<section class="slide">
+  <header><span class="chip">Chương 2 · Phân tích và thiết kế</span><h2>Mô hình logic và tân từ</h2>
+    <div class="note">Khóa chính <u>gạch chân</u> · khóa ngoại <i>in nghiêng</i></div></header>
+  <div class="body grid g2" style="gap:18px">
+    <div class="card">
+      <div class="schema"><div class="r"><b>THELOAI</b>(<u>MATL</u>, TENTL)</div><div class="d">Mỗi thể loại có mã riêng và tên không trùng.</div></div>
+      <div class="schema"><div class="r"><b>TACGIA</b>(<u>MATG</u>, TENTG, NAMSINH, QUOCTICH)</div><div class="d">Tác giả có mã, họ tên, năm sinh (có thể chưa biết), quốc tịch.</div></div>
+      <div class="schema"><div class="r"><b>NHAXUATBAN</b>(<u>MANXB</u>, TENNXB, DIACHI, SODT)</div><div class="d">Nhà xuất bản có mã, tên không trùng, địa chỉ, số điện thoại.</div></div>
+      <div class="schema"><div class="r"><b>DAUSACH</b>(<u>MADS</u>, TENDS, <i>MATL</i>, <i>MANXB</i>, NAMXB, SOTRANG, GIA, SOLUONG, SLCON)</div><div class="d">Đầu sách thuộc thể loại MATL, do NXB MANXB phát hành; có SOLUONG cuốn, SLCON cuốn sẵn sàng.</div></div>
+      <div class="schema"><div class="r"><b>DAUSACH_TACGIA</b>(<u><i>MADS</i></u>, <u><i>MATG</i></u>, VAITRO)</div><div class="d">Tác giả MATG tham gia đầu sách MADS với vai trò VAITRO.</div></div>
+      <div class="schema"><div class="r"><b>CUONSACH</b>(<u>MACS</u>, <i>MADS</i>, NGAYNHAP, VITRI, TINHTRANG)</div><div class="d">Một bản của đầu sách MADS, nhập ngày NGAYNHAP, đặt tại VITRI.</div></div>
+    </div>
+    <div class="card">
+      <div class="schema"><div class="r"><b>DOCGIA</b>(<u>MADG</u>, HOTEN, NGSINH, GIOITINH, DIACHI, SODT, EMAIL, NGAYLAPTHE, NGAYHETHAN, TONGNO)</div><div class="d">Thông tin độc giả và thẻ; TONGNO là tiền phạt chưa thanh toán.</div></div>
+      <div class="schema"><div class="r"><b>PHIEUMUON</b>(<u>MAPM</u>, <i>MADG</i>, NGAYMUON, HANTRA, TINHTRANG)</div><div class="d">Độc giả MADG mượn theo phiếu MAPM, phải trả trước HANTRA.</div></div>
+      <div class="schema"><div class="r"><b>CTPHIEUMUON</b>(<u><i>MAPM</i></u>, <u><i>MACS</i></u>, NGAYTRA, TINHTRANGTRA)</div><div class="d">Cuốn MACS thuộc phiếu MAPM; khi trả ghi ngày trả và tình trạng.</div></div>
+      <div class="schema"><div class="r"><b>PHIEUPHAT</b>(<u>MAPP</u>, <i>MAPM</i>, <i>MACS</i>, NGAYLAP, LYDO, SOTIEN, DATHANHTOAN)</div><div class="d">Khoản phạt cho cuốn MACS của phiếu MAPM, đã hoặc chưa thanh toán.</div></div>
+      <div class="schema"><div class="r"><b>TAIKHOAN</b>(<u>TENDANGNHAP</u>, MATKHAU, TRANGTHAI)</div><div class="d">MATKHAU là giá trị băm SHA2-256; TRANGTHAI = 0 nghĩa là bị khóa.</div></div>
+    </div>
+  </div>
+</section>
+```
+
+- [ ] **Step 3: Chạy test, xác nhận đạt**
+
+Run: `python3 docs/slide/tools/check_slides.py --upto 9`
+Expected: `OK: 9 slide, da kiem tra noi dung slide 1-9`
+
+- [ ] **Step 4: Đo tràn chữ và xem ảnh chụp**
+
+Run: `bash docs/slide/tools/render.sh check && bash docs/slide/tools/render.sh shots`
+Expected: `data-overflow="none"`.
+
+Mở `slide-07.png` … `slide-09.png` bằng Read và kiểm tra:
+- ERD đủ 11 khối, nhãn quan hệ không đè lên đường nối hay khối.
+- Bảng ở slide 8 không bị cắt dòng cuối.
+
+Nếu slide 8 tràn: đổi `font-size` của `table.t.sm` trong slide đó thành 12.5px bằng `style` trên thẻ `<table>`.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add docs/slide/Slides_NhomX.html
+git commit -m "feat(slide): add ERD, integrity constraints and logical model slides"
+```
+
+---
+
+### Task 4: Slide 10–12 (Cài đặt, Stored Procedure, Trigger)
+
+**Files:**
+- Modify: `docs/slide/Slides_NhomX.html` (chèn trước `<!-- /slides -->`)
+
+**Interfaces:**
+- Consumes: `pre.sql`, `pre.sql.sm` (JS tự tô màu), `.ba`, `.flow`, `.res`, `.stat`, `table.t.sm`.
+- Produces: slide 10, 11, 12.
+
+- [ ] **Step 1: Chạy test, xác nhận đang lỗi**
+
+Run: `python3 docs/slide/tools/check_slides.py --upto 12`
+Expected: `FAIL` với dòng `can it nhat 12 slide, hien co 9`.
+
+- [ ] **Step 2: Chèn slide 10–12**
+
+Chèn ngay trước dòng `<!-- /slides -->`:
+
+```html
+<!-- ===== Slide 10: Chương 3 Cài đặt ===== -->
+<section class="slide">
+  <header><span class="chip">Chương 3 · Cài đặt</span><h2>Tạo bảng, ràng buộc và dữ liệu mẫu</h2></header>
+  <div class="body grid" style="grid-template-columns:1.15fr 1fr;gap:18px">
+    <div class="stack">
+      <div class="card">
+        <h3><span class="ico"><svg><use href="#i-server"/></svg></span>Môi trường cài đặt</h3>
+        <span class="pill" style="margin-top:0">SQL Server 2022</span><span class="pill sky" style="margin-top:0">Docker · mssql/server:2022-latest</span><span class="pill green" style="margin-top:0">Collation Vietnamese_CI_AS</span>
+        <div class="flow mono" style="margin-top:10px">
+          <span class="step">1_TaoBang</span><span class="to">→</span><span class="step">2_DuLieuMau</span><span class="to">→</span><span class="step">3_Function</span><span class="to">→</span><span class="step">4_Trigger</span><span class="to">→</span>
+          <span class="step">5_StoredProcedure</span><span class="to">→</span><span class="step">6_Cursor</span><span class="to">→</span><span class="step">7_AnToanThongTin</span><span class="to">→</span><span class="step">8_Report</span>
+        </div>
+      </div>
+      <pre class="sql sm">CREATE TABLE DAUSACH (
+  MADS    CHAR(5)       PRIMARY KEY,
+  TENDS   NVARCHAR(100) NOT NULL,
+  MATL    CHAR(4) NOT NULL FOREIGN KEY REFERENCES THELOAI (MATL),
+  MANXB   CHAR(5) NOT NULL FOREIGN KEY REFERENCES NHAXUATBAN (MANXB),
+  NAMXB   INT NOT NULL,  SOTRANG INT NOT NULL,  GIA MONEY NOT NULL,
+  SOLUONG INT NOT NULL DEFAULT 0,  SLCON INT NOT NULL DEFAULT 0,
+  CONSTRAINT CK_DAUSACH_NAMXB CHECK (NAMXB BETWEEN 1900 AND YEAR(GETDATE())),
+  CONSTRAINT CK_DAUSACH_SOTRANG CHECK (SOTRANG &gt; 0),
+  CONSTRAINT CK_DAUSACH_GIA   CHECK (GIA &gt; 0),
+  CONSTRAINT CK_DAUSACH_SL    CHECK (SOLUONG &gt;= 0
+                              AND SLCON BETWEEN 0 AND SOLUONG))</pre>
+      <div class="muted small" style="line-height:1.45">Khóa chính nhiều cột dùng <span class="mono">PRIMARY KEY (...)</span>; PHIEUPHAT có khóa ngoại kép (MAPM, MACS) tới CTPHIEUMUON; MATKHAU kiểu <span class="mono">VARBINARY(32)</span>.</div>
+    </div>
+    <div class="stack">
+      <div class="card">
+        <h3><span class="ico sky"><svg><use href="#i-db"/></svg></span>Số dòng dữ liệu</h3>
+        <table class="t sm">
+          <thead><tr><th>Bảng</th><th>Dòng</th><th>Bảng</th><th>Dòng</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">THELOAI</td><td>9</td><td class="mono">CUONSACH</td><td>26</td></tr>
+            <tr><td class="mono">TACGIA</td><td>16</td><td class="mono">DOCGIA</td><td>118</td></tr>
+            <tr><td class="mono">NHAXUATBAN</td><td>10</td><td class="mono">PHIEUMUON</td><td>23</td></tr>
+            <tr><td class="mono">DAUSACH</td><td>16</td><td class="mono">CTPHIEUMUON</td><td>38</td></tr>
+            <tr><td class="mono">DAUSACH_TACGIA</td><td>17</td><td class="mono">PHIEUPHAT</td><td>10</td></tr>
+            <tr><td class="mono">TAIKHOAN</td><td>1</td><td></td><td></td></tr>
+          </tbody>
+        </table>
+        <div class="muted small" style="margin-top:6px">Đếm trên bản sao CSDL ngày 11/10/2026; dữ liệu mô phỏng tháng 4 – 9/2026.</div>
+      </div>
+      <div class="card">
+        <h3><span class="ico green"><svg><use href="#i-target"/></svg></span>Bao quát tình huống</h3>
+        <ul class="list" style="font-size:13.5px">
+          <li><b>Độc giả:</b> thẻ hết hạn (DG006), nợ 250.000đ (DG009), chưa từng mượn (DG012), thiếu email (DG013, DG015).</li>
+          <li><b>Sách:</b> cuốn hư (CS006, CS012), mất (CS015); đầu sách chưa có tác giả (DS016); thể loại chưa có sách (TL08).</li>
+          <li><b>Mượn – trả:</b> đúng hạn, trễ, trả một phần (PM0012, PM0016), đang quá hạn; phạt đủ ba lý do.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Slide 11: 4.1.1 Stored Procedure ===== -->
+<section class="slide">
+  <header><span class="chip">Chương 4 · Xử lý thông tin</span><h2>Stored Procedure</h2>
+    <div class="note">Tổng cộng <b>38</b> SP: 5 nghiệp vụ chính · 2 chứa cursor · 3 xác thực, sao lưu · 28 phục vụ màn hình web (thêm, sửa, xóa, tìm kiếm phân trang)</div></header>
+  <div class="body grid" style="grid-template-columns:0.85fr 1fr;gap:18px">
+    <div class="card">
+      <h3><span class="ico"><svg><use href="#i-code"/></svg></span>5 thủ tục nghiệp vụ chính</h3>
+      <table class="t sm">
+        <thead><tr><th>Thủ tục</th><th style="width:96px">Tham số</th><th>Kết quả trả về</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">SP_THEMDOCGIA</td><td>vào</td><td>0 trùng mã · 2 thành công, thẻ hạn 2 năm</td></tr>
+          <tr><td class="mono">SP_LAPPHIEUMUON</td><td>vào, ra @MAPM</td><td>1 thành công · 0 lỗi, rollback cả phiếu</td></tr>
+          <tr><td class="mono">SP_TRASACH</td><td>vào, ra @TIENPHAT</td><td>0 không thấy · 1 đã trả · 2 thành công</td></tr>
+          <tr><td class="mono">SP_THANHTOANPHAT</td><td>vào, ra @SOTIEN</td><td>0 không có độc giả · 1 không nợ · 2 thành công</td></tr>
+          <tr><td class="mono">SP_THONGKETHANG</td><td>vào, 3 ra</td><td>Số phiếu, lượt sách, tiền phạt + top 5 đầu sách</td></tr>
+        </tbody>
+      </table>
+      <p class="note-box">Ví dụ SP_TRASACH: trả CS011 trễ 26 ngày → @TIENPHAT = 130.000. SP_THONGKETHANG tháng 9/2026: 6 phiếu, 11 lượt sách.</p>
+    </div>
+    <div class="card">
+      <h3 style="margin-bottom:8px"><span class="ico sky"><svg><use href="#i-swap"/></svg></span>SP_LAPPHIEUMUON – lập phiếu nhiều cuốn</h3>
+      <pre class="sql sm">CREATE OR ALTER PROCEDURE SP_LAPPHIEUMUON
+  @MADG CHAR(5), @DSMACS VARCHAR(200), @MAPM CHAR(6) OUTPUT
+AS BEGIN
+  BEGIN TRY
+    BEGIN TRANSACTION;
+    SELECT @MAX = ISNULL(MAX(CAST(SUBSTRING(MAPM, 3, 4) AS INT)), 0)
+    FROM PHIEUMUON WITH (UPDLOCK, HOLDLOCK);
+    SET @MAPM = 'PM' + RIGHT('0000' + CAST(@MAX + 1 AS VARCHAR(4)), 4);
+    INSERT INTO PHIEUMUON (MAPM, MADG, NGAYMUON, HANTRA, TINHTRANG)
+    VALUES (@MAPM, @MADG, CAST(GETDATE() AS DATE),
+            DATEADD(DAY, 14, CAST(GETDATE() AS DATE)), N'Đang mượn');
+    INSERT INTO CTPHIEUMUON (MAPM, MACS)
+    SELECT DISTINCT @MAPM, LTRIM(RTRIM(value))
+    FROM STRING_SPLIT(@DSMACS, ',') WHERE LTRIM(RTRIM(value)) &lt;&gt; '';
+    COMMIT TRANSACTION; RETURN 1;
+  END TRY
+  BEGIN CATCH  -- ROLLBACK, @MAPM = NULL, RETURN 0
+END</pre>
+      <div class="ba" style="margin-top:10px">
+        <div class="before"><b class="h">Trước</b>CS001, CS002: Có sẵn<br>DS001 “Mắt biếc”: SLCON = 2</div>
+        <div class="arrow">→</div>
+        <div class="after"><b class="h">Sau</b>@MAPM = PM0329, hạn 2026-10-25<br>CS001, CS002: Đang mượn; SLCON = 0</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Slide 12: 4.1.2 Trigger ===== -->
+<section class="slide">
+  <header><span class="chip">Chương 4 · Xử lý thông tin</span><h2>Trigger</h2></header>
+  <div class="body grid g2" style="gap:18px">
+    <div class="card">
+      <h3><span class="ico amber"><svg><use href="#i-zap"/></svg></span>5 trigger và tầm ảnh hưởng</h3>
+      <table class="t sm">
+        <thead><tr><th>Trigger</th><th style="width:118px">Bảng · sự kiện</th><th>Nhiệm vụ</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">TRG_CUONSACH_CAPNHATSL</td><td>CUONSACH · I, U, D</td><td>Tính lại SOLUONG, SLCON</td></tr>
+          <tr><td class="mono">TRG_PHIEUMUON_KIEMTRA</td><td>PHIEUMUON · I, U</td><td>Chặn thẻ hết hạn, còn nợ</td></tr>
+          <tr><td class="mono">TRG_CTPM_MUONSACH</td><td>CTPHIEUMUON · I</td><td>Chỉ mượn cuốn “Có sẵn”</td></tr>
+          <tr><td class="mono">TRG_CTPM_TRASACH</td><td>CTPHIEUMUON · U</td><td>Cập nhật cuốn, lập phiếu phạt, đóng phiếu</td></tr>
+          <tr><td class="mono">TRG_PHIEUPHAT_TONGNO</td><td>PHIEUPHAT · I, U, D</td><td>Đồng bộ DOCGIA.TONGNO</td></tr>
+        </tbody>
+      </table>
+      <div class="small muted" style="margin:12px 0 6px;font-weight:600">Chuỗi kích hoạt khi trả sách</div>
+      <div class="flow mono">
+        <span class="step">SP_TRASACH</span><span class="to">→</span><span class="step">TRG_CTPM_TRASACH</span><span class="to">→</span>
+        <span class="step">INSERT PHIEUPHAT</span><span class="to">→</span><span class="step">TRG_PHIEUPHAT_TONGNO</span><span class="to">→</span><span class="step">DOCGIA.TONGNO</span>
+      </div>
+      <div class="res red">Lập phiếu cho DG006 (thẻ hết hạn) và DG009 (nợ 250.000đ): cả hai bị từ chối, không phiếu nào được tạo.</div>
+    </div>
+    <div class="card">
+      <h3 style="margin-bottom:8px"><span class="ico sky"><svg><use href="#i-loop"/></svg></span>TRG_CTPM_TRASACH – tự lập phiếu phạt</h3>
+      <pre class="sql sm">CREATE TRIGGER TRG_CTPM_TRASACH ON CTPHIEUMUON AFTER UPDATE AS
+BEGIN
+  UPDATE CS SET TINHTRANG = CASE I.TINHTRANGTRA
+      WHEN N'Bình thường' THEN N'Có sẵn' ELSE I.TINHTRANGTRA END
+  FROM CUONSACH CS JOIN inserted I ON CS.MACS = I.MACS
+  WHERE I.NGAYTRA IS NOT NULL
+  ;WITH TRA AS (...),  -- dong vua tra kem HANTRA, GIA
+  PHAT AS (
+    SELECT MAPM, MACS, NGAYTRA, N'Trả trễ' AS LYDO,
+           dbo.FN_TIENPHATTRE(HANTRA, NGAYTRA) AS SOTIEN
+    FROM TRA WHERE NGAYTRA &gt; HANTRA
+    UNION ALL SELECT ..., N'Hư hỏng', GIA * 0.5 FROM TRA WHERE ...
+    UNION ALL SELECT ..., N'Mất sách', GIA FROM TRA WHERE ...)
+  INSERT INTO PHIEUPHAT (MAPP, MAPM, MACS, NGAYLAP, LYDO, ...)
+  SELECT 'PP' + ..., MAPM, MACS, NGAYTRA, LYDO, SOTIEN, 0 FROM PHAT
+  UPDATE PHIEUMUON SET TINHTRANG = N'Đã trả' WHERE ...  -- tra het
+END</pre>
+      <div class="small muted" style="margin:10px 0 6px;font-weight:600">Trả CS003 (giá 110.000đ, phiếu PM0014) ngày 2026-10-11, tình trạng “Hư hỏng”</div>
+      <div class="grid g4" style="gap:8px">
+        <div class="stat" style="padding:8px 10px"><div class="v" style="font-size:16px">Hư hỏng</div><div class="l">CS003</div></div>
+        <div class="stat" style="padding:8px 10px"><div class="v" style="font-size:16px;color:#D97706">55.000</div><div class="l">PP0012 hư 50%</div></div>
+        <div class="stat" style="padding:8px 10px"><div class="v" style="font-size:16px;color:#D97706">35.000</div><div class="l">PP0013 trễ 7 ngày</div></div>
+        <div class="stat" style="padding:8px 10px"><div class="v" style="font-size:16px">90.000</div><div class="l">TONGNO DG014</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+```
+
+- [ ] **Step 3: Chạy test, xác nhận đạt**
+
+Run: `python3 docs/slide/tools/check_slides.py --upto 12`
+Expected: `OK: 12 slide, da kiem tra noi dung slide 1-12`. Không còn lỗi `<pre>` nào, vì mọi `<`, `>` trong code đã viết `&lt;`, `&gt;`.
+
+- [ ] **Step 4: Đo tràn chữ và xem ảnh chụp**
+
+Run: `bash docs/slide/tools/render.sh check && bash docs/slide/tools/render.sh shots`
+Expected: `data-overflow="none"`.
+
+Mở `slide-10.png` … `slide-12.png` bằng Read và kiểm tra:
+- Code có tô màu: từ khóa màu tím, chuỗi `N'...'` màu xanh lá, tên `SP_`/`TRG_`/`FN_` màu xanh dương.
+- Không dòng code nào bị cắt ở mép phải.
+
+Nếu `check` báo slide 11 hoặc 12 tràn: đổi `pre.sql.sm` của slide đó sang `style="font-size:11.5px"`, rồi chạy lại.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add docs/slide/Slides_NhomX.html
+git commit -m "feat(slide): add installation, stored procedure and trigger slides"
+```
+
+---
+
+### Task 5: Slide 13–15 (Function và Cursor, An toàn thông tin, Report)
+
+**Files:**
+- Modify: `docs/slide/Slides_NhomX.html` (chèn trước `<!-- /slides -->`)
+
+**Interfaces:**
+- Consumes: `.obj`, `.obj-h`, `.name`, `.res`, `.res.red`, `pre.sql.sm`, `pre.code.sm`, `.hbar`, `.legend`, `.dot`, `table.t.sm`.
+- Produces: slide 13, 14, 15.
+
+- [ ] **Step 1: Chạy test, xác nhận đang lỗi**
+
+Run: `python3 docs/slide/tools/check_slides.py --upto 15`
+Expected: `FAIL` với dòng `can it nhat 15 slide, hien co 12`.
+
+- [ ] **Step 2: Chèn slide 13–15**
+
+Chèn ngay trước dòng `<!-- /slides -->`.
+
+Số liệu của biểu đồ:
+- **Donut** (r = 44, chu vi 276,46): 13/26 → 138,23; 10/26 → 106,33; 2/26 → 21,27; 1/26 → 10,63.
+- **Thanh xếp loại**: 101/119 = 84,9%; 6/119 = 5,0%; 5/119 = 4,2%; 5/119 = 4,2%; 2/119 = 1,7%.
+- **Tiền phạt**: 233/498 = 46,8%; 265/498 = 53,2%; mất sách 250/498 = 50,2%.
+
+```html
+<!-- ===== Slide 13: 4.1.3–4.1.4 Function, Cursor ===== -->
+<section class="slide">
+  <header><span class="chip">Chương 4 · Xử lý thông tin</span><h2>Function và Cursor</h2></header>
+  <div class="body stack" style="gap:16px">
+    <div class="grid g3" style="gap:16px">
+      <div class="card obj">
+        <div class="obj-h"><span class="tag">Hàm vô hướng</span><span class="name">FN_SOSACHDANGMUON</span></div>
+        <p>Số cuốn độc giả đang giữ; trả −1 nếu không có độc giả.</p>
+        <pre class="sql sm">SELECT dbo.FN_SOSACHDANGMUON('DG007')</pre>
+        <div class="res">DG007 → 3 · DG003 → 0 · XX000 → −1</div>
+      </div>
+      <div class="card obj">
+        <div class="obj-h"><span class="tag">Hàm vô hướng</span><span class="name">FN_TIENPHATTRE</span></div>
+        <p>5.000đ × số ngày trễ; dùng chung cho trigger, cursor, view.</p>
+        <pre class="sql sm">IF @SONGAYTRE &lt;= 0 RETURN 0
+RETURN @SONGAYTRE * 5000</pre>
+        <div class="res">Hạn 15/09, trả 26/09 → 55.000đ · đúng hạn → 0</div>
+      </div>
+      <div class="card obj">
+        <div class="obj-h"><span class="tag sky">Hàm trả về bảng</span><span class="name">FN_LICHSUMUON</span></div>
+        <p>Lịch sử mượn kèm số ngày trễ và trạng thái từng cuốn.</p>
+        <pre class="sql sm">SELECT * FROM dbo.FN_LICHSUMUON('DG007')</pre>
+        <div class="res">5 dòng: 2 “Đã trả (Bình thường)”, 3 “Đang mượn”</div>
+      </div>
+    </div>
+    <div class="grid g2" style="gap:16px">
+      <div class="card obj">
+        <div class="obj-h"><span class="tag amber">Cursor</span><span class="name">SP_CURSOR_XEPLOAIDOCGIA</span></div>
+        <p>Duyệt từng độc giả, đếm lượt mượn, số lần trễ, hư/mất, tiền phạt rồi ghi vào DOCGIA_XEPLOAI.</p>
+        <pre class="sql sm">SET @XEPLOAI = CASE
+  WHEN @SOLUOT = 0                    THEN N'Chưa mượn'
+  WHEN @SOMAT &gt; 0 OR @TONGNO &gt; 100000 THEN N'Hạn chế'
+  WHEN @SOTRE &gt;= 2 OR @SOHUMAT &gt; 0    THEN N'Cảnh báo'
+  WHEN @SOTRE = 1                     THEN N'Bình thường'
+  ELSE N'Uy tín' END</pre>
+        <div style="display:flex;height:14px;border-radius:7px;overflow:hidden;margin-top:10px">
+          <div style="width:84.9%;background:#CBD5E1"></div><div style="width:5.0%;background:#F59E0B"></div>
+          <div style="width:4.2%;background:#0EA5E9"></div><div style="width:4.2%;background:#10B981"></div><div style="width:1.7%;background:#EF4444"></div>
+        </div>
+        <div class="legend"><span><i class="dot" style="background:#CBD5E1"></i>Chưa mượn 101</span><span><i class="dot" style="background:#F59E0B"></i>Cảnh báo 6</span>
+          <span><i class="dot" style="background:#0EA5E9"></i>Bình thường 5</span><span><i class="dot" style="background:#10B981"></i>Uy tín 5</span><span><i class="dot" style="background:#EF4444"></i>Hạn chế 2</span><span>· 119 độc giả</span></div>
+      </div>
+      <div class="card obj">
+        <div class="obj-h"><span class="tag amber">Cursor</span><span class="name">SP_CURSOR_NHACNHOQUAHAN</span></div>
+        <p>Duyệt từng cuốn chưa trả đã quá hạn, tính tiền phạt tạm, soạn tin nhắc vào NHACNHO_QUAHAN.</p>
+        <pre class="sql sm">WHILE @@FETCH_STATUS = 0 BEGIN
+  IF NOT EXISTS (SELECT * FROM NHACNHO_QUAHAN WHERE MAPM = @MAPM
+    AND MACS = @MACS AND NGAYLAP = @NGAYKIEMTRA) BEGIN
+    SET @TIENPHAT = dbo.FN_TIENPHATTRE(@HANTRA, @NGAYKIEMTRA)
+    INSERT INTO NHACNHO_QUAHAN (...) VALUES (...)  -- kem @NOIDUNG
+  END
+  FETCH NEXT FROM CUR_QUAHAN INTO @MAPM, @MACS, ...
+END</pre>
+        <div class="res">11/10/2026: 4 nhắc nhở; DG004 quá hạn 17 ngày, tạm tính 85.000đ. Chạy lại cùng ngày: 0 nhắc nhở mới.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Slide 14: 4.2 An toàn thông tin ===== -->
+<section class="slide">
+  <header><span class="chip">Chương 4 · An toàn thông tin</span><h2>Xác thực, phân quyền, import/export, sao lưu</h2></header>
+  <div class="body grid g2" style="gap:16px;grid-template-rows:1fr 1fr">
+    <div class="card">
+      <h3><span class="ico"><svg><use href="#i-key"/></svg></span>Xác thực hai lớp</h3>
+      <ul class="list" style="font-size:13.5px">
+        <li>Login SQL Server <span class="mono">LG_QUANLY, LG_THUTHU, LG_DOCGIA</span> (<span class="mono">CHECK_POLICY = ON</span>) ánh xạ tới user <span class="mono">U_...</span>.</li>
+        <li>Website: TAIKHOAN lưu băm; <span class="mono">SP_DANGNHAP</span> trả @KETQUA 0 sai / 1 bị khóa / 2 thành công.</li>
+      </ul>
+      <pre class="sql sm">MATKHAU = HASHBYTES('SHA2_256', @MATKHAU)  -- VARBINARY(32)</pre>
+      <div class="res">admin / 123456 → @KETQUA = 2 · sai mật khẩu → 0</div>
+    </div>
+    <div class="card">
+      <h3><span class="ico green"><svg><use href="#i-shield"/></svg></span>Phân quyền theo role</h3>
+      <table class="t sm" style="font-size:12.5px">
+        <thead><tr><th style="width:86px">Role</th><th>GRANT</th><th style="width:150px">DENY</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">R_QUANLY</td><td>db_datareader, db_datawriter, db_backupoperator; EXECUTE dbo</td><td>–</td></tr>
+          <tr><td class="mono">R_THUTHU</td><td>SELECT toàn bộ; INSERT, UPDATE 6 bảng nghiệp vụ; SP nghiệp vụ</td><td>DELETE; SELECT TAIKHOAN</td></tr>
+          <tr><td class="mono">R_DOCGIA</td><td>SELECT danh mục sách; SP_TIMSACH</td><td>DOCGIA, TAIKHOAN; mọi lệnh ghi</td></tr>
+        </tbody>
+      </table>
+      <div class="res red">EXECUTE AS U_THUTHU: DELETE FROM PHIEUPHAT → permission denied</div>
+    </div>
+    <div class="card">
+      <h3><span class="ico sky"><svg><use href="#i-upload"/></svg></span>Import và Export</h3>
+      <pre class="sql sm">BULK INSERT #DOCGIA_IMPORT FROM '.../DOCGIA_IMPORT.csv'
+  WITH (FORMAT = 'CSV', DATAFILETYPE = 'widechar', FIRSTROW = 2)</pre>
+      <div class="muted small" style="margin:6px 0 8px">Chỉ INSERT mã chưa tồn tại vào DOCGIA, nên CHECK vẫn được kiểm tra.</div>
+      <pre class="code sm">bcp "SELECT MADS, TENDS, SOLUONG, SLCON FROM ...DAUSACH"
+    queryout DAUSACH.csv -c -C 65001 -t,</pre>
+      <div class="muted small" style="margin-top:6px">Hoặc SSMS: Tasks › Export Data → Excel.</div>
+    </div>
+    <div class="card">
+      <h3><span class="ico amber"><svg><use href="#i-save"/></svg></span>Backup và Restore</h3>
+      <ul class="list" style="font-size:13.5px">
+        <li>Recovery model FULL; <span class="mono">SP_SAOLUU @DUONGDAN, @LOAI</span> sao lưu FULL hoặc DIFF, chỉ R_QUANLY được gọi.</li>
+      </ul>
+      <pre class="sql sm">RESTORE DATABASE QUANLYTHUVIEN FROM DISK = N'..._FULL.bak'
+  WITH NORECOVERY, REPLACE
+RESTORE DATABASE QUANLYTHUVIEN FROM DISK = N'..._DIFF.bak'
+  WITH RECOVERY</pre>
+      <div class="res">Bản FULL: 818 trang, tệp .bak khoảng 6,46 MB</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Slide 15: 4.3 Report ===== -->
+<section class="slide">
+  <header><span class="chip">Chương 4 · Trình bày thông tin</span><h2>5 report trên trang Báo cáo</h2>
+    <div class="note">React + Recharts ← API ASP.NET Core (Dapper) ← 5 view <span class="mono">VW_BC_*</span><br>Truy vấn lại mỗi lần mở trang, không lưu sẵn số liệu</div></header>
+  <div class="body stack" style="gap:16px">
+    <div class="grid g3" style="gap:16px">
+      <div class="card obj">
+        <div class="obj-h"><span class="tag">Report 1</span><b>Tình trạng kho sách</b></div>
+        <div class="mono small muted" style="margin:2px 0 6px">VW_BC_TINHTRANGKHO</div>
+        <div style="display:flex;gap:14px;align-items:center">
+          <svg viewBox="0 0 120 120" width="104" height="104" aria-label="Donut tình trạng kho">
+            <g transform="rotate(-90 60 60)" fill="none" stroke-width="18">
+              <circle cx="60" cy="60" r="44" stroke="#10B981" stroke-dasharray="138.23 276.46"/>
+              <circle cx="60" cy="60" r="44" stroke="#2563EB" stroke-dasharray="106.33 276.46" stroke-dashoffset="-138.23"/>
+              <circle cx="60" cy="60" r="44" stroke="#F59E0B" stroke-dasharray="21.27 276.46" stroke-dashoffset="-244.56"/>
+              <circle cx="60" cy="60" r="44" stroke="#EF4444" stroke-dasharray="10.63 276.46" stroke-dashoffset="-265.83"/>
+            </g>
+            <text x="60" y="60" text-anchor="middle" font-size="22" font-weight="800" fill="#0F172A">26</text>
+            <text x="60" y="78" text-anchor="middle" font-size="11" fill="#475569">cuốn</text>
+          </svg>
+          <div class="legend" style="flex-direction:column;gap:3px;margin:0">
+            <span><i class="dot" style="background:#10B981"></i>Có sẵn 13</span><span><i class="dot" style="background:#2563EB"></i>Đang mượn 10</span>
+            <span><i class="dot" style="background:#F59E0B"></i>Hư hỏng 2</span><span><i class="dot" style="background:#EF4444"></i>Mất 1</span>
+          </div>
+        </div>
+        <div class="muted small" style="margin-top:8px;line-height:1.4">“Clean Code” đang được mượn hết 2 cuốn, cần nhập thêm.</div>
+      </div>
+      <div class="card obj">
+        <div class="obj-h"><span class="tag">Report 2</span><b>Sách được mượn nhiều</b></div>
+        <div class="mono small muted" style="margin:2px 0 2px">VW_BC_SACHMUONNHIEU</div>
+        <div class="hbar"><span>Mắt biếc</span><div class="track"><div class="fill" style="width:100%"></div></div><b>5</b></div>
+        <div class="hbar"><span>Harry Potter và Hòn đá Phù thủy</span><div class="track"><div class="fill" style="width:80%"></div></div><b>4</b></div>
+        <div class="hbar"><span>Đắc nhân tâm</span><div class="track"><div class="fill" style="width:80%"></div></div><b>4</b></div>
+        <div class="hbar"><span>Database System Concepts</span><div class="track"><div class="fill" style="width:80%"></div></div><b>4</b></div>
+        <div class="muted small" style="margin-top:8px;line-height:1.4">“Mắt biếc” dẫn đầu với 5 lượt từ 5 độc giả.</div>
+      </div>
+      <div class="card obj">
+        <div class="obj-h"><span class="tag">Report 3</span><b>Lượt mượn theo tháng</b></div>
+        <div class="mono small muted" style="margin:2px 0 4px">VW_BC_LUOTMUON_THANG</div>
+        <svg viewBox="0 0 300 120" width="100%" height="112" aria-label="Lượt mượn tháng 4 đến 9">
+          <g stroke="#E2E8F0"><path d="M20 100H290M20 72H290M20 44H290"/></g>
+          <polygon points="30,100 30,79 78,79 126,51 174,51 222,51 270,23 270,100" fill="#2563EB" opacity=".10"/>
+          <polyline points="30,79 78,79 126,51 174,51 222,51 270,23" fill="none" stroke="#2563EB" stroke-width="3" stroke-linejoin="round"/>
+          <g fill="#fff" stroke="#2563EB" stroke-width="2.5"><circle cx="30" cy="79" r="4"/><circle cx="78" cy="79" r="4"/><circle cx="126" cy="51" r="4"/><circle cx="174" cy="51" r="4"/><circle cx="222" cy="51" r="4"/><circle cx="270" cy="23" r="4"/></g>
+          <g font-size="11" fill="#0F172A" font-weight="700" text-anchor="middle"><text x="30" y="70">3</text><text x="78" y="70">3</text><text x="126" y="42">7</text><text x="174" y="42">7</text><text x="222" y="42">7</text><text x="270" y="14">11</text></g>
+          <g font-size="10.5" fill="#475569" text-anchor="middle"><text x="30" y="115">T4</text><text x="78" y="115">T5</text><text x="126" y="115">T6</text><text x="174" y="115">T7</text><text x="222" y="115">T8</text><text x="270" y="115">T9</text></g>
+        </svg>
+        <div class="muted small" style="margin-top:4px;line-height:1.4">Tháng 9 đạt 11 lượt (đầu năm học); Văn học Việt Nam nhiều nhất.</div>
+      </div>
+    </div>
+    <div class="grid g2" style="gap:16px">
+      <div class="card obj">
+        <div class="obj-h"><span class="tag amber">Report 4</span><b>Tiền phạt theo tháng và lý do</b><span class="mono small muted">VW_BC_TIENPHAT_THANG</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:8px"><span class="small muted">10 phiếu phạt</span><b style="font-size:22px;color:#D97706">498.000đ</b></div>
+        <div style="display:flex;height:14px;border-radius:7px;overflow:hidden;margin-top:6px"><div style="width:46.8%;background:#10B981"></div><div style="width:53.2%;background:#F59E0B"></div></div>
+        <div class="legend"><span><i class="dot" style="background:#10B981"></i>Đã thu 233.000đ</span><span><i class="dot" style="background:#F59E0B"></i>Chưa thu 265.000đ</span></div>
+        <div style="display:flex;height:14px;border-radius:7px;overflow:hidden;margin-top:8px"><div style="width:50.2%;background:#EF4444"></div><div style="width:49.8%;background:#CBD5E1"></div></div>
+        <div class="legend"><span><i class="dot" style="background:#EF4444"></i>Mất sách 250.000đ (~50%)</span><span><i class="dot" style="background:#CBD5E1"></i>Trả trễ, hư hỏng</span></div>
+      </div>
+      <div class="card obj">
+        <div class="obj-h"><span class="tag red">Report 5</span><b>Độc giả giữ sách quá hạn</b><span class="mono small muted">VW_BC_DOCGIA_QUAHAN</span></div>
+        <table class="t sm" style="margin-top:8px">
+          <thead><tr><th>Độc giả</th><th>Số ngày trễ</th><th>Tạm tính</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">DG001</td><td>26 ngày</td><td>130.000đ</td></tr>
+            <tr><td class="mono">DG004</td><td>17 ngày</td><td>85.000đ</td></tr>
+          </tbody>
+        </table>
+        <div class="muted small" style="margin-top:6px;line-height:1.4">6 cuốn quá hạn thuộc 5 độc giả; danh sách là đầu vào cho cursor nhắc nhở.</div>
+      </div>
+    </div>
+  </div>
+</section>
+```
+
+- [ ] **Step 3: Chạy test, xác nhận đạt**
+
+Run: `python3 docs/slide/tools/check_slides.py --upto 15`
+Expected: `OK: 15 slide, da kiem tra noi dung slide 1-15`
+
+- [ ] **Step 4: Đo tràn chữ và xem ảnh chụp**
+
+Run: `bash docs/slide/tools/render.sh check && bash docs/slide/tools/render.sh shots`
+Expected: `data-overflow="none"`.
+
+Mở `slide-13.png` … `slide-15.png` bằng Read và kiểm tra:
+- Donut chia đúng 4 phần (xanh lá chiếm khoảng một nửa).
+- Đường biểu diễn lượt mượn đi lên ở T9.
+- Các nhãn tên sách trong Report 2 không đè lên thanh.
+- 4 ô ở slide 14 cao bằng nhau, không ô nào bị cắt.
+
+Nếu `check` báo tràn: ở slide 14, giảm `font-size` của `ul.list` xuống 13px; ở slide 15, giảm chiều cao biểu đồ SVG (`height="96"`). Sau đó chạy lại.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add docs/slide/Slides_NhomX.html
+git commit -m "feat(slide): add function/cursor, security and report slides"
+```
+
+---
+
+### Task 6: Slide 16–19, xuất PDF và kiểm tra toàn bộ
+
+**Files:**
+- Modify: `docs/slide/Slides_NhomX.html` (chèn trước `<!-- /slides -->`)
+- Create: `docs/slide/Slides_NhomX.pdf` (sinh ra bằng `render.sh pdf`)
+
+**Interfaces:**
+- Consumes: toàn bộ lớp CSS; `.ph`; `.hero`; `render.sh pdf`.
+- Produces: bộ slide hoàn chỉnh 19 trang và file PDF.
+
+- [ ] **Step 1: Chạy test đầy đủ, xác nhận đang lỗi**
+
+Run: `python3 docs/slide/tools/check_slides.py`
+Expected: `FAIL` với dòng `can dung 19 slide, hien co 15`.
+
+- [ ] **Step 2: Chèn slide 16–19**
+
+Chèn ngay trước dòng `<!-- /slides -->`:
+
+```html
+<!-- ===== Slide 16: 5.1 Website demo ===== -->
+<section class="slide">
+  <header><span class="chip">Chương 5 · Demo và kết luận</span><h2>Website demo</h2></header>
+  <div class="body grid" style="grid-template-columns:1.1fr 1fr;gap:18px">
+    <div class="stack">
+      <div class="card">
+        <h3><span class="ico"><svg><use href="#i-layers"/></svg></span>Kiến trúc</h3>
+        <div style="display:grid;grid-template-columns:1fr 22px 1fr 22px 1fr;align-items:stretch;gap:4px">
+          <div class="stat" style="padding:10px"><b>Frontend</b><div class="l">React 19, Vite, Tailwind, shadcn/ui, Recharts</div></div>
+          <div style="display:grid;place-items:center;color:#94A3B8;font-weight:800">→</div>
+          <div class="stat" style="padding:10px"><b>Backend</b><div class="l">ASP.NET Core (.NET 10), Dapper, gọi SP</div></div>
+          <div style="display:grid;place-items:center;color:#94A3B8;font-weight:800">→</div>
+          <div class="stat" style="padding:10px"><b>CSDL</b><div class="l">SQL Server 2022 trong Docker</div></div>
+        </div>
+        <div class="note-box" style="margin-top:10px;padding:6px 12px">.NET Aspire khởi động đồng thời backend, frontend và dashboard theo dõi log.</div>
+      </div>
+      <div class="card">
+        <h3><span class="ico sky"><svg><use href="#i-monitor"/></svg></span>Luồng demo cho mỗi đối tượng</h3>
+        <div class="flow">
+          <span class="step">B1 Bài toán</span><span class="to">→</span><span class="step">B2 Câu SQL</span><span class="to">→</span><span class="step">B3 Bảng trước</span><span class="to">→</span><span class="step">B4 Nút thực thi</span><span class="to">→</span><span class="step">B5 Bảng sau / output</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3><span class="ico green"><svg><use href="#i-code"/></svg></span>Cách chạy</h3>
+        <ol style="margin:0;padding-left:20px;font-size:13px;line-height:1.6" class="muted">
+          <li><span class="mono">docker compose up -d</span> – chạy SQL Server</li>
+          <li>Chạy <span class="mono">db/init_all.sql</span> (hoặc các script 1 → 8)</li>
+          <li><span class="mono">npm install</span> trong thư mục <span class="mono">frontend</span></li>
+          <li><span class="mono">dotnet run --project QuanLyThuVien.AppHost</span></li>
+          <li>Đăng nhập bằng tài khoản <span class="mono">admin</span></li>
+        </ol>
+      </div>
+    </div>
+    <div class="grid g2" style="gap:14px;grid-template-rows:1fr 1fr">
+      <div class="ph"><div><svg class="i"><use href="#i-monitor"/></svg>[Chèn ảnh màn hình đăng nhập]</div></div>
+      <div class="ph"><div><svg class="i"><use href="#i-monitor"/></svg>[Chèn ảnh màn hình quản lý sách]</div></div>
+      <div class="ph"><div><svg class="i"><use href="#i-monitor"/></svg>[Chèn ảnh màn hình mượn – trả]</div></div>
+      <div class="ph"><div><svg class="i"><use href="#i-monitor"/></svg>[Chèn ảnh màn hình báo cáo]</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Slide 17: 5.2–5.4 ===== -->
+<section class="slide">
+  <header><span class="chip">Chương 5 · Demo và kết luận</span><h2>Kết quả, hạn chế và hướng phát triển</h2></header>
+  <div class="body grid g3">
+    <div class="card">
+      <h3><span class="ico green"><svg><use href="#i-check"/></svg></span>Kết quả đạt được</h3>
+      <ul class="list check" style="font-size:14.5px">
+        <li>CSDL 11 bảng, 17 ràng buộc toàn vẹn (18 CHECK, 2 UNIQUE, 5 trigger), dữ liệu mẫu bao quát tình huống.</li>
+        <li>5 SP nghiệp vụ, 5 trigger, 3 function, 2 cursor, kiểm chứng bằng kết quả chạy thật.</li>
+        <li>Xác thực hai lớp, 3 role với GRANT/DENY/REVOKE, import/export, sao lưu FULL/DIFF.</li>
+        <li>5 report và website demo lấy dữ liệu trực tiếp từ CSDL.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3><span class="ico amber"><svg><use href="#i-alert"/></svg></span>Hạn chế</h3>
+      <ul class="list" style="font-size:14.5px">
+        <li>Website chỉ có tài khoản quản trị; 3 vai trò mới phân quyền ở mức SQL Server.</li>
+        <li>Mã phiếu phạt sinh bằng MAX + 1, có thể trùng khi nhiều người trả cùng lúc.</li>
+        <li>Script nạp dữ liệu lớn tạm tắt trigger; nếu dừng giữa chừng thì trigger không được bật lại.</li>
+        <li>Chưa gửi nhắc nhở thật; chưa đánh giá cursor trên dữ liệu lớn.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3><span class="ico"><svg><use href="#i-trend"/></svg></span>Hướng phát triển</h3>
+      <ul class="list" style="font-size:14.5px">
+        <li>Đăng nhập theo vai trò, cổng tra cứu cho độc giả.</li>
+        <li>Gia hạn, đặt trước sách, quét mã vạch khi mượn – trả.</li>
+        <li>Nhắc nhở qua email/SMS; sao lưu tự động bằng SQL Server Agent.</li>
+        <li>Dùng SEQUENCE hoặc IDENTITY để sinh mã an toàn; kiểm tra trạng thái trigger sau khi nạp dữ liệu.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Slide 18: 5.5 + TLTK ===== -->
+<section class="slide">
+  <header><span class="chip">Chương 5 · Demo và kết luận</span><h2>Video demo và tài liệu tham khảo</h2></header>
+  <div class="body grid" style="grid-template-columns:380px 1fr;gap:18px">
+    <div class="card" style="display:flex;flex-direction:column;justify-content:center;text-align:center;gap:10px">
+      <span class="ico" style="width:72px;height:72px;border-radius:20px;margin:0 auto"><svg style="width:38px;height:38px"><use href="#i-video"/></svg></span>
+      <b style="font-size:20px">Video demo 15 – 20 phút</b>
+      <div class="muted small">Chạy website, minh họa SP, trigger, function, cursor, phân quyền và 5 report.</div>
+      <div class="ph" style="padding:14px;margin-top:6px">[Dán link Google Drive, chế độ công khai]</div>
+    </div>
+    <div class="card">
+      <h3><span class="ico sky"><svg><use href="#i-file"/></svg></span>Tài liệu tham khảo</h3>
+      <ol style="margin:0;padding:0;list-style:none;font-size:14px;line-height:1.5" class="muted">
+        <li style="margin-bottom:7px">[1] Nguyễn Gia Tuấn Anh, Trương Châu Long, <i>Bài tập và bài giải SQL Server</i>. TP. HCM: NXB Thanh niên, 2005.</li>
+        <li style="margin-bottom:7px">[2] Đỗ Phúc, Nguyễn Đăng Tỵ, <i>Cơ sở dữ liệu</i>. TP. HCM: NXB Đại học Quốc gia TP. HCM, 2010.</li>
+        <li style="margin-bottom:7px">[3] Nguyễn Gia Tuấn Anh, Mai Văn Cường, Bùi Danh Hường, <i>Cơ sở dữ liệu nâng cao</i>. TP. HCM: NXB Đại học Quốc gia TP. HCM, 2019.</li>
+        <li style="margin-bottom:7px">[4] I. Ben-Gan, <i>Microsoft SQL Server 2012 T-SQL Fundamentals</i>. Redmond, WA: Microsoft Press, 2012.</li>
+        <li style="margin-bottom:7px">[5] Khoa Khoa học và Kỹ thuật Thông tin, “Slide bài giảng IE103 – Quản lý thông tin,” Trường ĐH Công nghệ Thông tin, ĐHQG-HCM, 2026.</li>
+        <li style="margin-bottom:7px">[6] Microsoft, “CREATE TRIGGER (Transact-SQL),” <i>Microsoft Learn</i>. [Online]. Available: learn.microsoft.com/sql/t-sql/statements/create-trigger-transact-sql</li>
+        <li>[7] Microsoft, “Back up and restore of SQL Server databases,” <i>Microsoft Learn</i>. [Online]. Available: learn.microsoft.com/sql/relational-databases/backup-restore/back-up-and-restore-of-sql-server-databases</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Slide 19: Cảm ơn ===== -->
+<section class="slide hero">
+  <div class="body" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
+    <span class="chip">IE103 – Quản lý thông tin · Nhóm X</span>
+    <h1 class="gradient-text" style="font-size:64px;margin:22px 0 12px">Cảm ơn thầy và các bạn<br>đã lắng nghe!</h1>
+    <p class="lead">Hỏi &amp; Đáp</p>
+    <div style="display:flex;gap:12px;margin-top:28px">
+      <span class="pill">XÂY DỰNG HỆ THỐNG QUẢN LÝ THƯ VIỆN</span><span class="pill sky">CSDL QUANLYTHUVIEN</span><span class="pill green">SQL Server 2022</span>
+    </div>
+  </div>
+</section>
+```
+
+- [ ] **Step 3: Chạy test đầy đủ, xác nhận đạt**
+
+Run: `python3 docs/slide/tools/check_slides.py`
+Expected: `OK: 19 slide, da kiem tra noi dung slide 1-19`
+
+- [ ] **Step 4: Đo tràn chữ, chụp ảnh và duyệt toàn bộ**
+
+Run: `bash docs/slide/tools/render.sh check && bash docs/slide/tools/render.sh shots`
+Expected: `data-overflow="none"` và 19 tệp `slide-01.png` … `slide-19.png`.
+
+Mở **cả 19 ảnh** bằng Read và kiểm tra:
+- Footer `n / 19` đúng số trang; bìa và slide 19 không có footer.
+- Không có chữ bị cắt hay đè nhau.
+- Màu sắc thống nhất giữa các slide.
+
+- [ ] **Step 5: Kiểm tra điều hướng với hash ngoài phạm vi (Review Focus 1)**
+
+Run:
+
+```bash
+cd docs/slide && E="/mnt/c/Program Files (x86)/Microsoft/Edge/Application/msedge.exe"
+U="file:///$(wslpath -w "$PWD/Slides_NhomX.html" | sed 's#\\#/#g')"
+for h in 0 99 abc; do
+  timeout 120 "$E" --headless=new --disable-gpu --virtual-time-budget=3000 --dump-dom "$U#$h" 2>/dev/null \
+  | python3 -c "import sys,re; s=re.findall(r'<section class=\"([^\"]*)\"', sys.stdin.read()); a=[i+1 for i,c in enumerate(s) if 'active' in c.split()]; print('$h ->', a)"
+done
+cd ../..
+```
+
+Expected:
+
+```
+0 -> [1]
+99 -> [19]
+abc -> [1]
+```
+
+- [ ] **Step 6: Kiểm tra co giãn ở cửa sổ không phải 16:9 (Review Focus 4)**
+
+Run: `bash docs/slide/tools/render.sh shots 1366,768`
+Mở `slide-01.png` và `slide-15.png` bằng Read. Slide phải nằm giữa, giữ nguyên tỉ lệ 16:9, có viền nền xám ở hai bên, không bị cắt.
+
+Sau đó chạy `bash docs/slide/tools/render.sh shots` để chụp lại ảnh ở kích thước chuẩn.
+
+- [ ] **Step 7: Xuất PDF và kiểm tra (Review Focus 5)**
+
+Run: `bash docs/slide/tools/render.sh pdf`
+Expected:
+
+```
+Pages:           19
+Page size:       960 x 540 pts
+```
+
+Tiếp theo chạy `pdftoppm -f 15 -l 15 -r 60 -png docs/slide/Slides_NhomX.pdf docs/slide/.shots/pdf` rồi mở ảnh sinh ra bằng Read. Trang phải giữ nền chấm, màu của các thẻ, biểu đồ và footer `15 / 19`.
+
+- [ ] **Step 8: Commit**
+
+```bash
+git add docs/slide/Slides_NhomX.html docs/slide/Slides_NhomX.pdf
+git commit -m "feat(slide): add demo, conclusion, references slides and export PDF"
+```
