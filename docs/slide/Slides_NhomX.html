@@ -53,6 +53,7 @@ html, body { margin: 0; height: 100%; background: #CBD5E1; font-family: var(--fo
 .g4 { grid-template-columns: repeat(4, 1fr); } .g5 { grid-template-columns: repeat(5, 1fr); }
 .g6 { grid-template-columns: repeat(6, 1fr); }
 .stack { display: flex; flex-direction: column; gap: 14px; min-height: 0; }
+.stack > * { flex-shrink: 0; }
 .card {
   background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px 20px; overflow: hidden;
   box-shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 8px 24px rgba(15, 23, 42, .06);
@@ -87,11 +88,13 @@ table.t th:first-child { border-radius: 8px 0 0 8px; } table.t th:last-child { b
 table.t td { padding: 6px 10px; border-top: 1px solid var(--line); vertical-align: top; }
 table.t tr:first-child td { border-top: 0; }
 table.t.sm { font-size: 13px; } table.t.sm td, table.t.sm th { padding: 5px 8px; }
+table.t.xs td, table.t.xs th { padding: 3px 8px; }
 
 /* code */
 pre.sql, pre.code {
   margin: 0; background: var(--code-bg); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px;
   font: 12.5px/1.45 var(--mono); color: #334155; white-space: pre; overflow: hidden;
+  font-variant-ligatures: none;
 }
 pre.sql.sm, pre.code.sm { font-size: 12px; }
 pre .k { color: #7C3AED; font-weight: 600; } pre .s { color: #059669; } pre .c { color: #94A3B8; font-style: italic; }
@@ -522,6 +525,162 @@ pre .o { color: var(--primary); font-weight: 600; } pre .v { color: #0369A1; } p
       <div class="schema"><div class="r"><b>CTPHIEUMUON</b>(<u><i>MAPM</i></u>, <u><i>MACS</i></u>, NGAYTRA, TINHTRANGTRA)</div><div class="d">Cuốn MACS thuộc phiếu MAPM; khi trả ghi ngày trả và tình trạng.</div></div>
       <div class="schema"><div class="r"><b>PHIEUPHAT</b>(<u>MAPP</u>, <i>MAPM</i>, <i>MACS</i>, NGAYLAP, LYDO, SOTIEN, DATHANHTOAN)</div><div class="d">Khoản phạt cho cuốn MACS của phiếu MAPM, đã hoặc chưa thanh toán.</div></div>
       <div class="schema"><div class="r"><b>TAIKHOAN</b>(<u>TENDANGNHAP</u>, MATKHAU, TRANGTHAI)</div><div class="d">MATKHAU là giá trị băm SHA2-256; TRANGTHAI = 0 nghĩa là bị khóa.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Slide 10: Chương 3 Cài đặt ===== -->
+<section class="slide">
+  <header><span class="chip">Chương 3 · Cài đặt</span><h2>Tạo bảng, ràng buộc và dữ liệu mẫu</h2></header>
+  <div class="body grid" style="grid-template-columns:1.15fr 1fr;gap:18px">
+    <div class="stack">
+      <div class="card">
+        <h3><span class="ico"><svg><use href="#i-server"/></svg></span>Môi trường cài đặt</h3>
+        <span class="pill" style="margin-top:0">SQL Server 2022</span><span class="pill sky" style="margin-top:0">Docker · mssql/server:2022-latest</span><span class="pill green" style="margin-top:0">Collation Vietnamese_CI_AS</span>
+        <div class="flow mono" style="margin-top:10px">
+          <span class="step">1_TaoBang</span><span class="to">→</span><span class="step">2_DuLieuMau</span><span class="to">→</span><span class="step">3_Function</span><span class="to">→</span><span class="step">4_Trigger</span><span class="to">→</span>
+          <span class="step">5_StoredProcedure</span><span class="to">→</span><span class="step">6_Cursor</span><span class="to">→</span><span class="step">7_AnToanThongTin</span><span class="to">→</span><span class="step">8_Report</span>
+        </div>
+      </div>
+      <pre class="sql sm">CREATE TABLE DAUSACH (
+  MADS    CHAR(5)       PRIMARY KEY,
+  TENDS   NVARCHAR(100) NOT NULL,
+  MATL    CHAR(4) NOT NULL FOREIGN KEY REFERENCES THELOAI (MATL),
+  MANXB   CHAR(5) NOT NULL FOREIGN KEY REFERENCES NHAXUATBAN (MANXB),
+  NAMXB   INT NOT NULL,  SOTRANG INT NOT NULL,  GIA MONEY NOT NULL,
+  SOLUONG INT NOT NULL DEFAULT 0,  SLCON INT NOT NULL DEFAULT 0,
+  CONSTRAINT CK_DAUSACH_NAMXB CHECK (NAMXB BETWEEN 1900 AND YEAR(GETDATE())),
+  CONSTRAINT CK_DAUSACH_SOTRANG CHECK (SOTRANG &gt; 0),
+  CONSTRAINT CK_DAUSACH_GIA   CHECK (GIA &gt; 0),
+  CONSTRAINT CK_DAUSACH_SL    CHECK (SOLUONG &gt;= 0
+                              AND SLCON BETWEEN 0 AND SOLUONG))</pre>
+      <div class="muted small" style="line-height:1.45">Khóa chính nhiều cột dùng <span class="mono">PRIMARY KEY (...)</span>; PHIEUPHAT có khóa ngoại kép (MAPM, MACS) tới CTPHIEUMUON; MATKHAU kiểu <span class="mono">VARBINARY(32)</span>.</div>
+    </div>
+    <div class="stack">
+      <div class="card">
+        <h3><span class="ico sky"><svg><use href="#i-db"/></svg></span>Số dòng dữ liệu</h3>
+        <table class="t sm xs">
+          <thead><tr><th>Bảng</th><th>Dòng</th><th>Bảng</th><th>Dòng</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">THELOAI</td><td>9</td><td class="mono">CUONSACH</td><td>26</td></tr>
+            <tr><td class="mono">TACGIA</td><td>16</td><td class="mono">DOCGIA</td><td>118</td></tr>
+            <tr><td class="mono">NHAXUATBAN</td><td>10</td><td class="mono">PHIEUMUON</td><td>23</td></tr>
+            <tr><td class="mono">DAUSACH</td><td>16</td><td class="mono">CTPHIEUMUON</td><td>38</td></tr>
+            <tr><td class="mono">DAUSACH_TACGIA</td><td>17</td><td class="mono">PHIEUPHAT</td><td>10</td></tr>
+            <tr><td class="mono">TAIKHOAN</td><td>1</td><td class="muted">Tổng</td><td class="muted">11 bảng</td></tr>
+          </tbody>
+        </table>
+        <div class="muted small" style="margin-top:4px">Bản sao CSDL ngày 11/10/2026 · dữ liệu tháng 4 – 9/2026</div>
+      </div>
+      <div class="card">
+        <h3><span class="ico green"><svg><use href="#i-target"/></svg></span>Bao quát tình huống</h3>
+        <ul class="list" style="font-size:13px">
+          <li><b>Độc giả:</b> thẻ hết hạn (DG006), nợ 250.000đ (DG009), chưa từng mượn (DG012), thiếu email (DG013, DG015).</li>
+          <li><b>Sách:</b> cuốn hư (CS006, CS012), mất (CS015); đầu sách chưa có tác giả (DS016); thể loại chưa có sách (TL08).</li>
+          <li><b>Mượn – trả:</b> đúng hạn, trễ, trả một phần (PM0012, PM0016), đang quá hạn; phạt đủ ba lý do.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Slide 11: 4.1.1 Stored Procedure ===== -->
+<section class="slide">
+  <header><span class="chip">Chương 4 · Xử lý thông tin</span><h2>Stored Procedure</h2>
+    <div class="note">Tổng cộng <b>38</b> SP: 5 nghiệp vụ chính · 2 chứa cursor · 3 xác thực, sao lưu · 28 phục vụ màn hình web (thêm, sửa, xóa, tìm kiếm phân trang)</div></header>
+  <div class="body grid" style="grid-template-columns:0.85fr 1fr;gap:18px">
+    <div class="card">
+      <h3><span class="ico"><svg><use href="#i-code"/></svg></span>5 thủ tục nghiệp vụ chính</h3>
+      <table class="t sm">
+        <thead><tr><th>Thủ tục</th><th style="width:96px">Tham số</th><th>Kết quả trả về</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">SP_THEMDOCGIA</td><td>vào</td><td>0 trùng mã · 2 thành công, thẻ hạn 2 năm</td></tr>
+          <tr><td class="mono">SP_LAPPHIEUMUON</td><td>vào, ra @MAPM</td><td>1 thành công · 0 lỗi, rollback cả phiếu</td></tr>
+          <tr><td class="mono">SP_TRASACH</td><td>vào, ra @TIENPHAT</td><td>0 không thấy · 1 đã trả · 2 thành công</td></tr>
+          <tr><td class="mono">SP_THANHTOANPHAT</td><td>vào, ra @SOTIEN</td><td>0 không có độc giả · 1 không nợ · 2 thành công</td></tr>
+          <tr><td class="mono">SP_THONGKETHANG</td><td>vào, 3 ra</td><td>Số phiếu, lượt sách, tiền phạt + top 5 đầu sách</td></tr>
+        </tbody>
+      </table>
+      <p class="note-box">Ví dụ SP_TRASACH: trả CS011 trễ 26 ngày → @TIENPHAT = 130.000. SP_THONGKETHANG tháng 9/2026: 6 phiếu, 11 lượt sách.</p>
+    </div>
+    <div class="card">
+      <h3 style="margin-bottom:8px"><span class="ico sky"><svg><use href="#i-swap"/></svg></span>SP_LAPPHIEUMUON – lập phiếu nhiều cuốn</h3>
+      <pre class="sql sm">CREATE OR ALTER PROCEDURE SP_LAPPHIEUMUON
+  @MADG CHAR(5), @DSMACS VARCHAR(200), @MAPM CHAR(6) OUTPUT
+AS BEGIN
+  BEGIN TRY
+    BEGIN TRANSACTION;
+    SELECT @MAX = ISNULL(MAX(CAST(SUBSTRING(MAPM, 3, 4) AS INT)), 0)
+    FROM PHIEUMUON WITH (UPDLOCK, HOLDLOCK);
+    SET @MAPM = 'PM' + RIGHT('0000' + CAST(@MAX + 1 AS VARCHAR(4)), 4);
+    INSERT INTO PHIEUMUON (MAPM, MADG, NGAYMUON, HANTRA, TINHTRANG)
+    VALUES (@MAPM, @MADG, CAST(GETDATE() AS DATE),
+            DATEADD(DAY, 14, CAST(GETDATE() AS DATE)), N'Đang mượn');
+    INSERT INTO CTPHIEUMUON (MAPM, MACS)
+    SELECT DISTINCT @MAPM, LTRIM(RTRIM(value))
+    FROM STRING_SPLIT(@DSMACS, ',') WHERE LTRIM(RTRIM(value)) &lt;&gt; '';
+    COMMIT TRANSACTION; RETURN 1;
+  END TRY
+  BEGIN CATCH  -- ROLLBACK, @MAPM = NULL, RETURN 0
+END</pre>
+      <div class="ba" style="margin-top:10px">
+        <div class="before"><b class="h">Trước</b>CS001, CS002: Có sẵn<br>DS001 “Mắt biếc”: SLCON = 2</div>
+        <div class="arrow">→</div>
+        <div class="after"><b class="h">Sau</b>@MAPM = PM0329, hạn 2026-10-25<br>CS001, CS002: Đang mượn; SLCON = 0</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Slide 12: 4.1.2 Trigger ===== -->
+<section class="slide">
+  <header><span class="chip">Chương 4 · Xử lý thông tin</span><h2>Trigger</h2></header>
+  <div class="body grid g2" style="gap:18px">
+    <div class="card">
+      <h3><span class="ico amber"><svg><use href="#i-zap"/></svg></span>5 trigger và tầm ảnh hưởng</h3>
+      <table class="t sm">
+        <thead><tr><th>Trigger</th><th style="width:158px">Bảng · sự kiện</th><th>Nhiệm vụ</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">TRG_CUONSACH_CAPNHATSL</td><td>CUONSACH · I, U, D</td><td>Tính lại SOLUONG, SLCON</td></tr>
+          <tr><td class="mono">TRG_PHIEUMUON_KIEMTRA</td><td>PHIEUMUON · I, U</td><td>Chặn thẻ hết hạn, còn nợ</td></tr>
+          <tr><td class="mono">TRG_CTPM_MUONSACH</td><td>CTPHIEUMUON · I</td><td>Chỉ mượn cuốn “Có sẵn”</td></tr>
+          <tr><td class="mono">TRG_CTPM_TRASACH</td><td>CTPHIEUMUON · U</td><td>Cập nhật cuốn, lập phiếu phạt, đóng phiếu</td></tr>
+          <tr><td class="mono">TRG_PHIEUPHAT_TONGNO</td><td>PHIEUPHAT · I, U, D</td><td>Đồng bộ DOCGIA.TONGNO</td></tr>
+        </tbody>
+      </table>
+      <div class="small muted" style="margin:12px 0 6px;font-weight:600">Chuỗi kích hoạt khi trả sách</div>
+      <div class="flow mono">
+        <span class="step">SP_TRASACH</span><span class="to">→</span><span class="step">TRG_CTPM_TRASACH</span><span class="to">→</span>
+        <span class="step">INSERT PHIEUPHAT</span><span class="to">→</span><span class="step">TRG_PHIEUPHAT_TONGNO</span><span class="to">→</span><span class="step">DOCGIA.TONGNO</span>
+      </div>
+      <div class="res red">Lập phiếu cho DG006 (thẻ hết hạn) và DG009 (nợ 250.000đ): cả hai bị từ chối, không phiếu nào được tạo.</div>
+    </div>
+    <div class="card">
+      <h3 style="margin-bottom:8px"><span class="ico sky"><svg><use href="#i-loop"/></svg></span>TRG_CTPM_TRASACH – tự lập phiếu phạt</h3>
+      <pre class="sql sm">CREATE TRIGGER TRG_CTPM_TRASACH ON CTPHIEUMUON AFTER UPDATE AS
+BEGIN
+  UPDATE CS SET TINHTRANG = CASE I.TINHTRANGTRA
+      WHEN N'Bình thường' THEN N'Có sẵn' ELSE I.TINHTRANGTRA END
+  FROM CUONSACH CS JOIN inserted I ON CS.MACS = I.MACS
+  WHERE I.NGAYTRA IS NOT NULL
+  ;WITH TRA AS (...),  -- dong vua tra kem HANTRA, GIA
+  PHAT AS (
+    SELECT MAPM, MACS, NGAYTRA, N'Trả trễ' AS LYDO,
+           dbo.FN_TIENPHATTRE(HANTRA, NGAYTRA) AS SOTIEN
+    FROM TRA WHERE NGAYTRA &gt; HANTRA
+    UNION ALL SELECT ..., N'Hư hỏng', GIA * 0.5 FROM TRA WHERE ...
+    UNION ALL SELECT ..., N'Mất sách', GIA FROM TRA WHERE ...)
+  INSERT INTO PHIEUPHAT (MAPP, MAPM, MACS, NGAYLAP, LYDO, ...)
+  SELECT 'PP' + ..., MAPM, MACS, NGAYTRA, LYDO, SOTIEN, 0 FROM PHAT
+  UPDATE PHIEUMUON SET TINHTRANG = N'Đã trả' WHERE ...  -- tra het
+END</pre>
+      <div class="small muted" style="margin:10px 0 6px;font-weight:600">Trả CS003 (giá 110.000đ, phiếu PM0014) ngày 2026-10-11, tình trạng “Hư hỏng”</div>
+      <div class="grid g4" style="gap:8px">
+        <div class="stat" style="padding:8px 10px"><div class="v" style="font-size:16px">Hư hỏng</div><div class="l">CS003</div></div>
+        <div class="stat" style="padding:8px 10px"><div class="v" style="font-size:16px;color:#D97706">55.000</div><div class="l">PP0012 hư 50%</div></div>
+        <div class="stat" style="padding:8px 10px"><div class="v" style="font-size:16px;color:#D97706">35.000</div><div class="l">PP0013 trễ 7 ngày</div></div>
+        <div class="stat" style="padding:8px 10px"><div class="v" style="font-size:16px">90.000</div><div class="l">TONGNO DG014</div></div>
+      </div>
     </div>
   </div>
 </section>
