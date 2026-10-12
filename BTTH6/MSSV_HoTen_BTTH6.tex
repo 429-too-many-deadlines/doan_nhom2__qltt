@@ -1,0 +1,172 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T5]{fontenc}
+\usepackage{lmodern}
+\usepackage[vietnamese]{babel}
+\usepackage[a4paper,margin=2.5cm]{geometry}
+\usepackage{pdflscape}
+\usepackage{booktabs,array,xcolor,listings,tikz}
+\usetikzlibrary{positioning}
+
+\lstdefinestyle{sql}{
+  language=SQL, basicstyle=\ttfamily\scriptsize, keywordstyle=\color{blue!70!black}\bfseries,
+  commentstyle=\color{green!40!black}\itshape, stringstyle=\color{red!60!black},
+  backgroundcolor=\color{black!4}, frame=single, rulecolor=\color{black!25},
+  breaklines=true, extendedchars=true, inputencoding=utf8, columns=fullflexible, keepspaces=true, showstringspaces=false,
+  morekeywords={LOGIN,USER,DENY,GRANT,SCHEMA,EXECUTE,CHECK_POLICY}, escapeinside={(*@}{@*)}
+}
+\lstset{style=sql}
+
+
+\title{\textbf{BTTH6 -- Bài tập tổng hợp (Câu 1 và Câu 3)}}
+\author{}
+\date{}
+
+\begin{document}
+\begin{landscape}
+\thispagestyle{empty}
+\centering
+{\Large\bfseries BTTH6 -- Bài tập tổng hợp (Câu 1 và Câu 3)}\\[3pt]
+{\small\textbf{Môn học:} IE103 -- Quản lý Thông tin \quad \textbf{Sinh viên:} Họ tên -- MSSV \quad \textbf{Môi trường:} Microsoft SQL Server 2022}\\[-2pt]
+\rule{\linewidth}{0.4pt}\\[2pt]
+{\large\bfseries Câu 1. Tổ chức/Biểu diễn thông tin}\quad{\normalsize\bfseries 1.1. Sơ đồ ERD của CSDL QLĐT}\\[2pt]
+\begin{tikzpicture}[x=0.95cm,y=1.0cm,
+  line/.style={thick},
+  card/.style={font=\scriptsize\bfseries,fill=white,inner sep=1pt},
+  rel/.style={font=\scriptsize\itshape,fill=white,inner sep=1pt}]
+\tikzset{every node/.append style={text depth=0.2ex}}
+% thực thể: tên + khóa (PK gạch chân, FK in nghiêng)
+\newcommand{\E}[4]{\node[draw,rounded corners=2pt,fill=blue!6,align=left,inner sep=3pt,font=\footnotesize,minimum width=2.6cm] (#1) at (#3) {\textbf{#2}\\ #4};}
+\E{HOCHAM}{HOCHAM}{12,8.6}{\underline{MSHH}}
+\E{GIAOVIEN}{GIAOVIEN}{12,6}{\underline{MSGV}\\ \textit{MSHH}}
+\E{HOCVI}{HOCVI}{1,8}{\underline{MSHV}}
+\E{CHUYENNGANH}{CHUYENNGANH}{1,4.2}{\underline{MSCN}}
+\E{GVHVCN}{GV\_HV\_CN}{6,6}{\underline{MSGV}, \underline{MSHV}\\ \underline{MSCN}}
+\E{GVHDDT}{GV\_HDDT}{6,2.2}{\underline{MSGV}, \underline{MSDT}}
+\E{GVPBDT}{GV\_PBDT}{12,2.2}{\underline{MSGV}, \underline{MSDT}}
+\E{GVUVDT}{GV\_UVDT}{18,2.2}{\underline{MSGV}, \underline{MSDT}}
+\E{DETAI}{DETAI}{12,-1.5}{\underline{MSDT}}
+\E{SINHVIEN}{SINHVIEN}{1,-1.5}{\underline{MSSV}}
+\E{SVDETAI}{SV\_DETAI}{6.2,-1.5}{\textit{MSSV}, \textit{MSDT}}
+\E{HOIDONGDT}{HOIDONG\_DT}{21.5,-1.5}{\underline{MSHD}, \underline{MSDT}}
+\E{HOIDONG}{HOIDONG}{23,5.2}{\underline{MSHD}\\ \textit{MSGV}}
+\E{HOIDONGGV}{HOIDONG\_GV}{18,8.6}{\underline{MSHD}, \underline{MSGV}}
+% quan hệ
+\draw[line] (HOCHAM) -- node[card,near start]{1} node[card,near end]{n} (GIAOVIEN);
+\draw[line] (GIAOVIEN) -- node[card,near start]{1} node[card,near end]{n} (GVHVCN);
+\draw[line] (HOCVI) -- node[card,near start]{1} node[card,near end]{n} (GVHVCN);
+\draw[line] (CHUYENNGANH) -- node[card,near start]{1} node[card,near end]{n} (GVHVCN);
+\draw[line] (GIAOVIEN) -- node[card,near start]{1} node[card,near end]{n} node[rel,midway]{hướng dẫn} (GVHDDT);
+\draw[line] (GIAOVIEN) -- node[card,near start]{1} node[card,near end]{n} node[rel,midway]{phản biện} (GVPBDT);
+\draw[line] (GIAOVIEN) -- node[card,near start]{1} node[card,near end]{n} node[rel,midway]{ủy viên} (GVUVDT);
+\draw[line] (DETAI) -- node[card,near start]{1} node[card,near end]{n} (GVHDDT);
+\draw[line] (DETAI) -- node[card,near start]{1} node[card,near end]{n} (GVPBDT);
+\draw[line] (DETAI) -- node[card,near start]{1} node[card,near end]{n} (GVUVDT);
+\draw[line] (SINHVIEN) -- node[card,near start]{1} node[card,near end]{n} (SVDETAI);
+\draw[line] (DETAI) -- node[card,near start]{1} node[card,near end]{n} (SVDETAI);
+\draw[line] (DETAI) -- node[card,near start]{1} node[card,near end]{n} (HOIDONGDT);
+\draw[line] (HOIDONG) -- node[card,near start]{1} node[card,near end]{n} (HOIDONGDT);
+\draw[line] (HOIDONG) -- node[card,near start]{1} node[card,near end]{n} (HOIDONGGV);
+\draw[line] (GIAOVIEN) -- node[card,near start]{1} node[card,near end]{n} (HOIDONGGV);
+\draw[line] (GIAOVIEN) -- node[card,near start]{1} node[card,near end]{n} node[rel,midway,above]{làm chủ tịch} (HOIDONG);
+\end{tikzpicture}
+
+\vspace{4pt}
+{\footnotesize Ký hiệu: \underline{gạch chân} = khóa chính, \textit{in nghiêng} = khóa ngoại; \textbf{1}--\textbf{n} = bản số một--nhiều.}
+\end{landscape}
+
+\noindent Ghi chú: sơ đồ chỉ hiển thị khóa; các thuộc tính còn lại như bảng 1.1 của BTTH2. \texttt{SV\_DETAI} không có khóa chính (theo đề). Sáu bảng \texttt{GV\_HV\_CN}, \texttt{GV\_HDDT}, \texttt{GV\_PBDT}, \texttt{GV\_UVDT}, \texttt{HOIDONG\_GV}, \texttt{HOIDONG\_DT} là các quan hệ n--n được tách thành bảng riêng. Hai khóa ngoại \texttt{GIAOVIEN.MSHH} và \texttt{HOIDONG.MSGV} có thể rỗng.
+
+\section*{Câu 3. An ninh thông tin}
+\subsection*{3.1. Tạo 3 user}
+\begin{lstlisting}
+USE master
+GO
+IF SUSER_ID('GIANGVIEN') IS NOT NULL DROP LOGIN GIANGVIEN
+IF SUSER_ID('GIAOVU')    IS NOT NULL DROP LOGIN GIAOVU
+IF SUSER_ID('SINHVIEN')  IS NOT NULL DROP LOGIN SINHVIEN
+GO
+CREATE LOGIN GIANGVIEN WITH PASSWORD = 'GiangVien@123', CHECK_POLICY = OFF
+CREATE LOGIN GIAOVU    WITH PASSWORD = 'GiaoVu@123',    CHECK_POLICY = OFF
+CREATE LOGIN SINHVIEN  WITH PASSWORD = 'SinhVien@123',  CHECK_POLICY = OFF
+GO
+USE QLDT
+GO
+CREATE USER GIANGVIEN FOR LOGIN GIANGVIEN
+CREATE USER GIAOVU    FOR LOGIN GIAOVU
+CREATE USER SINHVIEN  FOR LOGIN SINHVIEN
+GO
+\end{lstlisting}
+Mật khẩu: \texttt{GiangVien@123}, \texttt{GiaoVu@123}, \texttt{SinhVien@123}. Mỗi user gồm một LOGIN (cấp server) và một USER (cấp CSDL QLDT).
+
+\subsection*{3.2. Phân quyền}
+\begin{lstlisting}
+-- (*@GIAOVU: xem và cập nhật trên tất cả các bảng@*)
+GRANT SELECT, UPDATE ON SCHEMA::dbo TO GIAOVU
+
+-- (*@GIANGVIEN: xem thông tin GV, đề tài (hướng dẫn / phản biện / ủy viên), hội đồng, danh sách đề tài@*)
+GRANT SELECT ON GIAOVIEN    TO GIANGVIEN
+GRANT SELECT ON HOCVI       TO GIANGVIEN
+GRANT SELECT ON HOCHAM      TO GIANGVIEN
+GRANT SELECT ON CHUYENNGANH TO GIANGVIEN
+GRANT SELECT ON GV_HV_CN    TO GIANGVIEN
+GRANT SELECT ON GV_HDDT     TO GIANGVIEN
+GRANT SELECT ON GV_PBDT     TO GIANGVIEN
+GRANT SELECT ON GV_UVDT     TO GIANGVIEN
+GRANT SELECT ON HOIDONG     TO GIANGVIEN
+GRANT SELECT ON HOIDONG_GV  TO GIANGVIEN
+GRANT SELECT ON HOIDONG_DT  TO GIANGVIEN
+GRANT SELECT ON DETAI       TO GIANGVIEN
+-- (*@GIANGVIEN: cập nhật thông tin của mình (bảng GIAOVIEN)@*)
+GRANT UPDATE ON GIAOVIEN    TO GIANGVIEN
+
+-- (*@SINHVIEN: xem thông tin sinh viên, hội đồng, danh sách đề tài@*)
+GRANT SELECT ON SINHVIEN    TO SINHVIEN
+GRANT SELECT ON SV_DETAI    TO SINHVIEN
+GRANT SELECT ON HOIDONG     TO SINHVIEN
+GRANT SELECT ON HOIDONG_GV  TO SINHVIEN
+GRANT SELECT ON HOIDONG_DT  TO SINHVIEN
+GRANT SELECT ON DETAI       TO SINHVIEN
+
+-- (*@Cả 3 user không có quyền xóa@*)
+DENY DELETE ON SCHEMA::dbo TO GIANGVIEN, GIAOVU, SINHVIEN
+GO
+\end{lstlisting}
+
+\subsection*{Kết quả chạy thử}
+Chạy bằng \texttt{EXECUTE AS USER}; thao tác ghi đều được ROLLBACK.
+
+\medskip
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{User} & \textbf{Thao tác} & \textbf{Kết quả}\\
+\midrule
+GIAOVU & SELECT HOCVI & Được phép\\
+GIAOVU & UPDATE SINHVIEN & Được phép\\
+GIAOVU & INSERT HOCVI & BỊ TỪ CHỐI (không được cấp INSERT)\\
+GIAOVU & DELETE HOCVI & BỊ TỪ CHỐI\\
+\midrule
+GIANGVIEN & SELECT GV\_HDDT & Được phép\\
+GIANGVIEN & SELECT SINHVIEN & BỊ TỪ CHỐI\\
+GIANGVIEN & UPDATE GIAOVIEN & Được phép\\
+GIANGVIEN & UPDATE DETAI & BỊ TỪ CHỐI\\
+GIANGVIEN & DELETE GIAOVIEN & BỊ TỪ CHỐI\\
+\midrule
+SINHVIEN & SELECT SINHVIEN & Được phép\\
+SINHVIEN & SELECT HOIDONG & Được phép\\
+SINHVIEN & SELECT DETAI & Được phép\\
+SINHVIEN & SELECT GIAOVIEN & BỊ TỪ CHỐI\\
+SINHVIEN & UPDATE SINHVIEN & BỊ TỪ CHỐI\\
+SINHVIEN & DELETE SINHVIEN & BỊ TỪ CHỐI\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent\textbf{Lưu ý:}
+\begin{itemize}
+\item \texttt{DENY DELETE} đặt ở mức schema nên áp dụng cho mọi bảng, kể cả \texttt{GIAOVU}.
+\item Quyền ``GIANGVIEN cập nhật thông tin của mình'' được cấp bằng \texttt{GRANT UPDATE ON GIAOVIEN}. Cách này chưa giới hạn riêng dòng của chính giảng viên đó; muốn giới hạn cần thêm view lọc theo \texttt{SUSER\_SNAME()}.
+\item \texttt{SINHVIEN} được thêm quyền xem \texttt{SV\_DETAI} để biết sinh viên làm đề tài nào.
+\end{itemize}
+\end{document}
