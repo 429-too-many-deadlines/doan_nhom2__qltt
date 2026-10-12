@@ -1,19 +1,25 @@
 /* =====================================================================
-   File   : 05_StoredProcedure.sql
-   Noi dung: STORED PROCEDURE
-     A. Tham so vao          : SP_THEMDOCGIA, SP_TIMSACH
-     B. Tham so vao va ra    : SP_LAPPHIEUMUON, SP_TRASACH,
-                               SP_THANHTOANPHAT, SP_THONGKETHANG
+   File   : 5_StoredProcedure.sql
+   Noi dung: 33 STORED PROCEDURE
+     A. Nghiep vu (tham so vao / vao va ra):
+          SP 1 - 6  : SP_THEMDOCGIA, SP_TIMSACH, SP_LAPPHIEUMUON,
+                      SP_TRASACH, SP_THANHTOANPHAT, SP_THONGKETHANG
+     B. Quan ly doc gia, dau sach:
+          SP 7 - 12 : SP_SUADOCGIA, SP_SUADAUSACH, SP_THEMDAUSACH,
+                      SP_TIMDOCGIA, SP_XOADAUSACH, SP_XOADOCGIA
+     C. CRUD bo sung cho backend API:
+          SP 13 - 16: the loai        SP 17 - 18: phieu muon, phieu phat
+          SP 19 - 23: nha xuat ban, tac gia (lay danh sach, them/sua/xoa NXB)
+          SP 24 - 26: tac gia         SP 27 - 30: cuon sach
+          SP 31 - 33: tac gia cua dau sach
    ===================================================================== */
-USE QUANLYTHUVIEN;
-
-
+USE QUANLYTHUVIEN
 GO
 /* ---------------------------------------------------------------------
    SP 1. Them doc gia moi.
    Tham so vao: MADG, HOTEN, NGSINH, GIOITINH, DIACHI, SODT, EMAIL.
    - MADG da ton tai          -> tra ve 0
-   
+
    - Nguoc lai insert, ngay lap the = hom nay, han the: khach ngoai 6 thang,
      cac loai khac 2 nam      -> tra ve 2
    --------------------------------------------------------------------- */
@@ -338,7 +344,7 @@ SELECT @SP AS SOPHIEU, @SL AS SOLUOTSACH, @TP AS TIENPHAT
    SP 7. Sua doc gia.
    Tham so vao: MADG, HOTEN, NGSINH, GIOITINH, DIACHI, SODT, EMAIL.
    - MADG khong ton tai       -> tra ve 0
-   
+
    - Nguoc lai cap nhat      -> tra ve 2
    --------------------------------------------------------------------- */
 CREATE OR ALTER PROCEDURE SP_SUADOCGIA
@@ -447,7 +453,7 @@ GO
 
 /* ---------------------------------------------------------------------
    SP 10. Tim doc gia.
-   Tham so vao: TUKHOA (tim theo MADG hoac HOTEN). 
+   Tham so vao: TUKHOA (tim theo MADG hoac HOTEN).
    Tra ve: Danh sach doc gia.
    --------------------------------------------------------------------- */
 CREATE OR ALTER PROCEDURE SP_TIMDOCGIA
@@ -647,7 +653,7 @@ END
 GO
 
 /* ---------------------------------------------------------------------
-   SP 36. Lay danh sach phieu muon kem thong tin (phan trang).
+   SP 17. Lay danh sach phieu muon kem thong tin (phan trang).
    Tham so vao: PageNumber, PageSize.
    --------------------------------------------------------------------- */
 CREATE OR ALTER PROCEDURE SP_LAYDANHSACHPHIEUMUON
@@ -669,7 +675,7 @@ END
 GO
 
 /* ---------------------------------------------------------------------
-   SP 37. Lay danh sach phieu phat kem thong tin doc gia (phan trang).
+   SP 18. Lay danh sach phieu phat kem thong tin doc gia (phan trang).
    Tham so vao: PageNumber, PageSize.
    --------------------------------------------------------------------- */
 CREATE OR ALTER PROCEDURE SP_LAYDANHSACHPHIEUPHAT
@@ -690,7 +696,7 @@ BEGIN
 END
 GO
 /* ---------------------------------------------------------------------
-   SP 38. Lay danh sach nha xuat ban (phan trang).
+   SP 19. Lay danh sach nha xuat ban (phan trang).
    Tham so vao: TUKHOA, PageNumber, PageSize.
    --------------------------------------------------------------------- */
 CREATE OR ALTER PROCEDURE SP_LAYDANHSACHNHAXUATBAN
@@ -712,7 +718,7 @@ END
 GO
 
 /* ---------------------------------------------------------------------
-   SP 39. Lay danh sach tac gia (phan trang).
+   SP 20. Lay danh sach tac gia (phan trang).
    Tham so vao: TUKHOA, PageNumber, PageSize.
    --------------------------------------------------------------------- */
 CREATE OR ALTER PROCEDURE SP_LAYDANHSACHTACGIA
@@ -734,7 +740,7 @@ END
 GO
 
 /* ---------------------------------------------------------------------
-   SP 40. Them nha xuat ban.
+   SP 21. Them nha xuat ban.
    Tham so vao: MANXB, TENNXB, DIACHI, SODT.
    - MANXB da ton tai       -> tra ve 0
    - TENNXB da ton tai      -> tra ve 1
@@ -759,7 +765,7 @@ BEGIN
 		RETURN 1;
 	END
 
-	INSERT INTO NHAXUATBAN (MANXB, TENNXB, DIACHI, SODT) 
+	INSERT INTO NHAXUATBAN (MANXB, TENNXB, DIACHI, SODT)
 	VALUES (@MANXB, @TENNXB, @DIACHI, @SODT);
 
 	PRINT N'Thêm nhà xuất bản thành công.';
@@ -769,7 +775,7 @@ GO
 
 
 /* ---------------------------------------------------------------------
-   SP 41. Sua nha xuat ban.
+   SP 22. Sua nha xuat ban.
    Tham so vao: MANXB, TENNXB, DIACHI, SODT.
    - MANXB khong ton tai                -> tra ve 0
    - TENNXB bi trung voi nxb khac       -> tra ve 1
@@ -806,7 +812,7 @@ END
 GO
 
 /* ---------------------------------------------------------------------
-   SP 42. Xoa nha xuat ban.
+   SP 23. Xoa nha xuat ban.
    Tham so vao: MANXB.
    - MANXB khong ton tai                -> tra ve 0
    - MANXB da co DAUSACH                -> tra ve 1
@@ -835,6 +841,13 @@ BEGIN
 END
 GO
 
+/* ---------------------------------------------------------------------
+   SP 24. Them tac gia.
+   Tham so vao: MATG, TENTG, NAMSINH, QUOCTICH.
+   - MATG da ton tai -> tra ve 0
+   - NAMSINH lon hon nam hien tai -> tra ve 1
+   - Nguoc lai insert -> tra ve 2
+   --------------------------------------------------------------------- */
 CREATE OR ALTER PROCEDURE SP_THEMTACGIA
 	@MATG CHAR(5),
 	@TENTG NVARCHAR(50),
@@ -851,6 +864,13 @@ BEGIN
 END
 GO
 
+/* ---------------------------------------------------------------------
+   SP 25. Sua tac gia.
+   Tham so vao: MATG, TENTG, NAMSINH, QUOCTICH.
+   - MATG khong ton tai -> tra ve 0
+   - NAMSINH lon hon nam hien tai -> tra ve 1
+   - Nguoc lai update -> tra ve 2
+   --------------------------------------------------------------------- */
 CREATE OR ALTER PROCEDURE SP_SUATACGIA
 	@MATG CHAR(5),
 	@TENTG NVARCHAR(50),
@@ -867,6 +887,13 @@ BEGIN
 END
 GO
 
+/* ---------------------------------------------------------------------
+   SP 26. Xoa tac gia.
+   Tham so vao: MATG.
+   - MATG khong ton tai -> tra ve 0
+   - Tac gia da gan voi dau sach -> tra ve 1
+   - Nguoc lai delete -> tra ve 2
+   --------------------------------------------------------------------- */
 CREATE OR ALTER PROCEDURE SP_XOATACGIA
 	@MATG CHAR(5)
 AS
@@ -880,6 +907,13 @@ BEGIN
 END
 GO
 
+/* ---------------------------------------------------------------------
+   SP 27. Them cuon sach (ngay nhap = ngay hien tai).
+   Tham so vao: MACS, MADS, VITRI, TINHTRANG.
+   - MACS da ton tai -> tra ve 0
+   - MADS khong ton tai -> tra ve 1
+   - Nguoc lai insert -> tra ve 3
+   --------------------------------------------------------------------- */
 CREATE OR ALTER PROCEDURE SP_THEMCUONSACH
 	@MACS CHAR(5),
 	@MADS CHAR(5),
@@ -896,6 +930,12 @@ BEGIN
 END
 GO
 
+/* ---------------------------------------------------------------------
+   SP 28. Sua vi tri, tinh trang cuon sach.
+   Tham so vao: MACS, VITRI, TINHTRANG.
+   - MACS khong ton tai -> tra ve 0
+   - Nguoc lai update -> tra ve 2
+   --------------------------------------------------------------------- */
 CREATE OR ALTER PROCEDURE SP_SUACUONSACH
 	@MACS CHAR(5),
 	@VITRI NVARCHAR(20),
@@ -909,6 +949,13 @@ BEGIN
 END
 GO
 
+/* ---------------------------------------------------------------------
+   SP 29. Xoa cuon sach.
+   Tham so vao: MACS.
+   - MACS khong ton tai -> tra ve 0
+   - Cuon sach da co lich su muon -> tra ve 1
+   - Nguoc lai delete -> tra ve 2
+   --------------------------------------------------------------------- */
 CREATE OR ALTER PROCEDURE SP_XOACUONSACH
 	@MACS CHAR(5)
 AS
@@ -922,6 +969,10 @@ BEGIN
 END
 GO
 
+/* ---------------------------------------------------------------------
+   SP 30. Lay danh sach cuon sach cua mot dau sach.
+   Tham so vao: MADS.
+   --------------------------------------------------------------------- */
 CREATE OR ALTER PROCEDURE SP_LAYCUONSACHTHEODAUSACH
 	@MADS CHAR(5)
 AS
@@ -931,6 +982,10 @@ BEGIN
 END
 GO
 
+/* ---------------------------------------------------------------------
+   SP 31. Lay danh sach tac gia (kem vai tro) cua mot dau sach.
+   Tham so vao: MADS.
+   --------------------------------------------------------------------- */
 CREATE OR ALTER PROCEDURE SP_LAYTACGIATHEODAUSACH
 	@MADS CHAR(5)
 AS
@@ -940,6 +995,10 @@ BEGIN
 END
 GO
 
+/* ---------------------------------------------------------------------
+   SP 32. Gan tac gia cho dau sach.
+   Tham so vao: MADS, MATG, VAITRO.
+   --------------------------------------------------------------------- */
 CREATE OR ALTER PROCEDURE SP_THEMTACGIADAUSACH
 	@MADS CHAR(5),
 	@MATG CHAR(5),
@@ -950,6 +1009,10 @@ BEGIN
 END
 GO
 
+/* ---------------------------------------------------------------------
+   SP 33. Xoa toan bo tac gia cua mot dau sach (dung truoc khi gan lai).
+   Tham so vao: MADS.
+   --------------------------------------------------------------------- */
 CREATE OR ALTER PROCEDURE SP_XOATACGIADAUSACH
 	@MADS CHAR(5)
 AS

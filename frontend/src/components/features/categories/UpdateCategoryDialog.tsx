@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { categoriesService } from '@/services/categories.service';
 import type { Category } from '@/types/api.types';
+import { DB_LIMITS } from '@/lib/db-limits';
 
 interface Props {
   category: Category | null;
@@ -49,14 +50,14 @@ export function UpdateCategoryDialog({ category, open, onOpenChange, onSuccess }
           <div className="space-y-2">
             <label className="text-sm font-medium">Mã Thể Loại</label>
             <Input 
-              value={formData.maTl}
+              value={formData.maTl} maxLength={DB_LIMITS.MATL}
               disabled
             />
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium">Tên Thể Loại</label>
             <Input 
-              value={formData.tenTl}
+              value={formData.tenTl} maxLength={DB_LIMITS.TENTL}
               onChange={(e) => setFormData({ ...formData, tenTl: e.target.value })}
               placeholder="Nhập tên thể loại..." 
               required 

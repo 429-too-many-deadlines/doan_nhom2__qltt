@@ -1,7 +1,7 @@
 /* =====================================================================
-   File   : 04_Trigger.sql
+   File   : 4_Trigger.sql
    Noi dung: 5 TRIGGER hien thuc cac rang buoc toan ven va nghiep vu
-   Luu y  : chay SAU 02_DuLieuMau.sql va 03_Function.sql
+   Luu y  : chay SAU 2_DuLieuMau.sql va 3_Function.sql
    ===================================================================== */
 
 USE QUANLYTHUVIEN

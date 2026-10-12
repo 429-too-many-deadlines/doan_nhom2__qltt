@@ -17,6 +17,12 @@ public class UpdateAuthorEndpoint : IEndpoint
     {
         app.MapPut("api/authors/{id}", async (IDbConnection db, string id, [FromBody] UpdateAuthorRequest req) =>
         {
+            new DbValidator()
+                .Required("MaTG", id, DbRules.MaTg)
+                .Required("TenTG", req.TenTG, DbRules.TenTg)
+                .MaxLength("QuocTich", req.QuocTich, DbRules.QuocTich)
+                .ThrowIfInvalid();
+
             var parameters = new DynamicParameters();
             parameters.Add("@MATG", id);
             parameters.Add("@TENTG", req.TenTG);
@@ -29,10 +35,10 @@ public class UpdateAuthorEndpoint : IEndpoint
 
             return result switch
             {
-                0 => Results.NotFound(new MessageResponse("Không tìm thấy tác giả")),
-                1 => Results.BadRequest(new MessageResponse("Năm sinh tác giả không hợp lệ.")),
+                0 => ApiProblem.NotFound("Không tìm thấy tác giả"),
+                1 => ApiProblem.BadRequest("Năm sinh tác giả không hợp lệ."),
                 2 => Results.Ok(new MessageResponse("Cập nhật tác giả thành công")),
-                _ => Results.StatusCode(500)
+                _ => ApiProblem.Unexpected("SP_SUATACGIA", result)
             };
         })
         .WithName("UpdateAuthor")

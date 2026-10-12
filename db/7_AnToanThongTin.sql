@@ -1,5 +1,5 @@
 /* =====================================================================
-   File   : 07_AnToanThongTin.sql
+   File   : 7_AnToanThongTin.sql
    Noi dung: AN TOAN THONG TIN
      A. Xac thuc nguoi dung cua ung dung (bang TAIKHOAN, mat khau bam)
      B. Xac thuc & phan quyen tren SQL Server (LOGIN, USER, ROLE,
@@ -44,8 +44,8 @@ BEGIN
 	END
 
 	SET @KETQUA = 2
-	SELECT TENDANGNHAP, 'Admin' AS HOTEN 
-	FROM TAIKHOAN 
+	SELECT TENDANGNHAP, TENDANGNHAP AS HOTEN
+	FROM TAIKHOAN
 	WHERE TENDANGNHAP = @TENDANGNHAP
 END
 GO
@@ -72,18 +72,21 @@ GO
 
 
 
-INSERT INTO TAIKHOAN (TENDANGNHAP, MATKHAU) VALUES ('admin', HASHBYTES('SHA2_256', '123456'))
+/* Tai khoan dang nhap website (mat khau mac dinh 123456) */
+INSERT INTO TAIKHOAN (TENDANGNHAP, MATKHAU) VALUES ('admin', HASHBYTES('SHA2_256', N'123456'))
+INSERT INTO TAIKHOAN (TENDANGNHAP, MATKHAU) VALUES ('quanly01', HASHBYTES('SHA2_256', N'123456'))
+INSERT INTO TAIKHOAN (TENDANGNHAP, MATKHAU) VALUES ('quanly02', HASHBYTES('SHA2_256', N'123456'))
+INSERT INTO TAIKHOAN (TENDANGNHAP, MATKHAU) VALUES ('thuthu01', HASHBYTES('SHA2_256', N'123456'))
+INSERT INTO TAIKHOAN (TENDANGNHAP, MATKHAU) VALUES ('thuthu02', HASHBYTES('SHA2_256', N'123456'))
+INSERT INTO TAIKHOAN (TENDANGNHAP, MATKHAU) VALUES ('thuthu03', HASHBYTES('SHA2_256', N'123456'))
+INSERT INTO TAIKHOAN (TENDANGNHAP, MATKHAU) VALUES ('thuthu04', HASHBYTES('SHA2_256', N'123456'))
+INSERT INTO TAIKHOAN (TENDANGNHAP, MATKHAU) VALUES ('thuthu05', HASHBYTES('SHA2_256', N'123456'))
+INSERT INTO TAIKHOAN (TENDANGNHAP, MATKHAU) VALUES ('thuthu06', HASHBYTES('SHA2_256', N'123456'))
+INSERT INTO TAIKHOAN (TENDANGNHAP, MATKHAU) VALUES ('thuthu07', HASHBYTES('SHA2_256', N'123456'))
+INSERT INTO TAIKHOAN (TENDANGNHAP, MATKHAU) VALUES ('thuthu08', HASHBYTES('SHA2_256', N'123456'))
+INSERT INTO TAIKHOAN (TENDANGNHAP, MATKHAU) VALUES ('thuthu09', HASHBYTES('SHA2_256', N'123456'))
 
-
-
-
-
-
-
-
-
-
-UPDATE TAIKHOAN SET TRANGTHAI = 0 WHERE TENDANGNHAP = 'dg009'	-- tai khoan bi khoa
+UPDATE TAIKHOAN SET TRANGTHAI = 0 WHERE TENDANGNHAP = 'thuthu09'	-- tai khoan bi khoa (nhan vien da nghi viec)
 GO
 
 /* =====================================================================
@@ -130,7 +133,7 @@ GRANT EXECUTE ON SCHEMA::dbo TO R_QUANLY
 GO
 
 -- THU THU: xem tat ca (tru tai khoan), them/sua nghiep vu muon tra,
---          KHONG duoc xoa bat ky du lieu nao, khong sua thong tin nhan vien
+--          KHONG duoc xoa bat ky du lieu nao
 GRANT SELECT ON SCHEMA::dbo TO R_THUTHU
 GRANT INSERT, UPDATE ON DOCGIA		TO R_THUTHU
 GRANT INSERT, UPDATE ON PHIEUMUON	TO R_THUTHU
@@ -192,12 +195,12 @@ ORDER BY pr.name, DOITUONG
    ===================================================================== */
 
 /* C.1 IMPORT danh sach doc gia moi tu file CSV
-   File mau: database/data/DOCGIA_IMPORT.csv - ma hoa UTF-16 (Unicode), xuong
+   File mau: db/data/DOCGIA_IMPORT.csv - ma hoa UTF-16 (Unicode), xuong
    dong CRLF, dong dau la tieu de. Day la dinh dang Excel xuat ra khi chon
    "Save As > Unicode Text" / "CSV UTF-16", giu duoc tieng Viet co dau tren
    ca SQL Server Windows lan Linux (DATAFILETYPE = 'widechar').
    Duong dan la duong dan TREN MAY CHAY SQL SERVER. Voi Docker:
-     docker cp database/data/DOCGIA_IMPORT.csv <container>:/tmp/DOCGIA_IMPORT.csv
+     docker cp db/data/DOCGIA_IMPORT.csv <container>:/tmp/DOCGIA_IMPORT.csv
 
 CREATE TABLE #DOCGIA_IMPORT
 (
@@ -222,7 +225,7 @@ DROP TABLE #DOCGIA_IMPORT
 
 /* C.2 EXPORT du lieu ra file CSV bang cong cu bcp (chay tren command line):
 
-bcp "SELECT MADS, TENDS, SOLUONG, SLCON FROM QUANLYTHUVIEN.dbo.DAUSACH" queryout DAUSACH.csv -c -C 65001 -t, -S localhost,1444 -U sa -P "<mat khau>"
+bcp "SELECT MADS, TENDS, SOLUONG, SLCON FROM QUANLYTHUVIEN.dbo.DAUSACH" queryout DAUSACH.csv -c -C 65001 -t, -S localhost,1433 -U sa -P "<mat khau>"
 
    Hoac dung giao dien SSMS: chuot phai CSDL > Tasks > Export Data... > chon
    Destination = Microsoft Excel / Flat File.

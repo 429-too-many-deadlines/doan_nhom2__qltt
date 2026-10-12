@@ -5,6 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { apiClient } from '@/lib/api';
+import { DB_LIMITS } from '@/lib/db-limits';
+import { ApiError } from '@/types/error.types';
 
 export default function Settings() {
 
@@ -23,8 +25,7 @@ export default function Settings() {
       setBackupMsg(res.data.message);
       // toast.success(res.data.message);
     } catch (error) {
-      const err = error as { response?: { data?: { message?: string } } };
-      setBackupMsg(err.response?.data?.message || 'Lỗi sao lưu');
+      setBackupMsg(error instanceof ApiError ? error.message : 'Lỗi sao lưu');
       // toast.error(err.response?.data?.message || 'Lỗi sao lưu');
     }
   };
@@ -39,8 +40,7 @@ export default function Settings() {
       setOldPassword('');
       setNewPassword('');
     } catch (error) {
-      const err = error as { response?: { data?: { message?: string } } };
-      setChangePwdMsg(err.response?.data?.message || 'Lỗi đổi mật khẩu');
+      setChangePwdMsg(error instanceof ApiError ? error.message : 'Lỗi đổi mật khẩu');
       // toast.error(err.response?.data?.message || 'Lỗi đổi mật khẩu');
     }
   };
@@ -62,7 +62,7 @@ export default function Settings() {
             </div>
             <div className="space-y-2">
               <Label>Mật khẩu mới</Label>
-              <Input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} required />
+              <Input type="password" value={newPassword} maxLength={DB_LIMITS.MATKHAU} onChange={e => setNewPassword(e.target.value)} required />
             </div>
             <Button type="submit">Đổi mật khẩu</Button>
           </form>

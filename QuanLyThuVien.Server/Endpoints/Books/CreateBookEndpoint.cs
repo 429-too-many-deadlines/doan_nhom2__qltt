@@ -17,6 +17,13 @@ public class CreateBookEndpoint : IEndpoint
     {
         app.MapPost("api/books", async (IDbConnection db, [FromBody] CreateBookRequest req) =>
         {
+            new DbValidator()
+                .Required("MaDS", req.MaDS, DbRules.MaDs)
+                .Required("TenDS", req.TenDS, DbRules.TenDs)
+                .Required("MaTL", req.MaTL, DbRules.MaTl)
+                .Required("MaNXB", req.MaNXB, DbRules.MaNxb)
+                .ThrowIfInvalid();
+
             var parameters = new DynamicParameters();
             parameters.Add("@MADS", req.MaDS);
             parameters.Add("@TENDS", req.TenDS);
@@ -32,11 +39,11 @@ public class CreateBookEndpoint : IEndpoint
 
             return result switch
             {
-                0 => Results.BadRequest(new MessageResponse("Mã đầu sách đã tồn tại.")),
-                1 => Results.BadRequest(new MessageResponse("Mã thể loại không tồn tại.")),
-                2 => Results.BadRequest(new MessageResponse("Mã nhà xuất bản không tồn tại.")),
+                0 => ApiProblem.BadRequest("Mã đầu sách đã tồn tại."),
+                1 => ApiProblem.BadRequest("Mã thể loại không tồn tại."),
+                2 => ApiProblem.BadRequest("Mã nhà xuất bản không tồn tại."),
                 3 => Results.Ok(new MessageResponse("Thêm đầu sách thành công")),
-                _ => Results.StatusCode(500)
+                _ => ApiProblem.Unexpected("SP_THEMDAUSACH", result)
             };
         })
         .WithName("CreateBook")

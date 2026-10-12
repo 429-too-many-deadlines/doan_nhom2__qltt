@@ -170,8 +170,8 @@ export const MonthlyOverviewTab = ({ month, year }: MonthlyOverviewTabProps) => 
                     />
                     <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
                     <Tooltip
-                      formatter={(value: number | string) => [`${value} lượt mượn`, 'Số lượt mượn']}
-                      labelFormatter={(label: string) => `Sách: ${label}`}
+                      formatter={(value) => [`${Number(value)} lượt mượn`, 'Số lượt mượn']}
+                      labelFormatter={(label) => `Sách: ${label}`}
                       contentStyle={{
                         borderRadius: '8px',
                         backgroundColor: 'var(--background, #fff)',

@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Plus } from 'lucide-react';
 import { authorsService } from '@/services/authors.service';
+import { DB_LIMITS } from '@/lib/db-limits';
 
 interface Props {
   onSuccess: () => void;
@@ -50,7 +51,7 @@ export function CreateAuthorDialog({ onSuccess }: Props) {
           <div className="space-y-2">
             <label className="text-sm font-medium">Mã Tác Giả</label>
             <Input 
-              value={formData.MATG}
+              value={formData.MATG} maxLength={DB_LIMITS.MATG}
               onChange={(e) => setFormData({ ...formData, MATG: e.target.value })}
               placeholder="VD: TG01" 
               required 
@@ -59,7 +60,7 @@ export function CreateAuthorDialog({ onSuccess }: Props) {
           <div className="space-y-2">
             <label className="text-sm font-medium">Tên Tác Giả</label>
             <Input 
-              value={formData.TENTG}
+              value={formData.TENTG} maxLength={DB_LIMITS.TENTG}
               onChange={(e) => setFormData({ ...formData, TENTG: e.target.value })}
               placeholder="Nhập tên tác giả..." 
               required 
@@ -77,7 +78,7 @@ export function CreateAuthorDialog({ onSuccess }: Props) {
           <div className="space-y-2">
             <label className="text-sm font-medium">Quốc Tịch</label>
             <Input 
-              value={formData.QUOCTICH}
+              value={formData.QUOCTICH} maxLength={DB_LIMITS.QUOCTICH}
               onChange={(e) => setFormData({ ...formData, QUOCTICH: e.target.value })}
               placeholder="VD: Việt Nam" 
             />

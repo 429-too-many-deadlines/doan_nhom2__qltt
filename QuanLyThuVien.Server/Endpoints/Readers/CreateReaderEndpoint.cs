@@ -15,6 +15,15 @@ public class CreateReaderEndpoint : IEndpoint
     {
         app.MapPost("api/readers", async (IDbConnection db, [FromBody] CreateReaderRequest req) =>
         {
+            new DbValidator()
+                .Required("MaDG", req.MaDg, DbRules.MaDg)
+                .Required("HoTen", req.HoTen, DbRules.HoTenDg)
+                .Required("GioiTinh", req.GioiTinh, DbRules.GioiTinh)
+                .MaxLength("DiaChi", req.DiaChi, DbRules.DiaChiDg)
+                .Required("SoDT", req.SoDt, DbRules.SoDt)
+                .MaxLength("Email", req.Email, DbRules.Email)
+                .ThrowIfInvalid();
+
             var parameters = new DynamicParameters();
             parameters.Add("@MADG", req.MaDg);
             parameters.Add("@HOTEN", req.HoTen);
@@ -30,10 +39,9 @@ public class CreateReaderEndpoint : IEndpoint
 
             return result switch
             {
-                0 => Results.BadRequest(new MessageResponse("Mã độc giả đã tồn tại.")),
-                1 => Results.BadRequest(new MessageResponse("Loại độc giả không tồn tại.")),
+                0 => ApiProblem.BadRequest("Mã độc giả đã tồn tại."),
                 2 => Results.Ok(new MessageResponse("Thêm độc giả thành công.")),
-                _ => Results.StatusCode(500)
+                _ => ApiProblem.Unexpected("SP_THEMDOCGIA", result)
             };
         })
         .WithName("CreateReader")

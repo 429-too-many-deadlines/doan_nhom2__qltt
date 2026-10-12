@@ -173,8 +173,6 @@ Hãy sử dụng Xpath, Xquery để thực hiện các yêu cầu sau:
 ---
 ### Hướng dẫn nộp bài: 
 + Nộp file PDF và SQL.
-  Đặt tên file: **MSSV_HoTen_BTTH5.pdf** và **MSSV_HoTen_BTTH5.sql**.
 + Các bạn trình bày code SQL thực thi vào báo cáo ứng với từng câu hỏi.
 + Nộp kèm theo file `.sql` chứa code thực thi của các bạn với file báo cáo.
-+ Nộp qua hệ thống courses.uit.edu.vn. Lưu ý: **KHÔNG NÉN FILE**.
 

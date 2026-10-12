@@ -15,6 +15,8 @@ public class GetBookCopiesEndpoint : IEndpoint
     {
         app.MapGet("api/books/{id}/copies", async (IDbConnection db, string id) =>
         {
+            new DbValidator().Required("MaDS", id, DbRules.MaDs).ThrowIfInvalid();
+
             var copies = await db.QueryAsync(
                 "SP_LAYCUONSACHTHEODAUSACH",
                 new { MADS = id },

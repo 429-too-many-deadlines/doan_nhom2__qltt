@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { transactionsService } from '@/services/transactions.service';
 import type { BorrowSlip } from '@/types/api.types';
+import { DB_LIMITS } from '@/lib/db-limits';
 
 interface Props {
   transaction: BorrowSlip | null;
@@ -57,14 +58,14 @@ export function UpdateTransactionDialog({ transaction, open, onOpenChange, onSuc
           <div className="space-y-2">
             <label className="text-sm font-medium">Mã Phiếu Mượn</label>
             <Input 
-              value={formData.MAPM}
+              value={formData.MAPM} maxLength={DB_LIMITS.MAPM}
               disabled
             />
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium">Mã Cuốn Sách</label>
             <Input 
-              value={formData.MACS}
+              value={formData.MACS} maxLength={DB_LIMITS.MACS}
               disabled
             />
           </div>

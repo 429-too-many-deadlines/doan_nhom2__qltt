@@ -17,6 +17,12 @@ public class UpdateBookCopyEndpoint : IEndpoint
     {
         app.MapPut("api/books/copies/{macs}", async (IDbConnection db, string macs, [FromBody] UpdateBookCopyRequest req) =>
         {
+            new DbValidator()
+                .Required("MaCS", macs, DbRules.MaCs)
+                .MaxLength("ViTri", req.ViTri, DbRules.ViTri)
+                .Required("TinhTrang", req.TinhTrang, DbRules.TinhTrang)
+                .ThrowIfInvalid();
+
             var parameters = new DynamicParameters();
             parameters.Add("@MACS", macs);
             parameters.Add("@VITRI", req.ViTri);
@@ -28,10 +34,9 @@ public class UpdateBookCopyEndpoint : IEndpoint
 
             return result switch
             {
-                0 => Results.NotFound(new MessageResponse("Không tìm thấy cuốn sách")),
-                1 => Results.BadRequest(new MessageResponse("Tình trạng cuốn sách không hợp lệ.")),
+                0 => ApiProblem.NotFound("Không tìm thấy cuốn sách"),
                 2 => Results.Ok(new MessageResponse("Cập nhật cuốn sách thành công")),
-                _ => Results.StatusCode(500)
+                _ => ApiProblem.Unexpected("SP_SUACUONSACH", result)
             };
         })
         .WithName("UpdateBookCopy")

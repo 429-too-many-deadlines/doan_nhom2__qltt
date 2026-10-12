@@ -290,5 +290,3 @@ Tạo một bảng tên là **DETAI_DIEM**. Cấu trúc bảng như sau:
 + Nộp file PDF. Đặt tên file: **MSSV_HoTen_BTTH2.pdf**.
 + Ứng với mỗi câu hỏi, trình bày đoạn code bằng ngôn ngữ SQL trong file báo cáo. Có thể giải thích hoặc mô tả thêm về đoạn code (nếu có).
 + Nộp kèm theo file `.sql` tương ứng cùng với file pdf, đặt tên là: **MSSV_HoTen_BTTH2.sql**
-+ Nộp qua hệ thống courses.uit.edu.vn. Lưu ý: **KHÔNG NÉN FILE**.
-

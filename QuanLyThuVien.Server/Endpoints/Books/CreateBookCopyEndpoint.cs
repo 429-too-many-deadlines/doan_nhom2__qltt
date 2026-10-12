@@ -17,6 +17,13 @@ public class CreateBookCopyEndpoint : IEndpoint
     {
         app.MapPost("api/books/{id}/copies", async (IDbConnection db, string id, [FromBody] CreateBookCopyRequest req) =>
         {
+            new DbValidator()
+                .Required("MaDS", id, DbRules.MaDs)
+                .Required("MaCS", req.MaCS, DbRules.MaCs)
+                .MaxLength("ViTri", req.ViTri, DbRules.ViTri)
+                .MaxLength("TinhTrang", req.TinhTrang, DbRules.TinhTrang)
+                .ThrowIfInvalid();
+
             var parameters = new DynamicParameters();
             parameters.Add("@MACS", req.MaCS);
             parameters.Add("@MADS", id);
@@ -29,11 +36,10 @@ public class CreateBookCopyEndpoint : IEndpoint
 
             return result switch
             {
-                0 => Results.BadRequest(new MessageResponse("Mã cuốn sách đã tồn tại.")),
-                1 => Results.BadRequest(new MessageResponse("Mã đầu sách không tồn tại.")),
-                2 => Results.BadRequest(new MessageResponse("Tình trạng cuốn sách không hợp lệ.")),
+                0 => ApiProblem.BadRequest("Mã cuốn sách đã tồn tại."),
+                1 => ApiProblem.BadRequest("Mã đầu sách không tồn tại."),
                 3 => Results.Ok(new MessageResponse("Thêm cuốn sách thành công")),
-                _ => Results.StatusCode(500)
+                _ => ApiProblem.Unexpected("SP_THEMCUONSACH", result)
             };
         })
         .WithName("CreateBookCopy")

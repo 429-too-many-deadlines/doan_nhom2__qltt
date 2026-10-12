@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { publishersService } from '@/services/publishers.service';
 import type { Publisher } from '@/types/api.types';
+import { DB_LIMITS } from '@/lib/db-limits';
 
 interface Props {
   publisher: Publisher | null;
@@ -58,14 +59,14 @@ export function UpdatePublisherDialog({ publisher, open, onOpenChange, onSuccess
           <div className="space-y-2">
             <label className="text-sm font-medium">Mã NXB</label>
             <Input 
-              value={formData.MANXB}
+              value={formData.MANXB} maxLength={DB_LIMITS.MANXB}
               disabled
             />
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium">Tên NXB</label>
             <Input 
-              value={formData.TENNXB}
+              value={formData.TENNXB} maxLength={DB_LIMITS.TENNXB}
               onChange={(e) => setFormData({ ...formData, TENNXB: e.target.value })}
               placeholder="Nhập tên nhà xuất bản..." 
               required 
@@ -74,7 +75,7 @@ export function UpdatePublisherDialog({ publisher, open, onOpenChange, onSuccess
           <div className="space-y-2">
             <label className="text-sm font-medium">Địa chỉ</label>
             <Input 
-              value={formData.DIACHI}
+              value={formData.DIACHI} maxLength={DB_LIMITS.DIACHI_NXB}
               onChange={(e) => setFormData({ ...formData, DIACHI: e.target.value })}
               placeholder="Nhập địa chỉ..." 
             />
@@ -82,7 +83,7 @@ export function UpdatePublisherDialog({ publisher, open, onOpenChange, onSuccess
           <div className="space-y-2">
             <label className="text-sm font-medium">Số điện thoại</label>
             <Input 
-              value={formData.SODT}
+              value={formData.SODT} maxLength={DB_LIMITS.SODT}
               onChange={(e) => setFormData({ ...formData, SODT: e.target.value })}
               placeholder="Nhập số điện thoại..." 
             />

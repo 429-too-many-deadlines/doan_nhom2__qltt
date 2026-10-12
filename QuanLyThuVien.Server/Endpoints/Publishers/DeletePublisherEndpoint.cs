@@ -14,6 +14,10 @@ public class DeletePublisherEndpoint : IEndpoint
     {
         app.MapDelete("api/publishers/{id}", async (IDbConnection db, string id) =>
         {
+            new DbValidator()
+                .Required("MaNXB", id, DbRules.MaNxb)
+                .ThrowIfInvalid();
+
             var parameters = new DynamicParameters();
             parameters.Add("@MANXB", id);
             parameters.Add("@ReturnValue", dbType: DbType.Int32, direction: ParameterDirection.ReturnValue);
@@ -23,10 +27,10 @@ public class DeletePublisherEndpoint : IEndpoint
 
             return result switch
             {
-                0 => Results.NotFound(new MessageResponse("Không tìm thấy nhà xuất bản")),
-                1 => Results.BadRequest(new MessageResponse("Không thể xoá NXB đã có đầu sách")),
+                0 => ApiProblem.NotFound("Không tìm thấy nhà xuất bản"),
+                1 => ApiProblem.BadRequest("Không thể xoá NXB đã có đầu sách"),
                 2 => Results.Ok(new MessageResponse("Xoá nhà xuất bản thành công")),
-                _ => Results.StatusCode(500)
+                _ => ApiProblem.Unexpected("SP_XOANHAXUATBAN", result)
             };
         })
         .WithName("DeletePublisher")

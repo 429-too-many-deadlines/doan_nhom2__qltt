@@ -9,7 +9,6 @@ import {
   BookOpen,
   Layers,
   CircleDollarSign,
-  Users,
   Calendar,
   RotateCcw,
 } from 'lucide-react';
@@ -48,7 +47,7 @@ export default function Reports() {
     setYear(now.getFullYear());
   };
 
-  const showMonthFilter = activeTab === 'monthly' || activeTab === 'staff';
+  const showMonthFilter = activeTab === 'monthly';
 
   return (
     <div className="p-6 space-y-6">
@@ -108,7 +107,7 @@ export default function Reports() {
 
       {/* Tabs Navigation */}
       <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
-        <TabsList className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 w-full h-auto p-1 gap-1 bg-muted/60">
+        <TabsList className="grid grid-cols-2 lg:grid-cols-4 w-full h-auto p-1 gap-1 bg-muted/60">
           <TabsTrigger value="monthly" className="h-auto py-2 text-xs sm:text-sm font-medium">
             <BarChart3 className="h-4 w-4 mr-1.5" />
             Tổng Quan Tháng
@@ -136,14 +135,6 @@ export default function Reports() {
           >
             <CircleDollarSign className="h-4 w-4 mr-1.5" />
             Tiền Phạt & Quá Hạn
-          </TabsTrigger>
-          <TabsTrigger
-            value="staff"
-            onMouseEnter={() => tabPreloaders.staff()}
-            className="h-auto py-2 text-xs sm:text-sm font-medium"
-          >
-            <Users className="h-4 w-4 mr-1.5" />
-            Hiệu Suất Thủ Thư
           </TabsTrigger>
         </TabsList>
 

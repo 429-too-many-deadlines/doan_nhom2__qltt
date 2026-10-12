@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { readersService } from '@/services/readers.service';
 import type { Reader } from '@/types/api.types';
+import { DB_LIMITS, GIOITINH_OPTIONS } from '@/lib/db-limits';
 
 interface Props {
   reader: Reader | null;
@@ -70,14 +71,14 @@ export function UpdateReaderDialog({ reader, open, onOpenChange, onSuccess }: Pr
           <div className="space-y-2">
             <label className="text-sm font-medium">Mã Độc Giả</label>
             <Input 
-              value={formData.MADG}
+              value={formData.MADG} maxLength={DB_LIMITS.MADG}
               disabled
             />
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium">Họ Tên</label>
             <Input 
-              value={formData.HOTEN}
+              value={formData.HOTEN} maxLength={DB_LIMITS.HOTEN_DG}
               onChange={(e) => setFormData({ ...formData, HOTEN: e.target.value })}
               placeholder="Nguyễn Văn A" 
               required 
@@ -94,17 +95,22 @@ export function UpdateReaderDialog({ reader, open, onOpenChange, onSuccess }: Pr
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium">Giới Tính</label>
-            <Input 
+            <select
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               value={formData.GIOITINH}
               onChange={(e) => setFormData({ ...formData, GIOITINH: e.target.value })}
-              placeholder="Nam/Nữ" 
-              required 
-            />
+              required
+            >
+              <option value="">-- Chọn giới tính --</option>
+              {GIOITINH_OPTIONS.map((g) => (
+                <option key={g} value={g}>{g}</option>
+              ))}
+            </select>
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium">Số Điện Thoại</label>
             <Input 
-              value={formData.SODT}
+              value={formData.SODT} maxLength={DB_LIMITS.SODT}
               onChange={(e) => setFormData({ ...formData, SODT: e.target.value })}
               placeholder="090..." 
               required 
@@ -113,7 +119,7 @@ export function UpdateReaderDialog({ reader, open, onOpenChange, onSuccess }: Pr
           <div className="space-y-2">
             <label className="text-sm font-medium">Địa Chỉ</label>
             <Input 
-              value={formData.DIACHI}
+              value={formData.DIACHI} maxLength={DB_LIMITS.DIACHI_DG}
               onChange={(e) => setFormData({ ...formData, DIACHI: e.target.value })}
               placeholder="Địa chỉ..." 
             />
@@ -122,7 +128,7 @@ export function UpdateReaderDialog({ reader, open, onOpenChange, onSuccess }: Pr
             <label className="text-sm font-medium">Email</label>
             <Input 
               type="EMAIL"
-              value={formData.EMAIL}
+              value={formData.EMAIL} maxLength={DB_LIMITS.EMAIL}
               onChange={(e) => setFormData({ ...formData, EMAIL: e.target.value })}
               placeholder="EMAIL@..." 
             />

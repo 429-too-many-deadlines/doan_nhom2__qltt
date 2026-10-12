@@ -1,5 +1,5 @@
 /* =====================================================================
-   File   : 06_Cursor.sql
+   File   : 6_Cursor.sql
    Noi dung: 2 CURSOR (moi cursor duoc gom vao 1 Stored Procedure de
              goi lai tu ung dung)
    ===================================================================== */

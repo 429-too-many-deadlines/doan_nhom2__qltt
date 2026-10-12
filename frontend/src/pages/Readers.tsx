@@ -117,15 +117,16 @@ export default function Readers() {
                     <TableHead>Họ Tên</TableHead>
                     <TableHead>Giới Tính</TableHead>
                     <TableHead>Số ĐT</TableHead>
+                    <TableHead>Đang Mượn</TableHead>
                     <TableHead>Tổng Nợ</TableHead>
                     <TableHead className="w-[150px]">Hành Động</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {loadingReaders ? (
-                    <TableRow><TableCell colSpan={6} className="text-center h-24">Đang tải...</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={7} className="text-center h-24">Đang tải...</TableCell></TableRow>
                   ) : readers.length === 0 ? (
-                    <TableRow><TableCell colSpan={6} className="text-center h-24">Không có dữ liệu.</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={7} className="text-center h-24">Không có dữ liệu.</TableCell></TableRow>
                   ) : (
                     readers.map((reader, i) => {
                       const r = reader as Reader & Record<string, unknown>;
@@ -135,6 +136,7 @@ export default function Readers() {
                         <TableCell className="font-medium">{r.HOTEN || (r.hoten as string) || '-'}</TableCell>
                         <TableCell>{r.GIOITINH || (r.gioitinh as string) || '-'}</TableCell>
                         <TableCell>{r.SODT || (r.sodt as string) || '-'}</TableCell>
+                        <TableCell>{r.SOSACHDANGMUON ?? 0} cuốn</TableCell>
                         <TableCell className="font-semibold text-rose-600">{Number(r.TONGNO ?? (r.tongno as number) ?? 0).toLocaleString('vi-VN')} đ</TableCell>
                         <TableCell>
                           <div className="flex gap-2">

@@ -6,6 +6,7 @@ import { Plus } from 'lucide-react';
 import { booksService } from '@/services/books.service';
 import { toast } from 'sonner';
 import type { Category, Publisher } from '@/types/api.types';
+import { DB_LIMITS } from '@/lib/db-limits';
 
 interface Props {
   onSuccess: () => void;
@@ -65,11 +66,11 @@ export function CreateBookDialog({ onSuccess, categories, publishers }: Props) {
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
           <div className="space-y-2">
             <label className="text-sm font-medium">Mã Đầu Sách</label>
-            <Input name="maDs" placeholder="VD: DS001" required />
+            <Input name="maDs" maxLength={DB_LIMITS.MADS} placeholder="VD: DS001" required />
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium">Tên Sách</label>
-            <Input name="tenDs" placeholder="Tên sách mới..." required />
+            <Input name="tenDs" maxLength={DB_LIMITS.TENDS} placeholder="Tên sách mới..." required />
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium">Thể Loại</label>

@@ -5,6 +5,8 @@ import { apiClient } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { DB_LIMITS } from '@/lib/db-limits';
+import { ApiError } from '@/types/error.types';
 
 export default function Login() {
   const [username, setUsername] = useState('');
@@ -21,8 +23,7 @@ export default function Login() {
       login(response.data.token, response.data.user);
       navigate('/');
     } catch (err) {
-      const e = err as { response?: { data?: { message?: string } } };
-      setError(e.response?.data?.message || 'Login failed');
+      setError(err instanceof ApiError ? err.message : 'Đăng nhập thất bại');
     }
   };
 
@@ -37,7 +38,7 @@ export default function Login() {
             <Input
               id="username"
               type="text"
-              value={username}
+              value={username} maxLength={DB_LIMITS.TENDANGNHAP}
               onChange={(e) => setUsername(e.target.value)}
               required
             />
@@ -47,7 +48,7 @@ export default function Login() {
             <Input
               id="password"
               type="password"
-              value={password}
+              value={password} maxLength={DB_LIMITS.MATKHAU}
               onChange={(e) => setPassword(e.target.value)}
               required
             />

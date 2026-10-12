@@ -1,5 +1,5 @@
 import { apiClient } from '../lib/api';
-import type { PagedResult, CreateReaderRequest, MessageResponse, Reader, UpdateReaderRequest, GenericApiResponse } from '../types/api.types';
+import type { PagedResult, CreateReaderRequest, MessageResponse, Reader, UpdateReaderRequest, GenericApiResponse, ReaderBorrowingCount } from '../types/api.types';
 
 export const readersService = {
   createReader: async (data: CreateReaderRequest): Promise<MessageResponse> => {
@@ -26,6 +26,11 @@ export const readersService = {
 
   getReaderHistory: async (MADG: string): Promise<GenericApiResponse[]> => {
     const response = await apiClient.get<GenericApiResponse[]>(`/api/readers/${MADG}/history`);
+    return response.data;
+  },
+
+  getBorrowingCount: async (MADG: string): Promise<ReaderBorrowingCount> => {
+    const response = await apiClient.get<ReaderBorrowingCount>(`/api/readers/${MADG}/borrowing-count`);
     return response.data;
   },
 };

@@ -17,6 +17,12 @@ public class CreateAuthorEndpoint : IEndpoint
     {
         app.MapPost("api/authors", async (IDbConnection db, [FromBody] CreateAuthorRequest req) =>
         {
+            new DbValidator()
+                .Required("MaTG", req.MaTG, DbRules.MaTg)
+                .Required("TenTG", req.TenTG, DbRules.TenTg)
+                .MaxLength("QuocTich", req.QuocTich, DbRules.QuocTich)
+                .ThrowIfInvalid();
+
             var parameters = new DynamicParameters();
             parameters.Add("@MATG", req.MaTG);
             parameters.Add("@TENTG", req.TenTG);
@@ -29,10 +35,10 @@ public class CreateAuthorEndpoint : IEndpoint
 
             return result switch
             {
-                0 => Results.BadRequest(new MessageResponse("Mã tác giả đã tồn tại.")),
-                1 => Results.BadRequest(new MessageResponse("Năm sinh tác giả không hợp lệ.")),
+                0 => ApiProblem.BadRequest("Mã tác giả đã tồn tại."),
+                1 => ApiProblem.BadRequest("Năm sinh tác giả không hợp lệ."),
                 2 => Results.Ok(new MessageResponse("Thêm tác giả thành công")),
-                _ => Results.StatusCode(500)
+                _ => ApiProblem.Unexpected("SP_THEMTACGIA", result)
             };
         })
         .WithName("CreateAuthor")

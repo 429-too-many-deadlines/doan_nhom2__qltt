@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { authorsService } from '@/services/authors.service';
 import type { Author } from '@/types/api.types';
+import { DB_LIMITS } from '@/lib/db-limits';
 
 interface Props {
   author: Author | null;
@@ -59,14 +60,14 @@ export function UpdateAuthorDialog({ author, open, onOpenChange, onSuccess }: Pr
           <div className="space-y-2">
             <label className="text-sm font-medium">Mã Tác Giả</label>
             <Input 
-              value={formData.MATG}
+              value={formData.MATG} maxLength={DB_LIMITS.MATG}
               disabled
             />
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium">Tên Tác Giả</label>
             <Input 
-              value={formData.TENTG}
+              value={formData.TENTG} maxLength={DB_LIMITS.TENTG}
               onChange={(e) => setFormData({ ...formData, TENTG: e.target.value })}
               placeholder="Nhập tên tác giả..." 
               required 
@@ -84,7 +85,7 @@ export function UpdateAuthorDialog({ author, open, onOpenChange, onSuccess }: Pr
           <div className="space-y-2">
             <label className="text-sm font-medium">Quốc Tịch</label>
             <Input 
-              value={formData.QUOCTICH}
+              value={formData.QUOCTICH} maxLength={DB_LIMITS.QUOCTICH}
               onChange={(e) => setFormData({ ...formData, QUOCTICH: e.target.value })}
               placeholder="VD: Việt Nam" 
             />

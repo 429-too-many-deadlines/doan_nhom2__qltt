@@ -17,6 +17,13 @@ public class UpdatePublisherEndpoint : IEndpoint
     {
         app.MapPut("api/publishers/{id}", async (IDbConnection db, string id, [FromBody] UpdatePublisherRequest req) =>
         {
+            new DbValidator()
+                .Required("MaNXB", id, DbRules.MaNxb)
+                .Required("TenNXB", req.TenNXB, DbRules.TenNxb)
+                .MaxLength("DiaChi", req.DiaChi, DbRules.DiaChiNxb)
+                .MaxLength("SoDT", req.SoDT, DbRules.SoDt)
+                .ThrowIfInvalid();
+
             var parameters = new DynamicParameters();
             parameters.Add("@MANXB", id);
             parameters.Add("@TENNXB", req.TenNXB);
@@ -29,10 +36,10 @@ public class UpdatePublisherEndpoint : IEndpoint
 
             return result switch
             {
-                0 => Results.NotFound(new MessageResponse("Không tìm thấy nhà xuất bản")),
-                1 => Results.BadRequest(new MessageResponse("Tên nhà xuất bản đã tồn tại.")),
+                0 => ApiProblem.NotFound("Không tìm thấy nhà xuất bản"),
+                1 => ApiProblem.BadRequest("Tên nhà xuất bản đã tồn tại."),
                 2 => Results.Ok(new MessageResponse("Cập nhật nhà xuất bản thành công")),
-                _ => Results.StatusCode(500)
+                _ => ApiProblem.Unexpected("SP_SUANHAXUATBAN", result)
             };
         })
         .WithName("UpdatePublisher")

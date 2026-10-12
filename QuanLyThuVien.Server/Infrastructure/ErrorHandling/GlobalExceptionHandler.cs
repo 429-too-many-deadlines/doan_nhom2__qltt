@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using QuanLyThuVien.Server.Exceptions;
 
 namespace QuanLyThuVien.Server.Infrastructure.ErrorHandling;
@@ -42,6 +43,12 @@ public class GlobalExceptionHandler : IExceptionHandler
             problemDetails.Status = StatusCodes.Status400BadRequest;
             problemDetails.Title = "Bad Request";
             problemDetails.Detail = badRequestException.Message;
+        }
+        else if (exception is SqlException sqlException && SqlErrorTranslator.Translate(sqlException) is { } dbMessage)
+        {
+            problemDetails.Status = StatusCodes.Status400BadRequest;
+            problemDetails.Title = "Bad Request";
+            problemDetails.Detail = dbMessage;
         }
         else
         {

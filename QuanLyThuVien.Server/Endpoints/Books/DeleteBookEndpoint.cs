@@ -15,6 +15,10 @@ public class DeleteBookEndpoint : IEndpoint
     {
         app.MapDelete("api/books/{maDs}", async (IDbConnection db, string maDs) =>
         {
+            new DbValidator()
+                .Required("MaDS", maDs, DbRules.MaDs)
+                .ThrowIfInvalid();
+
             var parameters = new DynamicParameters();
             parameters.Add("@MADS", maDs);
             parameters.Add("@ReturnValue", dbType: DbType.Int32, direction: ParameterDirection.ReturnValue);
@@ -24,10 +28,10 @@ public class DeleteBookEndpoint : IEndpoint
 
             return result switch
             {
-                0 => Results.NotFound(new MessageResponse("Mã đầu sách không tồn tại.")),
-                1 => Results.BadRequest(new MessageResponse("Đầu sách này vẫn còn các cuốn sách, không thể xóa.")),
+                0 => ApiProblem.NotFound("Mã đầu sách không tồn tại."),
+                1 => ApiProblem.BadRequest("Đầu sách này vẫn còn các cuốn sách, không thể xóa."),
                 2 => Results.Ok(new MessageResponse("Xóa đầu sách thành công.")),
-                _ => Results.StatusCode(500)
+                _ => ApiProblem.Unexpected("SP_XOADAUSACH", result)
             };
         })
         .WithName("DeleteBook")

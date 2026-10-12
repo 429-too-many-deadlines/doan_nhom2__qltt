@@ -15,6 +15,10 @@ public class DeleteBookCopyEndpoint : IEndpoint
     {
         app.MapDelete("api/books/copies/{macs}", async (IDbConnection db, string macs) =>
         {
+            new DbValidator()
+                .Required("MaCS", macs, DbRules.MaCs)
+                .ThrowIfInvalid();
+
             var parameters = new DynamicParameters();
             parameters.Add("@MACS", macs);
             parameters.Add("@ReturnValue", dbType: DbType.Int32, direction: ParameterDirection.ReturnValue);
@@ -24,10 +28,10 @@ public class DeleteBookCopyEndpoint : IEndpoint
 
             return result switch
             {
-                0 => Results.NotFound(new MessageResponse("Không tìm thấy cuốn sách")),
-                1 => Results.BadRequest(new MessageResponse("Cuốn sách đã có lịch sử mượn, không thể xoá.")),
+                0 => ApiProblem.NotFound("Không tìm thấy cuốn sách"),
+                1 => ApiProblem.BadRequest("Cuốn sách đã có lịch sử mượn, không thể xoá."),
                 2 => Results.Ok(new MessageResponse("Xoá cuốn sách thành công")),
-                _ => Results.StatusCode(500)
+                _ => ApiProblem.Unexpected("SP_XOACUONSACH", result)
             };
         })
         .WithName("DeleteBookCopy")

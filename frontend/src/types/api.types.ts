@@ -24,15 +24,6 @@ export interface SearchBookResponse {
 }
 
 
-
-
-
-
-
-
-
-
-
 export interface TopBookResponse {
   MADS?: string;
   TENDS?: string;
@@ -52,21 +43,6 @@ export interface MonthlyStatsResponse {
 }
 
 
-
-// --- Account Types ---
-export interface Account {
-  username: string;
-  role: string;
-  maDG?: string | null;
-  ownerName?: string;
-  status: boolean;
-  // Fallback aliases
-  tendangnhap?: string;
-  vaitro?: string;
-  MADG?: string;
-  trangthai?: boolean;
-}
-
 // --- Book Copies & Authors ---
 export interface BookCopy {
   MACS: string;
@@ -74,42 +50,15 @@ export interface BookCopy {
   NGAYNHAP?: string;
   VITRI?: string;
   TINHTRANG?: string;
-  // Fallback aliases for camel/Pascal case
-  MaCS?: string;
-  MaDS?: string;
-  NgayNhap?: string;
-  ViTri?: string;
-  TinhTrang?: string;
 }
 
 export interface BookAuthor {
   MATG: string;
   VAITRO: string;
-  // Fallback aliases
-  MaTG?: string;
-  VaiTro?: string;
 }
-
-
-
-
-
-
-
-// --- Employees ---
-export interface Employee {
-  HOTEN: string;
-  NGSINH: string;
-  SODT: string;
-  CHUCVU: string;
-  NGVL: string;
-}
-
 
 
 // --- Reader Types ---
-
-
 
 
 export interface Author {
@@ -151,6 +100,12 @@ export interface Reader {
     SODT: string;
     EMAIL?: string;
     TONGNO?: number;
+    SOSACHDANGMUON?: number;
+}
+
+export interface ReaderBorrowingCount {
+    maDg: string;
+    soSachDangMuon: number;
 }
 
 export interface FineSlip {
@@ -163,11 +118,6 @@ export interface FineSlip {
     LYDO?: string;
     SOTIEN?: number;
     DATHANHTOAN?: boolean;
-    // Fallback / legacy fields
-    maPT?: string;
-    maPP?: string;
-    soTienThu?: number;
-    ngayThu?: string;
 }
 
 export interface BackupHistory {
@@ -185,13 +135,6 @@ export interface BackupRequest {
 export interface ChangePasswordRequest {
   oldPassword: string;
   newPassword: string;
-}
-
-export interface CreateAccountRequest {
-  username: string;
-  password: string;
-  role: string;
-  MADG: string | null;
 }
 
 export interface LoginRequest {
@@ -260,22 +203,6 @@ export interface UpdateCategoryRequest {
   TENTL: string;
 }
 
-export interface CreateEmployeeRequest {
-  HOTEN: string;
-  NGSINH: string;
-  SODT: string;
-  CHUCVU: string;
-  NGVL: string;
-}
-
-export interface UpdateEmployeeRequest {
-  HOTEN: string;
-  NGSINH: string;
-  SODT: string;
-  CHUCVU: string;
-  NGVL: string;
-}
-
 export interface CreatePublisherRequest {
   MANXB: string;
   TENNXB: string;
@@ -310,7 +237,6 @@ export interface UpdateReaderRequest {
 }
 
 
-
 export interface BackupResponse {
   message: string;
   history: BackupHistory[];
@@ -327,7 +253,7 @@ export interface BorrowRequest {
 
 export interface BorrowResponse {
   message: string;
-  MAPM: string;
+  maPm: string;
 }
 
 export interface BorrowSlip {

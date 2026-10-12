@@ -1,3 +1,4 @@
+using QuanLyThuVien.Server.Exceptions;
 using Dapper;
 using QuanLyThuVien.Server.Endpoints.Shared;
 using Microsoft.AspNetCore.Builder;
@@ -26,6 +27,10 @@ public class BackupEndpoint : IEndpoint
         [FromBody] BackupRequest req,
         IDbConnection db)
     {
+        // SP_SAOLUU chỉ nhận @LOAI = 'FULL' hoặc 'DIFF'; giá trị này còn được ghép vào tên file
+        if (req.Type is not ("FULL" or "DIFF"))
+            throw new ValidationException("Loại sao lưu phải là FULL hoặc DIFF.");
+
         var parameters = new DynamicParameters();
         // Mặc định lưu vào thư mục data của docker mssql
         string fileName = $"QUANLYTHUVIEN_{req.Type}_{DateTime.Now:yyyyMMdd_HHmmss}.bak";

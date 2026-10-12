@@ -1,5 +1,5 @@
 /* =====================================================================
-   File   : 08_Report.sql
+   File   : 8_Report.sql
    Noi dung: Cac VIEW lam nguon du lieu cho REPORT (Power BI / Tableau /
              Web demo). Moi view tuong ung 1 report.
    ===================================================================== */

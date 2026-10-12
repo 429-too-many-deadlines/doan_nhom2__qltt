@@ -1,4 +1,12 @@
-USE QUANLYTHUVIEN;
+/* =====================================================================
+   File   : 10_DuLieuPhatSinhMoi.sql
+   Noi dung: Nhap them 150 phieu muon phat sinh (PM0771 - PM0920) kem chi
+             tiet va phieu phat; cap nhat lai thuoc tinh dan xuat
+   Luu y  : chay SAU 9_DuLieuThem2026.sql; trigger duoc tat trong luc nhap
+            va bat lai o cuoi file
+   ===================================================================== */
+
+USE QUANLYTHUVIEN
 GO
 ALTER TABLE PHIEUMUON DISABLE TRIGGER ALL;
 ALTER TABLE CTPHIEUMUON DISABLE TRIGGER ALL;
@@ -644,4 +652,8 @@ GO
 ALTER TABLE PHIEUMUON ENABLE TRIGGER ALL;
 ALTER TABLE CTPHIEUMUON ENABLE TRIGGER ALL;
 ALTER TABLE PHIEUPHAT ENABLE TRIGGER ALL;
+-- Bat lai ca trigger cua dot 9 phong khi file 9 bi dung giua chung
+ALTER TABLE DOCGIA ENABLE TRIGGER ALL;
+ALTER TABLE CUONSACH ENABLE TRIGGER ALL;
+ALTER TABLE DAUSACH ENABLE TRIGGER ALL;
 GO

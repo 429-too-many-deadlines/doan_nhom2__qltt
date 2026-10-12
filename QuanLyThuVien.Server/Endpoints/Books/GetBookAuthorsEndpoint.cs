@@ -15,6 +15,8 @@ public class GetBookAuthorsEndpoint : IEndpoint
     {
         app.MapGet("api/books/{id}/authors", async (IDbConnection db, string id) =>
         {
+            new DbValidator().Required("MaDS", id, DbRules.MaDs).ThrowIfInvalid();
+
             var authors = await db.QueryAsync(
                 "SP_LAYTACGIATHEODAUSACH",
                 new { MADS = id },

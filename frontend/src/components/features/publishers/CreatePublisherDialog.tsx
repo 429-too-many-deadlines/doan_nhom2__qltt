@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Plus } from 'lucide-react';
 import { publishersService } from '@/services/publishers.service';
+import { DB_LIMITS } from '@/lib/db-limits';
 
 interface Props {
   onSuccess: () => void;
@@ -46,7 +47,7 @@ export function CreatePublisherDialog({ onSuccess }: Props) {
           <div className="space-y-2">
             <label className="text-sm font-medium">Mã NXB</label>
             <Input 
-              value={formData.MANXB}
+              value={formData.MANXB} maxLength={DB_LIMITS.MANXB}
               onChange={(e) => setFormData({ ...formData, MANXB: e.target.value })}
               placeholder="VD: NXB01" 
               required 
@@ -55,7 +56,7 @@ export function CreatePublisherDialog({ onSuccess }: Props) {
           <div className="space-y-2">
             <label className="text-sm font-medium">Tên NXB</label>
             <Input 
-              value={formData.TENNXB}
+              value={formData.TENNXB} maxLength={DB_LIMITS.TENNXB}
               onChange={(e) => setFormData({ ...formData, TENNXB: e.target.value })}
               placeholder="Nhập tên nhà xuất bản..." 
               required 
@@ -64,7 +65,7 @@ export function CreatePublisherDialog({ onSuccess }: Props) {
           <div className="space-y-2">
             <label className="text-sm font-medium">Địa chỉ</label>
             <Input 
-              value={formData.DIACHI}
+              value={formData.DIACHI} maxLength={DB_LIMITS.DIACHI_NXB}
               onChange={(e) => setFormData({ ...formData, DIACHI: e.target.value })}
               placeholder="Nhập địa chỉ..." 
             />
@@ -72,7 +73,7 @@ export function CreatePublisherDialog({ onSuccess }: Props) {
           <div className="space-y-2">
             <label className="text-sm font-medium">Số điện thoại</label>
             <Input 
-              value={formData.SODT}
+              value={formData.SODT} maxLength={DB_LIMITS.SODT}
               onChange={(e) => setFormData({ ...formData, SODT: e.target.value })}
               placeholder="Nhập số điện thoại..." 
             />

@@ -29,8 +29,12 @@ public class ChangePasswordEndpoint : IEndpoint
         var username = context.User.Identity?.Name;
         if (string.IsNullOrEmpty(username))
         {
-            return Results.Unauthorized();
+            return ApiProblem.Unauthorized("Không xác định được người dùng đăng nhập.");
         }
+
+        new DbValidator()
+            .Required("NewPassword", req.NewPassword, DbRules.MatKhau)
+            .ThrowIfInvalid();
 
         var parameters = new DynamicParameters();
         parameters.Add("@TENDANGNHAP", username);
@@ -47,7 +51,7 @@ public class ChangePasswordEndpoint : IEndpoint
             return Results.Ok(new MessageResponse("Đổi mật khẩu thành công"));
         }
 
-        return Results.BadRequest(new MessageResponse("Sai mật khẩu cũ"));
+        return ApiProblem.BadRequest("Sai mật khẩu cũ");
     }
 }
 

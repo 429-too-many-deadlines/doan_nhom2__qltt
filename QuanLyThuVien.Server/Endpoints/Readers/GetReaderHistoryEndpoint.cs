@@ -13,6 +13,10 @@ public class GetReaderHistoryEndpoint : IEndpoint
     {
         app.MapGet("api/readers/{maDg}/history", async (System.Data.IDbConnection db, string maDg) =>
         {
+            new DbValidator()
+                .Required("MaDG", maDg, DbRules.MaDg)
+                .ThrowIfInvalid();
+
             var parameters = new DynamicParameters();
             parameters.Add("@MADG", maDg);
 

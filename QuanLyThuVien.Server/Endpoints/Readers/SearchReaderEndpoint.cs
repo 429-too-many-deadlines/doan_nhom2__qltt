@@ -20,8 +20,21 @@ public class SearchReaderEndpoint : IEndpoint
             parameters.Add("@PageNumber", page);
             parameters.Add("@PageSize", pageSize);
 
-            var readers = await db.QueryAsync<dynamic>("SP_TIMDOCGIA", parameters, commandType: CommandType.StoredProcedure);
-            
+            var readers = (await db.QueryAsync<dynamic>("SP_TIMDOCGIA", parameters, commandType: CommandType.StoredProcedure)).ToList();
+
+            // Gắn số sách đang mượn (FN_SOSACHDANGMUON) cho cả trang bằng một truy vấn
+            var rows = readers.Cast<IDictionary<string, object>>().ToList();
+            if (rows.Count > 0)
+            {
+                var counts = (await db.QueryAsync<(string MaDg, int SoSach)>(
+                        "SELECT MADG, dbo.FN_SOSACHDANGMUON(MADG) FROM DOCGIA WHERE MADG IN @Ids",
+                        new { Ids = rows.Select(r => (string)r["MADG"]).ToArray() }))
+                    .ToDictionary(c => c.MaDg.Trim(), c => c.SoSach);
+
+                foreach (var row in rows)
+                    row["SOSACHDANGMUON"] = counts.GetValueOrDefault(((string)row["MADG"]).Trim());
+            }
+
             int totalCount = 0;
             var firstRow = readers.FirstOrDefault();
             if (firstRow != null)

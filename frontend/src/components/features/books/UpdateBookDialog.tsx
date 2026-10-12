@@ -7,6 +7,7 @@ import type { Category, Publisher, SearchBookResponse } from '@/types/api.types'
 import { AsyncCombobox } from '@/components/ui/async-combobox';
 import { categoriesService } from '@/services/categories.service';
 import { publishersService } from '@/services/publishers.service';
+import { DB_LIMITS } from '@/lib/db-limits';
 
 interface Props {
   book: SearchBookResponse | null;
@@ -99,7 +100,7 @@ export function UpdateBookDialog({ book, open, onOpenChange, onSuccess, categori
             <label className="text-sm font-medium">Mã Đầu Sách</label>
             <Input 
               name="MADS"
-              value={formData.MADS}
+              value={formData.MADS} maxLength={DB_LIMITS.MADS}
               disabled
             />
           </div>
@@ -107,7 +108,7 @@ export function UpdateBookDialog({ book, open, onOpenChange, onSuccess, categori
             <label className="text-sm font-medium">Tên Sách Mới</label>
             <Input 
               name="TENDS"
-              value={formData.TENDS}
+              value={formData.TENDS} maxLength={DB_LIMITS.TENDS}
               onChange={handleChange}
               placeholder="Tên sách mới..." 
               required 

@@ -17,6 +17,13 @@ public class UpdateBookEndpoint : IEndpoint
     {
         app.MapPut("api/books/{id}", async (IDbConnection db, string id, [FromBody] UpdateBookRequest req) =>
         {
+            new DbValidator()
+                .Required("MaDS", id, DbRules.MaDs)
+                .Required("TenDS", req.TenDS, DbRules.TenDs)
+                .Required("MaTL", req.MaTL, DbRules.MaTl)
+                .Required("MaNXB", req.MaNXB, DbRules.MaNxb)
+                .ThrowIfInvalid();
+
             var parameters = new DynamicParameters();
             parameters.Add("@MADS", id);
             parameters.Add("@TENDS", req.TenDS);
@@ -32,9 +39,9 @@ public class UpdateBookEndpoint : IEndpoint
 
             return result switch
             {
-                0 => Results.BadRequest(new MessageResponse("Mã đầu sách không tồn tại.")),
+                0 => ApiProblem.BadRequest("Mã đầu sách không tồn tại."),
                 1 => Results.Ok(new MessageResponse("Cập nhật đầu sách thành công")),
-                _ => Results.StatusCode(500)
+                _ => ApiProblem.Unexpected("SP_SUADAUSACH", result)
             };
         })
         .WithName("UpdateBook")

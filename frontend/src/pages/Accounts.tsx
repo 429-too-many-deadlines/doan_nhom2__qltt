@@ -3,6 +3,7 @@ import { authService } from '../services/auth.service';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import { toast } from 'sonner';
+import { DB_LIMITS } from '@/lib/db-limits';
 
 export default function Accounts() {
   const [changePwdData, setChangePwdData] = useState({ oldPassword: '', newPassword: '', confirmPassword: '' });
@@ -20,10 +21,9 @@ export default function Accounts() {
     setLoading(true);
     try {
       await authService.changePassword(changePwdData.oldPassword, changePwdData.newPassword);
-      toast.success('Đổi mật khẩu thành công!');
       setChangePwdData({ oldPassword: '', newPassword: '', confirmPassword: '' });
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Đổi mật khẩu thất bại.');
+    } catch {
+      // Lỗi (ProblemDetails) đã được interceptor trong lib/api.ts hiển thị
     } finally {
       setLoading(false);
     }
@@ -47,7 +47,7 @@ export default function Accounts() {
           <Input 
             type="password"
             placeholder="Nhập mật khẩu mới"
-            value={changePwdData.newPassword} 
+            value={changePwdData.newPassword} maxLength={DB_LIMITS.MATKHAU} 
             onChange={(e) => setChangePwdData({ ...changePwdData, newPassword: e.target.value })} 
           />
         </div>
@@ -56,7 +56,7 @@ export default function Accounts() {
           <Input 
             type="password"
             placeholder="Nhập lại mật khẩu mới"
-            value={changePwdData.confirmPassword} 
+            value={changePwdData.confirmPassword} maxLength={DB_LIMITS.MATKHAU} 
             onChange={(e) => setChangePwdData({ ...changePwdData, confirmPassword: e.target.value })} 
           />
         </div>

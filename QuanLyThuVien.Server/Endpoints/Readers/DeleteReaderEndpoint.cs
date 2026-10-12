@@ -15,6 +15,10 @@ public class DeleteReaderEndpoint : IEndpoint
     {
         app.MapDelete("api/readers/{maDg}", async (IDbConnection db, string maDg) =>
         {
+            new DbValidator()
+                .Required("MaDG", maDg, DbRules.MaDg)
+                .ThrowIfInvalid();
+
             var parameters = new DynamicParameters();
             parameters.Add("@MADG", maDg);
             parameters.Add("@ReturnValue", dbType: DbType.Int32, direction: ParameterDirection.ReturnValue);
@@ -24,10 +28,10 @@ public class DeleteReaderEndpoint : IEndpoint
 
             return result switch
             {
-                0 => Results.NotFound(new MessageResponse("Mã độc giả không tồn tại.")),
-                1 => Results.BadRequest(new MessageResponse("Độc giả đã có lịch sử mượn trả, không thể xóa.")),
+                0 => ApiProblem.NotFound("Mã độc giả không tồn tại."),
+                1 => ApiProblem.BadRequest("Độc giả đã có lịch sử mượn trả, không thể xóa."),
                 2 => Results.Ok(new MessageResponse("Xóa độc giả thành công.")),
-                _ => Results.StatusCode(500)
+                _ => ApiProblem.Unexpected("SP_XOADOCGIA", result)
             };
         })
         .WithName("DeleteReader")

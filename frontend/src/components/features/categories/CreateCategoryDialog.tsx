@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Plus } from 'lucide-react';
 import { categoriesService } from '@/services/categories.service';
+import { DB_LIMITS } from '@/lib/db-limits';
 
 interface Props {
   onSuccess: () => void;
@@ -46,7 +47,7 @@ export function CreateCategoryDialog({ onSuccess }: Props) {
           <div className="space-y-2">
             <label className="text-sm font-medium">Mã Thể Loại</label>
             <Input 
-              value={formData.maTl}
+              value={formData.maTl} maxLength={DB_LIMITS.MATL}
               onChange={(e) => setFormData({ ...formData, maTl: e.target.value })}
               placeholder="VD: IT01" 
               required 
@@ -55,7 +56,7 @@ export function CreateCategoryDialog({ onSuccess }: Props) {
           <div className="space-y-2">
             <label className="text-sm font-medium">Tên Thể Loại</label>
             <Input 
-              value={formData.tenTl}
+              value={formData.tenTl} maxLength={DB_LIMITS.TENTL}
               onChange={(e) => setFormData({ ...formData, tenTl: e.target.value })}
               placeholder="Nhập tên thể loại..." 
               required 

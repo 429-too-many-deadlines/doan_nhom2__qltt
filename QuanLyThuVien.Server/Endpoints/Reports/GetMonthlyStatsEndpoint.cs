@@ -20,7 +20,7 @@ public class GetMonthlyStatsEndpoint : IEndpoint
             parameters.Add("@NAM", year);
             parameters.Add("@SOPHIEU", dbType: DbType.Int32, direction: ParameterDirection.Output);
             parameters.Add("@SOLUOTSACH", dbType: DbType.Int32, direction: ParameterDirection.Output);
-            parameters.Add("@TIENPHAT", dbType: DbType.Decimal, direction: ParameterDirection.Output);
+            parameters.Add("@TIENPHAT", dbType: DbType.Decimal, direction: ParameterDirection.Output, precision: 19, scale: 4);
 
             var topBooks = await db.QueryAsync("SP_THONGKETHANG", parameters, commandType: CommandType.StoredProcedure);
             

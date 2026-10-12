@@ -17,6 +17,11 @@ public class CreateCategoryEndpoint : IEndpoint
     {
         app.MapPost("api/categories", async (IDbConnection db, [FromBody] CreateCategoryReq req) =>
         {
+            new DbValidator()
+                .Required("MaTL", req.MaTL, DbRules.MaTl)
+                .Required("TenTL", req.TenTL, DbRules.TenTl)
+                .ThrowIfInvalid();
+
             var parameters = new DynamicParameters();
             parameters.Add("@MATL", req.MaTL);
             parameters.Add("@TENTL", req.TenTL);
@@ -27,10 +32,10 @@ public class CreateCategoryEndpoint : IEndpoint
 
             return result switch
             {
-                0 => Results.BadRequest(new MessageResponse("Mã thể loại đã tồn tại.")),
-                1 => Results.BadRequest(new MessageResponse("Tên thể loại đã tồn tại.")),
+                0 => ApiProblem.BadRequest("Mã thể loại đã tồn tại."),
+                1 => ApiProblem.BadRequest("Tên thể loại đã tồn tại."),
                 2 => Results.Ok(new MessageResponse("Thêm thể loại thành công")),
-                _ => Results.StatusCode(500)
+                _ => ApiProblem.Unexpected("SP_THEMTHELOAI", result)
             };
         })
         .WithName("CreateCategory")

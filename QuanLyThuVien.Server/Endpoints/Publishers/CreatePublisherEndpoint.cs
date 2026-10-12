@@ -17,6 +17,13 @@ public class CreatePublisherEndpoint : IEndpoint
     {
         app.MapPost("api/publishers", async (IDbConnection db, [FromBody] CreatePublisherRequest req) =>
         {
+            new DbValidator()
+                .Required("MaNXB", req.MaNXB, DbRules.MaNxb)
+                .Required("TenNXB", req.TenNXB, DbRules.TenNxb)
+                .MaxLength("DiaChi", req.DiaChi, DbRules.DiaChiNxb)
+                .MaxLength("SoDT", req.SoDT, DbRules.SoDt)
+                .ThrowIfInvalid();
+
             var parameters = new DynamicParameters();
             parameters.Add("@MANXB", req.MaNXB);
             parameters.Add("@TENNXB", req.TenNXB);
@@ -29,10 +36,10 @@ public class CreatePublisherEndpoint : IEndpoint
 
             return result switch
             {
-                0 => Results.BadRequest(new MessageResponse("Mã nhà xuất bản đã tồn tại.")),
-                1 => Results.BadRequest(new MessageResponse("Tên nhà xuất bản đã tồn tại.")),
+                0 => ApiProblem.BadRequest("Mã nhà xuất bản đã tồn tại."),
+                1 => ApiProblem.BadRequest("Tên nhà xuất bản đã tồn tại."),
                 2 => Results.Ok(new MessageResponse("Thêm nhà xuất bản thành công")),
-                _ => Results.StatusCode(500)
+                _ => ApiProblem.Unexpected("SP_THEMNHAXUATBAN", result)
             };
         })
         .WithName("CreatePublisher")

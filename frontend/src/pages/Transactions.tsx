@@ -96,13 +96,15 @@ export default function Transactions() {
 
   const handlePayFine = async (madg: string) => {
     if (!madg) return;
+    // SP_THANHTOANPHAT thu toàn bộ phiếu phạt chưa thanh toán của độc giả, không theo từng phiếu
+    if (!window.confirm(`Thu toàn bộ tiền phạt chưa thanh toán của độc giả ${madg}?`)) return;
     try {
       setPayingFine(true);
-      const res = await transactionsService.payFine({ MADG: madg });
-      toast.success(res.message || 'Thanh toán tiền phạt thành công');
+      // Thông báo thành công (res.message) do interceptor trong lib/api.ts hiển thị
+      await transactionsService.payFine({ MADG: madg });
       fetchFineSlips();
     } catch {
-      toast.error('Lỗi khi thanh toán tiền phạt');
+      // Lỗi (ProblemDetails) đã được interceptor trong lib/api.ts hiển thị
     } finally {
       setPayingFine(false);
     }
@@ -168,16 +170,17 @@ export default function Transactions() {
                     </TableRow>
                   ) : (
                     transactions.map((transaction, index) => {
-                      const t = transaction as typeof transaction & Record<string, unknown>;
-                      const mapm = t.MAPM || t.mapm || '-';
-                      const madg = t.MADG || t.madg || '-';
-                      const tendg = t.TENDG || t.tendg || '-';
-                      const macs = t.MACS || t.macs || '-';
-                      const ngayMuon = ((t.NGAYMUON || t.ngaymuon) as string | undefined)?.split('T')[0] || '-';
-                      const hanTra = ((t.HANTRA || t.hantra) as string | undefined)?.split('T')[0] || '-';
-                      const ngayTra = ((t.NGAYTRA || t.ngaytra) as string | undefined)?.split('T')[0] || 'Chưa trả';
-                      const tinhTrangPM = t.TINHTRANG || t.tinhtrang || '-';
-                      const tinhTrangSach = t.TINHTRANGTRA || t.tinhtrangtra || (t.NGAYTRA ? 'Bình thường' : 'Chưa trả');
+                      // Tên trường = tên cột do SP_LAYDANHSACHPHIEUMUON trả về
+                      const t = transaction;
+                      const mapm = t.MAPM || '-';
+                      const madg = t.MADG || '-';
+                      const tendg = t.TENDG || '-';
+                      const macs = t.MACS || '-';
+                      const ngayMuon = t.NGAYMUON?.split('T')[0] || '-';
+                      const hanTra = t.HANTRA?.split('T')[0] || '-';
+                      const ngayTra = t.NGAYTRA?.split('T')[0] || 'Chưa trả';
+                      const tinhTrangPM = t.TINHTRANG || '-';
+                      const tinhTrangSach = t.TINHTRANGTRA || (t.NGAYTRA ? 'Bình thường' : 'Chưa trả');
 
                       return (
                         <TableRow key={`${mapm}-${macs}-${index}`}>
@@ -274,16 +277,17 @@ export default function Transactions() {
                     </TableRow>
                   ) : (
                     fineSlips.map((fine, idx) => {
-                      const f = fine as typeof fine & Record<string, unknown>;
-                      const mapp = f.MAPP || f.maPP || f.maPT || '-';
-                      const mapm = f.MAPM || f.mapm || '-';
-                      const madg = f.MADG || f.madg || '-';
-                      const tendg = f.TENDG || f.tendg || '-';
-                      const macs = f.MACS || f.macs || '-';
-                      const ngayLap = ((f.NGAYLAP || f.ngayThu || f.ngaylap) as string | undefined)?.split('T')[0] || '-';
-                      const lydo = f.LYDO || f.lydo || 'Vi phạm quy định';
-                      const sotien = Number(f.SOTIEN ?? f.soTienThu ?? f.sotien ?? 0);
-                      const isPaid = Boolean(f.DATHANHTOAN ?? f.dathanhtoan);
+                      // Tên trường = tên cột do SP_LAYDANHSACHPHIEUPHAT trả về
+                      const f = fine;
+                      const mapp = f.MAPP || '-';
+                      const mapm = f.MAPM || '-';
+                      const madg = f.MADG || '-';
+                      const tendg = f.TENDG || '-';
+                      const macs = f.MACS || '-';
+                      const ngayLap = f.NGAYLAP?.split('T')[0] || '-';
+                      const lydo = f.LYDO || '-';
+                      const sotien = Number(f.SOTIEN ?? 0);
+                      const isPaid = Boolean(f.DATHANHTOAN);
 
                       return (
                         <TableRow key={`${mapp}-${idx}`}>
@@ -318,7 +322,7 @@ export default function Transactions() {
                                 className="text-xs"
                               >
                                 <CreditCard className="w-3.5 h-3.5 mr-1" />
-                                Thu tiền
+                                Thu tiền độc giả
                               </Button>
                             ) : (
                               <span className="text-xs text-muted-foreground">-</span>

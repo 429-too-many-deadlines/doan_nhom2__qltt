@@ -1,5 +1,5 @@
 /* =====================================================================
-   File   : 03_Function.sql
+   File   : 3_Function.sql
    Noi dung: 3 FUNCTION (2 ham tra ve gia tri vo huong, 1 ham tra ve bang)
    ===================================================================== */
 

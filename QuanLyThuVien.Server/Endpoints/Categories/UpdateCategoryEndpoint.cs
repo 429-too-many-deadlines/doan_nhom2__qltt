@@ -17,6 +17,11 @@ public class UpdateCategoryEndpoint : IEndpoint
     {
         app.MapPut("api/categories/{id}", async (IDbConnection db, string id, [FromBody] UpdateCategoryRequest req) =>
         {
+            new DbValidator()
+                .Required("MaTL", id, DbRules.MaTl)
+                .Required("TenTL", req.TenTL, DbRules.TenTl)
+                .ThrowIfInvalid();
+
             var parameters = new DynamicParameters();
             parameters.Add("@MATL", id);
             parameters.Add("@TENTL", req.TenTL);
@@ -27,10 +32,10 @@ public class UpdateCategoryEndpoint : IEndpoint
 
             return result switch
             {
-                0 => Results.NotFound(new MessageResponse("Không tìm thấy thể loại")),
-                1 => Results.BadRequest(new MessageResponse("Tên thể loại đã tồn tại.")),
+                0 => ApiProblem.NotFound("Không tìm thấy thể loại"),
+                1 => ApiProblem.BadRequest("Tên thể loại đã tồn tại."),
                 2 => Results.Ok(new MessageResponse("Cập nhật thể loại thành công")),
-                _ => Results.StatusCode(500)
+                _ => ApiProblem.Unexpected("SP_SUATHELOAI", result)
             };
         })
         .WithName("UpdateCategory")

@@ -10,6 +10,7 @@ import { booksService } from '@/services/books.service';
 import { authorsService } from '@/services/authors.service';
 import { Plus, Trash2, ArrowLeft, Save, Edit2, X } from 'lucide-react';
 import type { BookCopy, BookAuthor } from '@/types/api.types';
+import { DB_LIMITS } from '@/lib/db-limits';
 
 export default function BookDetails() {
   const { id } = useParams<{ id: string }>();
@@ -39,12 +40,13 @@ export default function BookDetails() {
     setLoadingCopies(true);
     try {
       const data = await booksService.getBookCopies(id!);
-      const normalized = (data || []).map((c: Record<string, unknown>) => ({
-        MACS: (c.MACS || c.MaCS || c.macs || '') as string,
-        MADS: (c.MADS || c.MaDS || c.mads || id!) as string,
-        NGAYNHAP: (c.NGAYNHAP || c.NgayNhap || c.ngayNhap || '') as string,
-        VITRI: (c.VITRI ?? c.ViTri ?? c.viTri ?? '') as string,
-        TINHTRANG: (c.TINHTRANG || c.TinhTrang || c.tinhTrang || 'Có sẵn') as string,
+      // Tên trường = tên cột do SP_LAYCUONSACHTHEODAUSACH trả về; VITRI cho phép NULL
+      const normalized = (data || []).map((c) => ({
+        MACS: c.MACS,
+        MADS: c.MADS,
+        NGAYNHAP: c.NGAYNHAP ?? '',
+        VITRI: c.VITRI ?? '',
+        TINHTRANG: c.TINHTRANG ?? 'Có sẵn',
       }));
       setCopies(normalized);
     } catch {
@@ -58,9 +60,10 @@ export default function BookDetails() {
     setLoadingAuthors(true);
     try {
       const data = await booksService.getBookAuthors(id!);
-      const normalized = (data || []).map((a: Record<string, unknown>) => ({
-        MATG: (a.MATG || a.MaTG || a.matg || '') as string,
-        VAITRO: (a.VAITRO || a.VaiTro || a.vaitro || 'Tác giả') as string,
+      // Tên trường = tên cột do SP_LAYTACGIATHEODAUSACH trả về
+      const normalized = (data || []).map((a) => ({
+        MATG: a.MATG,
+        VAITRO: a.VAITRO,
       }));
       setBookAuthors(normalized);
     } catch {
@@ -236,11 +239,11 @@ export default function BookDetails() {
             <form onSubmit={handleAddCopy} className="flex gap-2 items-end">
               <div className="space-y-2 flex-1">
                 <label className="text-xs">Mã Cuốn Sách</label>
-                <Input value={newCopy.MACS} onChange={(e) => setNewCopy({...newCopy, MACS: e.target.value})} required placeholder="CS001" />
+                <Input value={newCopy.MACS} maxLength={DB_LIMITS.MACS} onChange={(e) => setNewCopy({...newCopy, MACS: e.target.value})} required placeholder="CS001" />
               </div>
               <div className="space-y-2 flex-1">
                 <label className="text-xs">Vị trí</label>
-                <Input value={newCopy.VITRI} onChange={(e) => setNewCopy({...newCopy, VITRI: e.target.value})} placeholder="Kệ A1" />
+                <Input value={newCopy.VITRI} maxLength={DB_LIMITS.VITRI} onChange={(e) => setNewCopy({...newCopy, VITRI: e.target.value})} placeholder="Kệ A1" />
               </div>
               <Button type="submit"><Plus className="w-4 h-4 mr-2"/>Thêm</Button>
             </form>
@@ -263,10 +266,10 @@ export default function BookDetails() {
                     <TableRow><TableCell colSpan={5} className="text-center h-24">Chưa có bản sao nào</TableCell></TableRow>
                   ) : (
                     copies.map((item) => {
-                      const macs = item.MACS || item.MaCS || '';
-                      const ngayNhap = (item.NGAYNHAP || item.NgayNhap)?.split('T')[0] || '-';
-                      const viTri = item.VITRI ?? item.ViTri ?? '-';
-                      const tinhTrang = item.TINHTRANG || item.TinhTrang || 'Có sẵn';
+                      const macs = item.MACS;
+                      const ngayNhap = item.NGAYNHAP?.split('T')[0] || '-';
+                      const viTri = item.VITRI || '-';
+                      const tinhTrang = item.TINHTRANG || 'Có sẵn';
 
                       return (
                         <TableRow key={macs}>
@@ -278,7 +281,7 @@ export default function BookDetails() {
                               <TableCell>
                                 <Input 
                                   className="h-8 w-24"
-                                  value={editCopyData.VITRI} 
+                                  value={editCopyData.VITRI} maxLength={DB_LIMITS.VITRI} 
                                   onChange={(e) => setEditCopyData({...editCopyData, VITRI: e.target.value})} 
                                 />
                               </TableCell>

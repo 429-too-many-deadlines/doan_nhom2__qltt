@@ -18,28 +18,29 @@ public class UpdateBookAuthorsEndpoint : IEndpoint
     {
         app.MapPut("api/books/{id}/authors", async (IDbConnection db, string id, [FromBody] UpdateBookAuthorsRequest req) =>
         {
+            var validator = new DbValidator().Required("MaDS", id, DbRules.MaDs);
+            foreach (var author in req.Authors)
+            {
+                validator.Required("MaTG", author.MaTG, DbRules.MaTg)
+                         .MaxLength("VaiTro", author.VaiTro, DbRules.VaiTro);
+            }
+            validator.ThrowIfInvalid();
+
             if (db.State != ConnectionState.Open) db.Open();
+            // Lỗi giữa chừng: transaction tự rollback khi dispose, GlobalExceptionHandler dịch lỗi CSDL thành 400
             using var transaction = db.BeginTransaction();
-            try
+            await db.ExecuteAsync("SP_XOATACGIADAUSACH", new { MADS = id }, transaction, commandType: CommandType.StoredProcedure);
+            foreach (var author in req.Authors)
             {
-                await db.ExecuteAsync("SP_XOATACGIADAUSACH", new { MADS = id }, transaction, commandType: CommandType.StoredProcedure);
-                foreach (var author in req.Authors)
-                {
-                    await db.ExecuteAsync(
-                        "SP_THEMTACGIADAUSACH",
-                        new { MADS = id, MATG = author.MaTG, VAITRO = author.VaiTro ?? "Tác giả" },
-                        transaction,
-                        commandType: CommandType.StoredProcedure
-                    );
-                }
-                transaction.Commit();
-                return Results.Ok(new MessageResponse("Cập nhật tác giả thành công"));
+                await db.ExecuteAsync(
+                    "SP_THEMTACGIADAUSACH",
+                    new { MADS = id, MATG = author.MaTG, VAITRO = author.VaiTro ?? "Tác giả" },
+                    transaction,
+                    commandType: CommandType.StoredProcedure
+                );
             }
-            catch (Exception ex)
-            {
-                transaction.Rollback();
-                return Results.BadRequest(new MessageResponse(ex.Message));
-            }
+            transaction.Commit();
+            return Results.Ok(new MessageResponse("Cập nhật tác giả thành công"));
         })
         .WithName("UpdateBookAuthors")
         .RequireAuthorization()

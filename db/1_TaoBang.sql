@@ -1,7 +1,7 @@
 /* =====================================================================
    DO AN MON HOC IE103 - QUAN LY THONG TIN
    De tai : QUAN LY THU VIEN
-   File   : 01_TaoBang.sql
+   File   : 1_TaoBang.sql
    Noi dung: Tao CSDL, tao bang, khoa chinh, khoa ngoai, rang buoc
    ===================================================================== */
 
@@ -113,7 +113,7 @@ CREATE TABLE DOCGIA
 	DIACHI		NVARCHAR(100)	NULL,
 	SODT		VARCHAR(15)		NOT NULL,
 	EMAIL		VARCHAR(50)		NULL,
-	
+
 	NGAYLAPTHE	DATE			NOT NULL DEFAULT GETDATE(),
 	NGAYHETHAN	DATE			NOT NULL,
 	TONGNO		MONEY			NOT NULL DEFAULT 0,

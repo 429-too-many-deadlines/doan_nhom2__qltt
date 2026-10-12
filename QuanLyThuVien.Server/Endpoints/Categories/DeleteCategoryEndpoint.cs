@@ -14,6 +14,10 @@ public class DeleteCategoryEndpoint : IEndpoint
     {
         app.MapDelete("api/categories/{id}", async (IDbConnection db, string id) =>
         {
+            new DbValidator()
+                .Required("MaTL", id, DbRules.MaTl)
+                .ThrowIfInvalid();
+
             var parameters = new DynamicParameters();
             parameters.Add("@MATL", id);
             parameters.Add("@ReturnValue", dbType: DbType.Int32, direction: ParameterDirection.ReturnValue);
@@ -23,10 +27,10 @@ public class DeleteCategoryEndpoint : IEndpoint
 
             return result switch
             {
-                0 => Results.NotFound(new MessageResponse("Không tìm thấy thể loại")),
-                1 => Results.BadRequest(new MessageResponse("Không thể xoá thể loại đang có sách")),
+                0 => ApiProblem.NotFound("Không tìm thấy thể loại"),
+                1 => ApiProblem.BadRequest("Không thể xoá thể loại đang có sách"),
                 2 => Results.Ok(new MessageResponse("Xoá thể loại thành công")),
-                _ => Results.StatusCode(500)
+                _ => ApiProblem.Unexpected("SP_XOATHELOAI", result)
             };
         })
         .WithName("DeleteCategory")

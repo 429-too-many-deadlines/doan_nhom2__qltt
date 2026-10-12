@@ -16,7 +16,16 @@ public class UpdateReaderEndpoint : IEndpoint
         app.MapPut("api/readers/{maDg}", async (IDbConnection db, string maDg, [FromBody] UpdateReaderRequest req) =>
         {
             if (maDg != req.MaDg)
-                return Results.BadRequest(new MessageResponse("Mã độc giả không khớp."));
+                return ApiProblem.BadRequest("Mã độc giả không khớp.");
+
+            new DbValidator()
+                .Required("MaDG", req.MaDg, DbRules.MaDg)
+                .Required("HoTen", req.HoTen, DbRules.HoTenDg)
+                .Required("GioiTinh", req.GioiTinh, DbRules.GioiTinh)
+                .MaxLength("DiaChi", req.DiaChi, DbRules.DiaChiDg)
+                .Required("SoDT", req.SoDt, DbRules.SoDt)
+                .MaxLength("Email", req.Email, DbRules.Email)
+                .ThrowIfInvalid();
 
             var parameters = new DynamicParameters();
             parameters.Add("@MADG", req.MaDg);
@@ -33,10 +42,9 @@ public class UpdateReaderEndpoint : IEndpoint
 
             return result switch
             {
-                0 => Results.NotFound(new MessageResponse("Mã độc giả không tồn tại.")),
-                1 => Results.BadRequest(new MessageResponse("Loại độc giả không tồn tại.")),
+                0 => ApiProblem.NotFound("Mã độc giả không tồn tại."),
                 2 => Results.Ok(new MessageResponse("Cập nhật độc giả thành công.")),
-                _ => Results.StatusCode(500)
+                _ => ApiProblem.Unexpected("SP_SUADOCGIA", result)
             };
         })
         .WithName("UpdateReader")
