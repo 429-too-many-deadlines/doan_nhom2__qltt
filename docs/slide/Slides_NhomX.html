@@ -685,6 +685,187 @@ END</pre>
   </div>
 </section>
 
+<!-- ===== Slide 13: 4.1.3–4.1.4 Function, Cursor ===== -->
+<section class="slide">
+  <header><span class="chip">Chương 4 · Xử lý thông tin</span><h2>Function và Cursor</h2></header>
+  <div class="body stack" style="gap:16px">
+    <div class="grid g3" style="gap:16px">
+      <div class="card obj">
+        <div class="obj-h"><span class="tag">Hàm vô hướng</span><span class="name">FN_SOSACHDANGMUON</span></div>
+        <p>Số cuốn độc giả đang giữ; −1 nếu không có độc giả.</p>
+        <pre class="sql sm">SELECT dbo.FN_SOSACHDANGMUON('DG007')</pre>
+        <div class="res">DG007 → 3 · DG003 → 0 · XX000 → −1</div>
+      </div>
+      <div class="card obj">
+        <div class="obj-h"><span class="tag">Hàm vô hướng</span><span class="name">FN_TIENPHATTRE</span></div>
+        <p>5.000đ × số ngày trễ; dùng lại ở trigger và cursor.</p>
+        <pre class="sql sm">IF @SONGAYTRE &lt;= 0 RETURN 0
+RETURN @SONGAYTRE * 5000</pre>
+        <div class="res">Hạn 15/09, trả 26/09 → 55.000đ · đúng hạn → 0</div>
+      </div>
+      <div class="card obj">
+        <div class="obj-h"><span class="tag sky">Hàm trả về bảng</span><span class="name">FN_LICHSUMUON</span></div>
+        <p>Lịch sử mượn, số ngày trễ, trạng thái từng cuốn.</p>
+        <pre class="sql sm">SELECT * FROM dbo.FN_LICHSUMUON('DG007')</pre>
+        <div class="res">5 dòng: 2 “Đã trả (Bình thường)”, 3 “Đang mượn”</div>
+      </div>
+    </div>
+    <div class="grid g2" style="gap:16px">
+      <div class="card obj">
+        <div class="obj-h"><span class="tag amber">Cursor</span><span class="name">SP_CURSOR_XEPLOAIDOCGIA</span><span class="tag green">119 độc giả</span></div>
+        <p>Duyệt từng độc giả, đếm lượt mượn, trễ, hư/mất, tiền phạt → DOCGIA_XEPLOAI.</p>
+        <pre class="sql sm">SET @XEPLOAI = CASE
+  WHEN @SOLUOT = 0                    THEN N'Chưa mượn'
+  WHEN @SOMAT &gt; 0 OR @TONGNO &gt; 100000 THEN N'Hạn chế'
+  WHEN @SOTRE &gt;= 2 OR @SOHUMAT &gt; 0    THEN N'Cảnh báo'
+  WHEN @SOTRE = 1                     THEN N'Bình thường'
+  ELSE N'Uy tín' END</pre>
+        <div style="display:flex;height:14px;border-radius:7px;overflow:hidden;margin-top:10px">
+          <div style="width:84.9%;background:#CBD5E1"></div><div style="width:5.0%;background:#F59E0B"></div>
+          <div style="width:4.2%;background:#0EA5E9"></div><div style="width:4.2%;background:#10B981"></div><div style="width:1.7%;background:#EF4444"></div>
+        </div>
+        <div class="legend"><span><i class="dot" style="background:#CBD5E1"></i>Chưa mượn 101</span><span><i class="dot" style="background:#F59E0B"></i>Cảnh báo 6</span>
+          <span><i class="dot" style="background:#0EA5E9"></i>Bình thường 5</span><span><i class="dot" style="background:#10B981"></i>Uy tín 5</span><span><i class="dot" style="background:#EF4444"></i>Hạn chế 2</span></div>
+      </div>
+      <div class="card obj">
+        <div class="obj-h"><span class="tag amber">Cursor</span><span class="name">SP_CURSOR_NHACNHOQUAHAN</span></div>
+        <p>Duyệt từng cuốn quá hạn, tính phạt tạm, soạn tin nhắc vào NHACNHO_QUAHAN.</p>
+        <pre class="sql sm">WHILE @@FETCH_STATUS = 0 BEGIN
+  IF NOT EXISTS (SELECT * FROM NHACNHO_QUAHAN WHERE MAPM = @MAPM
+    AND MACS = @MACS AND NGAYLAP = @NGAYKIEMTRA) BEGIN
+    SET @TIENPHAT = dbo.FN_TIENPHATTRE(@HANTRA, @NGAYKIEMTRA)
+    INSERT INTO NHACNHO_QUAHAN (...) VALUES (...)  -- kem @NOIDUNG
+  END
+  FETCH NEXT FROM CUR_QUAHAN INTO @MAPM, @MACS, ...
+END</pre>
+        <div class="res">11/10/2026: 4 nhắc nhở; DG004 quá hạn 17 ngày, tạm tính 85.000đ. Chạy lại cùng ngày: 0 nhắc nhở mới.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Slide 14: 4.2 An toàn thông tin ===== -->
+<section class="slide">
+  <header><span class="chip">Chương 4 · An toàn thông tin</span><h2>Xác thực, phân quyền, import/export, sao lưu</h2></header>
+  <div class="body grid g2" style="gap:10px 16px;grid-template-rows:1fr 1fr">
+    <div class="card">
+      <h3><span class="ico"><svg><use href="#i-key"/></svg></span>Xác thực hai lớp</h3>
+      <ul class="list" style="font-size:13.5px">
+        <li>Login <span class="mono">LG_QUANLY, LG_THUTHU, LG_DOCGIA</span> (<span class="mono">CHECK_POLICY = ON</span>) → user <span class="mono">U_...</span></li>
+        <li>Website: TAIKHOAN lưu băm; <span class="mono">SP_DANGNHAP</span> trả @KETQUA 0 sai / 1 bị khóa / 2 thành công.</li>
+      </ul>
+      <pre class="sql sm">MATKHAU = HASHBYTES('SHA2_256', @MATKHAU)  -- VARBINARY(32)</pre>
+      <div class="res">admin / 123456 → @KETQUA = 2 · sai mật khẩu → 0</div>
+    </div>
+    <div class="card" style="padding:12px 20px">
+      <h3 style="margin-bottom:6px"><span class="ico green"><svg><use href="#i-shield"/></svg></span>Phân quyền theo role</h3>
+      <table class="t sm xs" style="font-size:12.5px">
+        <thead><tr><th style="width:86px">Role</th><th>GRANT</th><th style="width:150px">DENY</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">R_QUANLY</td><td>db_datareader, db_datawriter, db_backupoperator, EXECUTE</td><td>–</td></tr>
+          <tr><td class="mono">R_THUTHU</td><td>SELECT; INSERT, UPDATE 6 bảng; SP nghiệp vụ</td><td>DELETE; xem TAIKHOAN</td></tr>
+          <tr><td class="mono">R_DOCGIA</td><td>SELECT danh mục sách; SP_TIMSACH</td><td>DOCGIA, TAIKHOAN, lệnh ghi</td></tr>
+        </tbody>
+      </table>
+      <div class="res red">EXECUTE AS U_THUTHU: DELETE FROM PHIEUPHAT → permission denied</div>
+    </div>
+    <div class="card">
+      <h3><span class="ico sky"><svg><use href="#i-upload"/></svg></span>Import và Export</h3>
+      <pre class="sql sm">BULK INSERT #DOCGIA_IMPORT FROM '.../DOCGIA_IMPORT.csv'
+  WITH (FORMAT = 'CSV', DATAFILETYPE = 'widechar', FIRSTROW = 2)</pre>
+      <div class="muted small" style="margin:6px 0 8px">Chỉ INSERT mã chưa tồn tại vào DOCGIA, nên CHECK vẫn được kiểm tra.</div>
+      <pre class="code sm">bcp "SELECT MADS, TENDS, SOLUONG, SLCON FROM ...DAUSACH"
+    queryout DAUSACH.csv -c -C 65001 -t,</pre>
+      <div class="muted small" style="margin-top:6px">Hoặc SSMS: Tasks › Export Data → Excel.</div>
+    </div>
+    <div class="card">
+      <h3><span class="ico amber"><svg><use href="#i-save"/></svg></span>Backup và Restore</h3>
+      <ul class="list" style="font-size:13.5px">
+        <li>Recovery model FULL; <span class="mono">SP_SAOLUU @DUONGDAN, @LOAI</span> sao lưu FULL hoặc DIFF, chỉ R_QUANLY được gọi.</li>
+      </ul>
+      <pre class="sql sm">RESTORE DATABASE QUANLYTHUVIEN FROM DISK = N'..._FULL.bak'
+  WITH NORECOVERY, REPLACE
+RESTORE DATABASE QUANLYTHUVIEN FROM DISK = N'..._DIFF.bak'
+  WITH RECOVERY</pre>
+      <div class="res">Bản FULL: 818 trang, tệp .bak khoảng 6,46 MB</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Slide 15: 4.3 Report ===== -->
+<section class="slide">
+  <header><span class="chip">Chương 4 · Trình bày thông tin</span><h2>5 report trên trang Báo cáo</h2>
+    <div class="note">React + Recharts ← API ASP.NET Core (Dapper) ← 5 view <span class="mono">VW_BC_*</span><br>Truy vấn lại mỗi lần mở trang, không lưu sẵn số liệu</div></header>
+  <div class="body stack" style="gap:16px">
+    <div class="grid g3" style="gap:16px">
+      <div class="card obj">
+        <div class="obj-h"><span class="tag">Report 1</span><b>Tình trạng kho sách</b></div>
+        <div class="mono small muted" style="margin:2px 0 6px">VW_BC_TINHTRANGKHO</div>
+        <div style="display:flex;gap:14px;align-items:center">
+          <svg viewBox="0 0 120 120" width="104" height="104" aria-label="Donut tình trạng kho">
+            <g transform="rotate(-90 60 60)" fill="none" stroke-width="18">
+              <circle cx="60" cy="60" r="44" stroke="#10B981" stroke-dasharray="138.23 276.46"/>
+              <circle cx="60" cy="60" r="44" stroke="#2563EB" stroke-dasharray="106.33 276.46" stroke-dashoffset="-138.23"/>
+              <circle cx="60" cy="60" r="44" stroke="#F59E0B" stroke-dasharray="21.27 276.46" stroke-dashoffset="-244.56"/>
+              <circle cx="60" cy="60" r="44" stroke="#EF4444" stroke-dasharray="10.63 276.46" stroke-dashoffset="-265.83"/>
+            </g>
+            <text x="60" y="60" text-anchor="middle" font-size="22" font-weight="800" fill="#0F172A">26</text>
+            <text x="60" y="78" text-anchor="middle" font-size="11" fill="#475569">cuốn</text>
+          </svg>
+          <div class="legend" style="flex-direction:column;gap:3px;margin:0">
+            <span><i class="dot" style="background:#10B981"></i>Có sẵn 13</span><span><i class="dot" style="background:#2563EB"></i>Đang mượn 10</span>
+            <span><i class="dot" style="background:#F59E0B"></i>Hư hỏng 2</span><span><i class="dot" style="background:#EF4444"></i>Mất 1</span>
+          </div>
+        </div>
+        <div class="muted small" style="margin-top:8px;line-height:1.4">“Clean Code” đang được mượn hết 2 cuốn, cần nhập thêm.</div>
+      </div>
+      <div class="card obj">
+        <div class="obj-h"><span class="tag">Report 2</span><b>Sách được mượn nhiều</b></div>
+        <div class="mono small muted" style="margin:2px 0 2px">VW_BC_SACHMUONNHIEU</div>
+        <div class="hbar"><span>Mắt biếc</span><div class="track"><div class="fill" style="width:100%"></div></div><b>5</b></div>
+        <div class="hbar"><span>Harry Potter và Hòn đá Phù thủy</span><div class="track"><div class="fill" style="width:80%"></div></div><b>4</b></div>
+        <div class="hbar"><span>Đắc nhân tâm</span><div class="track"><div class="fill" style="width:80%"></div></div><b>4</b></div>
+        <div class="hbar"><span>Database System Concepts</span><div class="track"><div class="fill" style="width:80%"></div></div><b>4</b></div>
+        <div class="muted small" style="margin-top:8px;line-height:1.4">“Mắt biếc” dẫn đầu với 5 lượt từ 5 độc giả.</div>
+      </div>
+      <div class="card obj">
+        <div class="obj-h"><span class="tag">Report 3</span><b>Lượt mượn theo tháng</b></div>
+        <div class="mono small muted" style="margin:2px 0 4px">VW_BC_LUOTMUON_THANG</div>
+        <svg viewBox="0 0 300 120" width="100%" height="112" aria-label="Lượt mượn tháng 4 đến 9">
+          <g stroke="#E2E8F0"><path d="M20 100H290M20 72H290M20 44H290"/></g>
+          <polygon points="30,100 30,79 78,79 126,51 174,51 222,51 270,23 270,100" fill="#2563EB" opacity=".10"/>
+          <polyline points="30,79 78,79 126,51 174,51 222,51 270,23" fill="none" stroke="#2563EB" stroke-width="3" stroke-linejoin="round"/>
+          <g fill="#fff" stroke="#2563EB" stroke-width="2.5"><circle cx="30" cy="79" r="4"/><circle cx="78" cy="79" r="4"/><circle cx="126" cy="51" r="4"/><circle cx="174" cy="51" r="4"/><circle cx="222" cy="51" r="4"/><circle cx="270" cy="23" r="4"/></g>
+          <g font-size="11" fill="#0F172A" font-weight="700" text-anchor="middle"><text x="30" y="70">3</text><text x="78" y="70">3</text><text x="126" y="42">7</text><text x="174" y="42">7</text><text x="222" y="42">7</text><text x="270" y="14">11</text></g>
+          <g font-size="10.5" fill="#475569" text-anchor="middle"><text x="30" y="115">T4</text><text x="78" y="115">T5</text><text x="126" y="115">T6</text><text x="174" y="115">T7</text><text x="222" y="115">T8</text><text x="270" y="115">T9</text></g>
+        </svg>
+        <div class="muted small" style="margin-top:4px;line-height:1.4">Tháng 9 đạt 11 lượt (đầu năm học); Văn học Việt Nam nhiều nhất.</div>
+      </div>
+    </div>
+    <div class="grid g2" style="gap:16px">
+      <div class="card obj">
+        <div class="obj-h"><span class="tag amber">Report 4</span><b>Tiền phạt theo tháng và lý do</b><span class="mono small muted">VW_BC_TIENPHAT_THANG</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:8px"><span class="small muted">10 phiếu phạt</span><b style="font-size:22px;color:#D97706">498.000đ</b></div>
+        <div style="display:flex;height:14px;border-radius:7px;overflow:hidden;margin-top:6px"><div style="width:46.8%;background:#10B981"></div><div style="width:53.2%;background:#F59E0B"></div></div>
+        <div class="legend"><span><i class="dot" style="background:#10B981"></i>Đã thu 233.000đ</span><span><i class="dot" style="background:#F59E0B"></i>Chưa thu 265.000đ</span></div>
+        <div style="display:flex;height:14px;border-radius:7px;overflow:hidden;margin-top:8px"><div style="width:50.2%;background:#EF4444"></div><div style="width:49.8%;background:#CBD5E1"></div></div>
+        <div class="legend"><span><i class="dot" style="background:#EF4444"></i>Mất sách 250.000đ (~50%)</span><span><i class="dot" style="background:#CBD5E1"></i>Trả trễ, hư hỏng</span></div>
+      </div>
+      <div class="card obj">
+        <div class="obj-h"><span class="tag red">Report 5</span><b>Độc giả giữ sách quá hạn</b><span class="mono small muted">VW_BC_DOCGIA_QUAHAN</span></div>
+        <table class="t sm" style="margin-top:8px">
+          <thead><tr><th>Độc giả</th><th>Số ngày trễ</th><th>Tạm tính</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">DG001</td><td>26 ngày</td><td>130.000đ</td></tr>
+            <tr><td class="mono">DG004</td><td>17 ngày</td><td>85.000đ</td></tr>
+          </tbody>
+        </table>
+        <div class="muted small" style="margin-top:6px;line-height:1.4">6 cuốn quá hạn thuộc 5 độc giả; danh sách là đầu vào cho cursor nhắc nhở.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- /slides -->
 </main>
 
@@ -749,17 +930,23 @@ END</pre>
   show(fromHash());
 
   // ?check: đo tràn chữ trên mọi slide, ghi kết quả vào body[data-overflow]
+  function desc(el) { var c = el.getAttribute('class'); return el.tagName.toLowerCase() + (c ? '.' + c.split(' ').join('.') : ''); }
+  var detail = [];
   function measure() {
     var bad = [];
     slides.forEach(function (s, i) {
       var sr = s.getBoundingClientRect(), hero = s.classList.contains('hero');
       var maxR = sr.right - (hero ? 40 : 48), maxB = sr.bottom - (hero ? 40 : 56), over = false;
       s.querySelectorAll('.body, .card, pre, .stat, .ph, td, th').forEach(function (el) {
-        if (el.scrollHeight > el.clientHeight + 2 || el.scrollWidth > el.clientWidth + 2) over = true;
+        if (!over && (el.scrollHeight > el.clientHeight + 2 || el.scrollWidth > el.clientWidth + 2)) {
+          over = true; detail.push((i + 1) + ':' + desc(el) + ' cuộn ' + (el.scrollHeight - el.clientHeight) + 'x' + (el.scrollWidth - el.clientWidth));
+        }
       });
       s.querySelectorAll('.body *').forEach(function (el) {
         var r = el.getBoundingClientRect();
-        if (r.width && (r.right > maxR || r.bottom > maxB)) over = true;
+        if (!over && r.width && (r.right > maxR || r.bottom > maxB)) {
+          over = true; detail.push((i + 1) + ':' + desc(el) + ' vượt ' + Math.round(Math.max(r.right - maxR, r.bottom - maxB)) + 'px');
+        }
       });
       if (over) bad.push(i + 1);
     });
@@ -772,6 +959,7 @@ END</pre>
     document.fonts.ready.then(function () {
       var bad = measure();
       document.body.setAttribute('data-overflow', bad.length ? bad.join(',') : 'none');
+      document.body.setAttribute('data-overflow-detail', detail.join(' | '));
     });
   }
 })();

@@ -20,6 +20,7 @@ case "${1:-}" in
     out="$(edge --window-size=1280,720 --dump-dom "$(url)?check")"
     res="$(grep -o 'data-overflow="[^"]*"' <<<"$out" | head -1 || true)"
     echo "${res:-data-overflow chua duoc ghi}"
+    grep -o 'data-overflow-detail="[^"]*"' <<<"$out" | head -1 || true
     [[ "$res" == 'data-overflow="none"' ]]
     ;;
   shots)
