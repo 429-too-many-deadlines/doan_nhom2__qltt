@@ -150,6 +150,14 @@ pre .o { color: var(--primary); font-weight: 600; } pre .v { color: #0369A1; } p
 .cover-head { display: flex; align-items: center; gap: 22px; padding-bottom: 18px; border-bottom: 2px solid var(--primary-100); }
 .cover-head img { display: block; height: 90px; width: auto; }
 .cover-label { margin-top: 30px; font-size: 15px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.demo-step { flex: 1; display: grid; grid-template-columns: 64px 1fr 520px; gap: 18px; align-items: center; padding: 12px 22px; }
+.demo-step b { font-size: 19px; }
+.demo-step .mono { font-size: 14px; }
+.demo-step .res { font-size: 15px; padding: 10px 14px; }
+.demo-n { font-size: 36px; font-weight: 800; }
+.sum-stats .stat { padding: 18px 18px; }
+.sum-stats .v { font-size: 38px; }
+.sum-stats .l { font-size: 15px; }
 .lead { margin: 0; font-size: 18px; color: var(--muted); }
 
 @page { size: 1280px 720px; margin: 0; }
@@ -236,8 +244,8 @@ pre .o { color: var(--primary); font-weight: 600; } pre .v { color: #0369A1; } p
         <ul class="list" style="font-size:14px"><li>Bảng, khóa chính, khóa ngoại, ràng buộc</li><li>Dữ liệu mẫu</li></ul></div>
       <div class="card"><div class="gradient-text" style="font-size:40px;font-weight:800">04</div><h3>Quản lý thông tin</h3>
         <ul class="list" style="font-size:14px"><li>Xử lý thông tin: SP, trigger, function, cursor</li><li>An toàn thông tin</li><li>Trình bày thông tin (report)</li></ul></div>
-      <div class="card"><div class="gradient-text" style="font-size:40px;font-weight:800">05</div><h3>Kết luận</h3>
-        <ul class="list" style="font-size:14px"><li>Kết quả đạt được</li><li>Hạn chế, hướng phát triển</li><li>Tài liệu tham khảo</li></ul></div>
+      <div class="card"><div class="gradient-text" style="font-size:40px;font-weight:800">05</div><h3>Tổng kết và demo SQL</h3>
+        <ul class="list" style="font-size:14px"><li>Tổng kết số liệu</li><li>Kịch bản demo SQL</li></ul></div>
     </div>
   </div>
 </section>
@@ -822,55 +830,77 @@ RESTORE DATABASE QUANLYTHUVIEN FROM DISK = N'..._DIFF.bak'
   </div>
 </section>
 
-<!-- ===== Slide 15: 5.2–5.4 ===== -->
+<!-- ===== Slide 15: Tổng kết ===== -->
 <section class="slide">
-  <header><span class="chip">Chương 5 · Kết luận</span><h2>Kết quả, hạn chế và hướng phát triển</h2></header>
-  <div class="body grid g3">
-    <div class="card">
-      <h3><span class="ico green"><svg><use href="#i-check"/></svg></span>Kết quả đạt được</h3>
-      <ul class="list check" style="font-size:16px">
-        <li>CSDL 11 bảng, 17 ràng buộc toàn vẹn (18 CHECK, 2 UNIQUE, 5 trigger), dữ liệu mẫu bao quát tình huống.</li>
-        <li>5 SP nghiệp vụ, 5 trigger, 3 function, 2 cursor, kiểm chứng bằng kết quả chạy thật.</li>
-        <li>Xác thực hai lớp, 3 role với GRANT/DENY/REVOKE, import/export, sao lưu FULL/DIFF.</li>
-        <li>5 report lấy dữ liệu trực tiếp từ CSDL qua view.</li>
-      </ul>
+  <header><span class="chip">Chương 5 · Tổng kết và demo SQL</span><h2>Tổng kết</h2></header>
+  <div class="body stack" style="gap:26px;justify-content:center">
+    <div class="grid g6 sum-stats" style="gap:14px">
+      <div class="stat"><div class="v">11</div><div class="l">bảng dữ liệu</div></div>
+      <div class="stat"><div class="v">17</div><div class="l">ràng buộc toàn vẹn</div></div>
+      <div class="stat"><div class="v">38</div><div class="l">stored procedure</div></div>
+      <div class="stat"><div class="v">5</div><div class="l">trigger</div></div>
+      <div class="stat"><div class="v">3 + 2</div><div class="l">function + cursor</div></div>
+      <div class="stat"><div class="v">5</div><div class="l">report từ view</div></div>
     </div>
-    <div class="card">
-      <h3><span class="ico amber"><svg><use href="#i-alert"/></svg></span>Hạn chế</h3>
-      <ul class="list" style="font-size:16px">
-        <li>Website chỉ có tài khoản quản trị; 3 vai trò mới phân quyền ở mức SQL Server.</li>
-        <li>Mã phiếu phạt sinh bằng MAX + 1, có thể trùng khi nhiều người trả cùng lúc.</li>
-        <li>Script nạp dữ liệu lớn tạm tắt trigger; nếu dừng giữa chừng thì trigger không được bật lại.</li>
-        <li>Chưa gửi nhắc nhở thật; chưa đánh giá cursor trên dữ liệu lớn.</li>
-      </ul>
-    </div>
-    <div class="card">
-      <h3><span class="ico"><svg><use href="#i-trend"/></svg></span>Hướng phát triển</h3>
-      <ul class="list" style="font-size:16px">
-        <li>Đăng nhập theo vai trò, cổng tra cứu cho độc giả.</li>
-        <li>Gia hạn, đặt trước sách, quét mã vạch khi mượn – trả.</li>
-        <li>Nhắc nhở qua email/SMS; sao lưu tự động bằng SQL Server Agent.</li>
-        <li>Dùng SEQUENCE hoặc IDENTITY để sinh mã an toàn; kiểm tra trạng thái trigger sau khi nạp dữ liệu.</li>
-      </ul>
+    <div class="grid g3" style="gap:16px">
+      <div class="card">
+        <h3><span class="ico"><svg><use href="#i-db"/></svg></span>Thiết kế và cài đặt</h3>
+        <ul class="list check" style="font-size:18px;line-height:1.55">
+          <li>ERD 11 thực thể, mô hình logic và tân từ.</li>
+          <li>17 ràng buộc toàn vẹn: 18 CHECK, 2 UNIQUE, 5 trigger.</li>
+          <li>Dữ liệu mẫu bao quát tình huống: trả trễ, hư hỏng, mất sách, thẻ hết hạn.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3><span class="ico amber"><svg><use href="#i-zap"/></svg></span>Xử lý thông tin</h3>
+        <ul class="list check" style="font-size:18px;line-height:1.55">
+          <li>5 SP nghiệp vụ có transaction và TRY…CATCH.</li>
+          <li>Trigger tự lập phiếu phạt, đồng bộ tổng nợ.</li>
+          <li>3 function, 2 cursor xếp loại độc giả và nhắc quá hạn.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3><span class="ico green"><svg><use href="#i-shield"/></svg></span>An toàn và trình bày</h3>
+        <ul class="list check" style="font-size:18px;line-height:1.55">
+          <li>3 role <span class="mono">R_QUANLY</span>, <span class="mono">R_THUTHU</span>, <span class="mono">R_DOCGIA</span> với GRANT/DENY.</li>
+          <li>Import/export, sao lưu FULL/DIFF.</li>
+          <li>5 report lấy trực tiếp từ view <span class="mono">VW_BC_*</span>.</li>
+        </ul>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- ===== Slide 16: TLTK ===== -->
+<!-- ===== Slide 16: Kịch bản demo SQL ===== -->
 <section class="slide">
-  <header><span class="chip">Chương 5 · Kết luận</span><h2>Tài liệu tham khảo</h2></header>
-  <div class="body">
-    <div class="card">
-      <ol style="margin:0;padding:0;list-style:none;font-size:17px;line-height:1.55" class="muted">
-        <li style="margin-bottom:14px">[1] Nguyễn Gia Tuấn Anh, Trương Châu Long, <i>Bài tập và bài giải SQL Server</i>. TP. HCM: NXB Thanh niên, 2005.</li>
-        <li style="margin-bottom:14px">[2] Đỗ Phúc, Nguyễn Đăng Tỵ, <i>Cơ sở dữ liệu</i>. TP. HCM: NXB Đại học Quốc gia TP. HCM, 2010.</li>
-        <li style="margin-bottom:14px">[3] Nguyễn Gia Tuấn Anh, Mai Văn Cường, Bùi Danh Hường, <i>Cơ sở dữ liệu nâng cao</i>. TP. HCM: NXB Đại học Quốc gia TP. HCM, 2019.</li>
-        <li style="margin-bottom:14px">[4] I. Ben-Gan, <i>Microsoft SQL Server 2012 T-SQL Fundamentals</i>. Redmond, WA: Microsoft Press, 2012.</li>
-        <li style="margin-bottom:14px">[5] Khoa Khoa học và Kỹ thuật Thông tin, “Slide bài giảng IE103 – Quản lý thông tin,” Trường ĐH Công nghệ Thông tin, ĐHQG-HCM, 2026.</li>
-        <li style="margin-bottom:14px">[6] Microsoft, “CREATE TRIGGER (Transact-SQL),” <i>Microsoft Learn</i>. [Online]. Available: learn.microsoft.com/sql/t-sql/statements/create-trigger-transact-sql</li>
-        <li>[7] Microsoft, “Back up and restore of SQL Server databases,” <i>Microsoft Learn</i>. [Online]. Available: learn.microsoft.com/sql/relational-databases/backup-restore/back-up-and-restore-of-sql-server-databases</li>
-      </ol>
-    </div>
+  <header><span class="chip">Chương 5 · Tổng kết và demo SQL</span><h2>Kịch bản demo trên SQL Server</h2>
+    <div class="note">Chuẩn bị: chạy <span class="mono">db/init_all.sql</span> trong SSMS</div></header>
+  <div class="body stack" style="gap:14px">
+      <div class="card demo-step">
+        <div class="gradient-text demo-n">01</div>
+        <div><b>Lập phiếu mượn CS001, CS002</b><div class="mono small muted" style="margin-top:2px">SP_LAPPHIEUMUON</div></div>
+        <div class="res" style="margin:0">@MAPM = PM0329, hạn 25/10; SLCON “Mắt biếc” = 0</div>
+      </div>
+      <div class="card demo-step">
+        <div class="gradient-text demo-n">02</div>
+        <div><b>Lập phiếu cho DG006 và DG009</b><div class="mono small muted" style="margin-top:2px">TRG_PHIEUMUON_KIEMTRA</div></div>
+        <div class="res red" style="margin:0">DG006 thẻ hết hạn, DG009 nợ 250.000đ → từ chối cả hai</div>
+      </div>
+      <div class="card demo-step">
+        <div class="gradient-text demo-n">03</div>
+        <div><b>Trả CS003 trễ 7 ngày, tình trạng “Hư hỏng”</b><div class="mono small muted" style="margin-top:2px">SP_TRASACH → TRG_CTPM_TRASACH → TRG_PHIEUPHAT_TONGNO</div></div>
+        <div class="res" style="margin:0">PP0012 55.000đ, PP0013 35.000đ; TONGNO DG014 = 90.000</div>
+      </div>
+      <div class="card demo-step">
+        <div class="gradient-text demo-n">04</div>
+        <div><b>Quét sách quá hạn ngày 11/10/2026</b><div class="mono small muted" style="margin-top:2px">SP_CURSOR_NHACNHOQUAHAN</div></div>
+        <div class="res" style="margin:0">4 nhắc nhở; chạy lại cùng ngày: 0 nhắc nhở mới</div>
+      </div>
+      <div class="card demo-step">
+        <div class="gradient-text demo-n">05</div>
+        <div><b>Xem 5 report</b><div class="mono small muted" style="margin-top:2px">SELECT * FROM VW_BC_*</div></div>
+        <div class="res" style="margin:0">Kho sách, sách mượn nhiều, lượt mượn, tiền phạt, quá hạn</div>
+      </div>
   </div>
 </section>
 

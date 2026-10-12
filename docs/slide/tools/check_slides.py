@@ -23,7 +23,7 @@ REQUIRED = {
         "XÂY DỰNG HỆ THỐNG", "QUẢN LÝ THƯ VIỆN", "Nhóm thực hiện", "Nhóm 2", "GVHD",
         "Nguyễn Thành Luân", "tháng 10 năm 2026"],
     2: ["Mô tả bài toán", "Phân tích và thiết kế", "Cài đặt", "Quản lý thông tin",
-        "Kết luận", "Tài liệu tham khảo"],
+        "Tổng kết và demo SQL", "Kịch bản demo SQL"],
     3: ["R_QUANLY", "R_THUTHU", "R_DOCGIA", "admin"],
     4: ["16 tuổi", "2 năm", "14 ngày", "5.000đ", "50%", "100%", "Có sẵn"],
     5: ["Xác thực", "Quản lý danh mục", "Quản lý kho sách", "Quản lý độc giả", "Mượn – trả",
@@ -44,8 +44,9 @@ REQUIRED = {
          "LG_THUTHU"],
     14: ["VW_BC_TINHTRANGKHO", "VW_BC_SACHMUONNHIEU", "VW_BC_LUOTMUON_THANG",
          "VW_BC_TIENPHAT_THANG", "VW_BC_DOCGIA_QUAHAN", "498.000", "Mắt biếc"],
-    15: ["Chương 5 · Kết luận", "Kết quả đạt được", "Hạn chế", "Hướng phát triển"],
-    16: ["Chương 5 · Kết luận", "Tài liệu tham khảo", "[1]", "[7]"],
+    15: ["Chương 5 · Tổng kết và demo SQL", "Tổng kết", "11", "17", "38", "3 + 2", "R_QUANLY"],
+    16: ["Kịch bản demo trên SQL Server", "SP_LAPPHIEUMUON", "PM0329", "TRG_PHIEUMUON_KIEMTRA",
+         "SP_TRASACH", "55.000", "35.000", "90.000", "SP_CURSOR_NHACNHOQUAHAN", "VW_BC_", "init_all.sql"],
     17: ["Cảm ơn"],
 }
 
