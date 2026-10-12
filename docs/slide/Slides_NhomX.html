@@ -604,13 +604,13 @@ pre .o { color: var(--primary); font-weight: 600; } pre .v { color: #0369A1; } p
       </table>
       <p class="note-box">Ví dụ SP_TRASACH: trả CS011 trễ 26 ngày → @TIENPHAT = 130.000. SP_THONGKETHANG tháng 9/2026: 6 phiếu, 11 lượt sách.</p>
     </div>
-    <div class="card">
-      <h3 style="margin-bottom:8px"><span class="ico sky"><svg><use href="#i-swap"/></svg></span>SP_LAPPHIEUMUON – lập phiếu nhiều cuốn</h3>
-      <pre class="sql sm">CREATE OR ALTER PROCEDURE SP_LAPPHIEUMUON
+    <div class="card" style="padding:12px 18px">
+      <h3 style="margin-bottom:6px"><span class="ico sky"><svg><use href="#i-swap"/></svg></span>SP_LAPPHIEUMUON – lập phiếu nhiều cuốn</h3>
+      <pre class="sql sm" style="font-size:11.5px;line-height:1.4">CREATE OR ALTER PROCEDURE SP_LAPPHIEUMUON
   @MADG CHAR(5), @DSMACS VARCHAR(200), @MAPM CHAR(6) OUTPUT
 AS BEGIN
-  BEGIN TRY
-    BEGIN TRANSACTION;
+  ...  -- kiem tra doc gia ton tai, danh sach khong rong
+  BEGIN TRY  BEGIN TRANSACTION;
     SELECT @MAX = ISNULL(MAX(CAST(SUBSTRING(MAPM, 3, 4) AS INT)), 0)
     FROM PHIEUMUON WITH (UPDLOCK, HOLDLOCK);
     SET @MAPM = 'PM' + RIGHT('0000' + CAST(@MAX + 1 AS VARCHAR(4)), 4);
@@ -622,9 +622,12 @@ AS BEGIN
     FROM STRING_SPLIT(@DSMACS, ',') WHERE LTRIM(RTRIM(value)) &lt;&gt; '';
     COMMIT TRANSACTION; RETURN 1;
   END TRY
-  BEGIN CATCH  -- ROLLBACK, @MAPM = NULL, RETURN 0
+  BEGIN CATCH
+    IF @@TRANCOUNT &gt; 0 ROLLBACK; SET @MAPM = NULL;
+    RAISERROR(@LOI, 16, 1); RETURN 0;
+  END CATCH
 END</pre>
-      <div class="ba" style="margin-top:10px">
+      <div class="ba" style="margin-top:8px;font-size:12.5px">
         <div class="before"><b class="h">Trước</b>CS001, CS002: Có sẵn<br>DS001 “Mắt biếc”: SLCON = 2</div>
         <div class="arrow">→</div>
         <div class="after"><b class="h">Sau</b>@MAPM = PM0329, hạn 2026-10-25<br>CS001, CS002: Đang mượn; SLCON = 0</div>
@@ -660,6 +663,7 @@ END</pre>
       <h3 style="margin-bottom:8px"><span class="ico sky"><svg><use href="#i-loop"/></svg></span>TRG_CTPM_TRASACH – tự lập phiếu phạt</h3>
       <pre class="sql sm">CREATE TRIGGER TRG_CTPM_TRASACH ON CTPHIEUMUON AFTER UPDATE AS
 BEGIN
+  ...  -- chan sua lai thong tin tra, ngay tra truoc ngay muon
   UPDATE CS SET TINHTRANG = CASE I.TINHTRANGTRA
       WHEN N'Bình thường' THEN N'Có sẵn' ELSE I.TINHTRANGTRA END
   FROM CUONSACH CS JOIN inserted I ON CS.MACS = I.MACS
@@ -892,7 +896,7 @@ RESTORE DATABASE QUANLYTHUVIEN FROM DISK = N'..._DIFF.bak'
         <h3><span class="ico green"><svg><use href="#i-code"/></svg></span>Cách chạy</h3>
         <ol style="margin:0;padding-left:20px;font-size:13px;line-height:1.5" class="muted">
           <li><span class="mono">docker compose up -d</span> – chạy SQL Server</li>
-          <li>Chạy <span class="mono">db/init_all.sql</span> (hoặc các script 1 → 8)</li>
+          <li>Chạy <span class="mono">db/init_all.sql</span> (hoặc lần lượt các script trong db/)</li>
           <li><span class="mono">npm install</span> trong thư mục <span class="mono">frontend</span></li>
           <li><span class="mono">dotnet run --project QuanLyThuVien.AppHost</span></li>
           <li>Đăng nhập bằng tài khoản <span class="mono">admin</span></li>
@@ -1030,13 +1034,16 @@ RESTORE DATABASE QUANLYTHUVIEN FROM DISK = N'..._DIFF.bak'
   addEventListener('resize', fit);
   addEventListener('hashchange', function () { show(fromHash()); });
   addEventListener('keydown', function (e) {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;  // để nguyên phím tắt của trình duyệt (Ctrl+F, Alt+←)
     var k = e.key;
-    if (k === 'ArrowRight' || k === 'PageDown' || k === ' ') { e.preventDefault(); show(cur + 1); }
+    if (k === ' ' && e.shiftKey) { e.preventDefault(); show(cur - 1); }
+    else if (k === 'ArrowRight' || k === 'PageDown' || k === ' ') { e.preventDefault(); show(cur + 1); }
     else if (k === 'ArrowLeft' || k === 'PageUp') { e.preventDefault(); show(cur - 1); }
     else if (k === 'Home') show(0);
     else if (k === 'End') show(total - 1);
     else if (k === 'f' || k === 'F') {
-      if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen();
+      var p = document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+      if (p && p.catch) p.catch(function () {});
     }
   });
   fit();
