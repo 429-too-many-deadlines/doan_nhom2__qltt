@@ -118,12 +118,12 @@ pre .o { color: var(--primary); font-weight: 600; } pre .v { color: #0369A1; } p
 .role { border: 1px solid var(--line); border-radius: 12px; padding: 9px 12px; margin-top: 10px; }
 .role-h { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .role p { margin: 4px 0 0; font-size: 13.5px; color: var(--muted); line-height: 1.45; }
-.schema { padding: 7px 0; border-top: 1px dashed var(--line); }
+.schema { padding: 10px 0; border-top: 1px dashed var(--line); }
 .schema:first-child { border-top: 0; padding-top: 0; }
-.schema .r { font-family: var(--mono); font-size: 12.5px; line-height: 1.45; }
+.schema .r { font-family: var(--mono); font-size: 14px; line-height: 1.45; }
 .schema .r b { color: var(--primary); }
 .schema .r u { text-decoration-thickness: 2px; text-underline-offset: 3px; }
-.schema .d { font-size: 13px; color: var(--muted); line-height: 1.4; margin-top: 2px; }
+.schema .d { font-size: 14.5px; color: var(--muted); line-height: 1.4; margin-top: 2px; }
 .ph {
   border: 2px dashed #93C5FD; border-radius: 14px; display: grid; place-items: center; text-align: center; padding: 12px;
   background: repeating-linear-gradient(45deg, #F8FAFC, #F8FAFC 10px, #EFF6FF 10px, #EFF6FF 20px);
@@ -401,6 +401,128 @@ pre .o { color: var(--primary); font-weight: 600; } pre .v { color: #0369A1; } p
       <div class="card"><h3><span class="ico amber"><svg><use href="#i-shield"/></svg></span>Quản trị CSDL</h3><p class="muted small" style="margin:0;line-height:1.5">Phân quyền theo role, import/export dữ liệu, sao lưu và phục hồi.</p></div>
     </div>
     <p class="note-box" style="margin-top:18px;display:flex;gap:10px;align-items:center"><span class="ico"><svg><use href="#i-db"/></svg></span>Mỗi chức năng trên website gọi trực tiếp stored procedure, function hoặc view trong CSDL <b class="mono">QUANLYTHUVIEN</b>; website không lưu sẵn dữ liệu.</p>
+  </div>
+</section>
+
+<!-- ===== Slide 7: 2.2 + 2.4 ERD ===== -->
+<section class="slide">
+  <header><span class="chip">Chương 2 · Phân tích và thiết kế</span><h2>Thực thể, mối quan hệ và sơ đồ ERD</h2></header>
+  <div class="body grid" style="grid-template-columns:830px 1fr;gap:18px">
+    <div class="card" style="padding:10px">
+      <svg viewBox="0 0 830 470" width="100%" aria-label="Sơ đồ ERD QUANLYTHUVIEN" font-family="Be Vietnam Pro, Segoe UI, sans-serif">
+        <g stroke="#94A3B8" stroke-width="1.6" fill="none">
+          <path d="M210 46L320 150"/><path d="M210 160H320"/><path d="M510 160H620"/><path d="M715 76V130"/>
+          <path d="M415 190V250"/><path d="M115 310V370"/><path d="M210 400H320"/><path d="M415 310V370"/><path d="M510 400H620"/>
+        </g>
+        <g font-size="11.5" fill="#1D4ED8" font-weight="600">
+          <text x="236" y="86">thuộc · 1:n</text>
+          <text x="222" y="152">phát hành · 1:n</text>
+          <text x="532" y="152">viết · 1:n</text>
+          <text x="724" y="108">1:n</text>
+          <text x="424" y="226">gồm · 1:n</text>
+          <text x="124" y="346">lập · 1:n</text>
+          <text x="226" y="392">có · 1:1..n</text>
+          <text x="424" y="346">được mượn · 1:n</text>
+          <text x="530" y="392">phát sinh · 1:n</text>
+        </g>
+        <g font-size="14" font-weight="700" fill="#0F172A" text-anchor="middle">
+          <rect x="20" y="16" width="190" height="60" rx="10" fill="#fff" stroke="#93C5FD"/><text x="115" y="40">THELOAI</text>
+          <rect x="20" y="130" width="190" height="60" rx="10" fill="#fff" stroke="#93C5FD"/><text x="115" y="154">NHAXUATBAN</text>
+          <rect x="320" y="130" width="190" height="60" rx="10" fill="#EFF6FF" stroke="#2563EB" stroke-width="2"/><text x="415" y="154">DAUSACH</text>
+          <rect x="620" y="16" width="190" height="60" rx="10" fill="#fff" stroke="#93C5FD"/><text x="715" y="40">TACGIA</text>
+          <rect x="620" y="130" width="190" height="60" rx="10" fill="#F0F9FF" stroke="#0EA5E9"/><text x="715" y="154">DAUSACH_TACGIA</text>
+          <rect x="320" y="250" width="190" height="60" rx="10" fill="#fff" stroke="#93C5FD"/><text x="415" y="274">CUONSACH</text>
+          <rect x="620" y="250" width="190" height="60" rx="10" fill="#F8FAFC" stroke="#94A3B8" stroke-dasharray="5 4"/><text x="715" y="274">TAIKHOAN</text>
+          <rect x="20" y="250" width="190" height="60" rx="10" fill="#fff" stroke="#93C5FD"/><text x="115" y="274">DOCGIA</text>
+          <rect x="20" y="370" width="190" height="60" rx="10" fill="#fff" stroke="#93C5FD"/><text x="115" y="394">PHIEUMUON</text>
+          <rect x="320" y="370" width="190" height="60" rx="10" fill="#F0F9FF" stroke="#0EA5E9"/><text x="415" y="394">CTPHIEUMUON</text>
+          <rect x="620" y="370" width="190" height="60" rx="10" fill="#FFFBEB" stroke="#F59E0B"/><text x="715" y="394">PHIEUPHAT</text>
+        </g>
+        <g font-family="JetBrains Mono, Consolas, monospace" font-size="11" fill="#475569" text-anchor="middle">
+          <text x="115" y="62">PK MATL</text><text x="115" y="176">PK MANXB</text><text x="415" y="176">PK MADS · FK MATL, MANXB</text>
+          <text x="715" y="62">PK MATG</text><text x="715" y="176">PK MADS, MATG · VAITRO</text><text x="415" y="296">PK MACS · FK MADS</text>
+          <text x="715" y="296">độc lập – đăng nhập web</text><text x="115" y="296">PK MADG · TONGNO</text><text x="115" y="416">PK MAPM · FK MADG</text>
+          <text x="415" y="416">PK MAPM, MACS</text><text x="715" y="416">PK MAPP · FK (MAPM, MACS)</text>
+        </g>
+      </svg>
+    </div>
+    <div class="card">
+      <h3><span class="ico"><svg><use href="#i-db"/></svg></span>Mối quan hệ, bản số</h3>
+      <ul class="list" style="font-size:13.5px">
+        <li>Thể loại, NXB 1 – n đầu sách; mỗi đầu sách thuộc đúng một thể loại, một NXB.</li>
+        <li>Đầu sách n – n tác giả qua <b>DAUSACH_TACGIA</b> (VAITRO).</li>
+        <li>Đầu sách 1 – n cuốn sách vật lý.</li>
+        <li>Độc giả 1 – n phiếu mượn.</li>
+        <li>Phiếu mượn n – n cuốn sách qua <b>CTPHIEUMUON</b>; mỗi phiếu ít nhất 1 cuốn.</li>
+        <li>Mỗi dòng chi tiết phát sinh 0..n phiếu phạt (vừa trễ vừa hư).</li>
+        <li><b>TAIKHOAN</b> độc lập với nghiệp vụ.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Slide 8: 2.3 Ràng buộc toàn vẹn ===== -->
+<section class="slide">
+  <header><span class="chip">Chương 2 · Phân tích và thiết kế</span><h2>17 ràng buộc toàn vẹn</h2>
+    <div class="note"><span class="pill">18 CHECK</span><span class="pill sky">2 UNIQUE</span><span class="pill amber">5 trigger</span></div></header>
+  <div class="body grid" style="grid-template-columns:1.15fr 1fr;gap:18px">
+    <div class="card">
+      <h3><span class="ico"><svg><use href="#i-check"/></svg></span>Bối cảnh một quan hệ → CHECK / UNIQUE</h3>
+      <table class="t sm">
+        <thead><tr><th style="width:30px">#</th><th>Nội dung</th><th style="width:132px">Bảng</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Giá &gt; 0, số trang &gt; 0, năm XB từ 1900 đến nay</td><td class="mono">DAUSACH</td></tr>
+          <tr><td>2</td><td>0 ≤ SLCON ≤ SOLUONG</td><td class="mono">DAUSACH</td></tr>
+          <tr><td>3</td><td>Tên thể loại, tên NXB không trùng (UNIQUE)</td><td class="mono">THELOAI, NXB</td></tr>
+          <tr><td>4</td><td>Năm sinh tác giả rỗng hoặc từ 1000 đến nay</td><td class="mono">TACGIA</td></tr>
+          <tr><td>5</td><td>Vai trò ∈ {Tác giả, Đồng tác giả, Dịch giả}</td><td class="mono">DAUSACH_TACGIA</td></tr>
+          <tr><td>6</td><td>Tình trạng ∈ {Có sẵn, Đang mượn, Hư hỏng, Mất}</td><td class="mono">CUONSACH</td></tr>
+          <tr><td>7</td><td>Giới tính ∈ {Nam, Nữ}; TONGNO ≥ 0</td><td class="mono">DOCGIA</td></tr>
+          <tr><td>8</td><td>Hết hạn sau ngày lập; đủ 16 tuổi; email đúng mẫu</td><td class="mono">DOCGIA</td></tr>
+          <tr><td>9</td><td>Hạn trả sau ngày mượn; tình trạng ∈ {Đang mượn, Đã trả}</td><td class="mono">PHIEUMUON</td></tr>
+          <tr><td>10</td><td>Tình trạng trả ∈ {Bình thường, Hư hỏng, Mất}</td><td class="mono">CTPHIEUMUON</td></tr>
+          <tr><td>11</td><td>Có ngày trả ⇔ có tình trạng trả</td><td class="mono">CTPHIEUMUON</td></tr>
+          <tr><td>12</td><td>Lý do ∈ {Trả trễ, Hư hỏng, Mất sách}; số tiền &gt; 0</td><td class="mono">PHIEUPHAT</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h3><span class="ico amber"><svg><use href="#i-zap"/></svg></span>Liên quan hệ, thuộc tính dẫn xuất → trigger</h3>
+      <table class="t sm">
+        <thead><tr><th style="width:30px">#</th><th>Nội dung và trigger cài đặt</th></tr></thead>
+        <tbody>
+          <tr><td>13</td><td>SOLUONG, SLCON = số cuốn / số cuốn “Có sẵn”<br><span class="tag amber mono">TRG_CUONSACH_CAPNHATSL</span></td></tr>
+          <tr><td>14</td><td>Chỉ lập phiếu khi thẻ còn hạn và không nợ<br><span class="tag amber mono">TRG_PHIEUMUON_KIEMTRA</span></td></tr>
+          <tr><td>15</td><td>Chỉ mượn cuốn “Có sẵn”, không nằm trong hai phiếu chưa trả<br><span class="tag amber mono">TRG_CTPM_MUONSACH</span></td></tr>
+          <tr><td>16</td><td>Trả sách: cập nhật cuốn, tự lập phiếu phạt, đóng phiếu<br><span class="tag amber mono">TRG_CTPM_TRASACH</span></td></tr>
+          <tr><td>17</td><td>TONGNO = tổng tiền phạt chưa thanh toán<br><span class="tag amber mono">TRG_PHIEUPHAT_TONGNO</span></td></tr>
+        </tbody>
+      </table>
+      <p class="note-box">RB 1–12 khai báo ngay trong <span class="mono">CREATE TABLE</span>; RB 13–17 vượt ra ngoài một quan hệ nên dùng trigger (mục 4.1.2).</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Slide 9: 2.5 Mô hình logic ===== -->
+<section class="slide">
+  <header><span class="chip">Chương 2 · Phân tích và thiết kế</span><h2>Mô hình logic và tân từ</h2>
+    <div class="note">Khóa chính <u>gạch chân</u> · khóa ngoại <i>in nghiêng</i></div></header>
+  <div class="body grid g2" style="gap:18px">
+    <div class="card">
+      <div class="schema"><div class="r"><b>THELOAI</b>(<u>MATL</u>, TENTL)</div><div class="d">Mỗi thể loại có mã riêng và tên không trùng.</div></div>
+      <div class="schema"><div class="r"><b>TACGIA</b>(<u>MATG</u>, TENTG, NAMSINH, QUOCTICH)</div><div class="d">Tác giả có mã, họ tên, năm sinh (có thể chưa biết), quốc tịch.</div></div>
+      <div class="schema"><div class="r"><b>NHAXUATBAN</b>(<u>MANXB</u>, TENNXB, DIACHI, SODT)</div><div class="d">Nhà xuất bản có mã, tên không trùng, địa chỉ, số điện thoại.</div></div>
+      <div class="schema"><div class="r"><b>DAUSACH</b>(<u>MADS</u>, TENDS, <i>MATL</i>, <i>MANXB</i>, NAMXB, SOTRANG, GIA, SOLUONG, SLCON)</div><div class="d">Đầu sách thuộc thể loại MATL, do NXB MANXB phát hành; có SOLUONG cuốn, SLCON cuốn sẵn sàng.</div></div>
+      <div class="schema"><div class="r"><b>DAUSACH_TACGIA</b>(<u><i>MADS</i></u>, <u><i>MATG</i></u>, VAITRO)</div><div class="d">Tác giả MATG tham gia đầu sách MADS với vai trò VAITRO.</div></div>
+      <div class="schema"><div class="r"><b>CUONSACH</b>(<u>MACS</u>, <i>MADS</i>, NGAYNHAP, VITRI, TINHTRANG)</div><div class="d">Một bản của đầu sách MADS, nhập ngày NGAYNHAP, đặt tại VITRI.</div></div>
+    </div>
+    <div class="card">
+      <div class="schema"><div class="r"><b>DOCGIA</b>(<u>MADG</u>, HOTEN, NGSINH, GIOITINH, DIACHI, SODT, EMAIL, NGAYLAPTHE, NGAYHETHAN, TONGNO)</div><div class="d">Thông tin độc giả và thẻ; TONGNO là tiền phạt chưa thanh toán.</div></div>
+      <div class="schema"><div class="r"><b>PHIEUMUON</b>(<u>MAPM</u>, <i>MADG</i>, NGAYMUON, HANTRA, TINHTRANG)</div><div class="d">Độc giả MADG mượn theo phiếu MAPM, phải trả trước HANTRA.</div></div>
+      <div class="schema"><div class="r"><b>CTPHIEUMUON</b>(<u><i>MAPM</i></u>, <u><i>MACS</i></u>, NGAYTRA, TINHTRANGTRA)</div><div class="d">Cuốn MACS thuộc phiếu MAPM; khi trả ghi ngày trả và tình trạng.</div></div>
+      <div class="schema"><div class="r"><b>PHIEUPHAT</b>(<u>MAPP</u>, <i>MAPM</i>, <i>MACS</i>, NGAYLAP, LYDO, SOTIEN, DATHANHTOAN)</div><div class="d">Khoản phạt cho cuốn MACS của phiếu MAPM, đã hoặc chưa thanh toán.</div></div>
+      <div class="schema"><div class="r"><b>TAIKHOAN</b>(<u>TENDANGNHAP</u>, MATKHAU, TRANGTHAI)</div><div class="d">MATKHAU là giá trị băm SHA2-256; TRANGTHAI = 0 nghĩa là bị khóa.</div></div>
+    </div>
   </div>
 </section>
 
