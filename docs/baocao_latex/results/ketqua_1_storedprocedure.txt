@@ -1,0 +1,98 @@
+Changed database context to 'QUANLYTHUVIEN'.
+### SP1 THEMDOCGIA
+SODG_TRUOC
+----------
+315
+Thêm độc giả thành công.
+KETQUA
+------
+2
+MADG|HOTEN|NGSINH|NGAYLAPTHE|NGAYHETHAN|TONGNO
+----|-----|------|----------|----------|------
+DG316|Trương Thị Hoa|2005-05-05|2026-10-13|2028-10-13|.0000
+Mã độc giả đã tồn tại.
+KETQUA_TRUNG
+------------
+0
+### SP2 LAPPHIEUMUON
+MADG|NGAYHETHAN|TONGNO
+----|----------|------
+DG012|2028-09-15|.0000
+MACS|TINHTRANG
+----|---------
+CS004|Có sẵn
+CS005|Có sẵn
+MADS|TENDS|SOLUONG|SLCON
+----|-----|-------|-----
+DS002|Cho tôi xin một vé đi tuổi thơ|2|2
+Lập phiếu mượn PM0921 thành công.
+KETQUA|MAPM
+------|----
+1|PM0921
+MAPM|MADG|NGAYMUON|HANTRA|TINHTRANG
+----|----|--------|------|---------
+PM0921|DG012|2026-10-13|2026-10-27|Đang mượn
+MACS|TINHTRANG
+----|---------
+CS004|Đang mượn
+CS005|Đang mượn
+MADS|TENDS|SOLUONG|SLCON
+----|-----|-------|-----
+DS002|Cho tôi xin một vé đi tuổi thơ|2|0
+### SP3 TRASACH
+MADG|TONGNO
+----|------
+DG014|80000.0000
+MAPM|MACS|NGAYTRA|TINHTRANGTRA|HANTRA
+----|----|-------|------------|------
+PM0014|CS003|NULL|NULL|2026-10-04
+PM0014|CS007|NULL|NULL|2026-10-04
+Trả sách thành công. Tiền phạt: 100,000 đ
+KETQUA|TIENPHAT
+------|--------
+2|100000.0000
+MAPP|MAPM|MACS|NGAYLAP|LYDO|SOTIEN|DATHANHTOAN
+----|----|----|-------|----|------|-----------
+PP1622|PM0014|CS003|2026-10-13|Hư hỏng|55000.0000|0
+PP1623|PM0014|CS003|2026-10-13|Trả trễ|45000.0000|0
+MACS|TINHTRANG
+----|---------
+CS003|Hư hỏng
+MAPM|TINHTRANG
+----|---------
+PM0014|Đang mượn
+MADG|TONGNO
+----|------
+DG014|180000.0000
+### SP4 THANHTOANPHAT
+MADG|TONGNO
+----|------
+DG009|250000.0000
+MAPP|LYDO|SOTIEN|DATHANHTOAN
+----|----|------|-----------
+PP0003|Mất sách|250000.0000|0
+Đã thanh toán 250,000 đ.
+KETQUA|DATHANHTOAN
+------|-----------
+2|250000.0000
+MAPP|LYDO|SOTIEN|DATHANHTOAN
+----|----|------|-----------
+PP0003|Mất sách|250000.0000|1
+MADG|TONGNO
+----|------
+DG009|.0000
+Độc giả không có khoản phạt nào chưa thanh toán.
+KETQUA_LAN2
+-----------
+1
+### SP5 THONGKETHANG
+MADS|TENDS|SOLUOTMUON
+----|-----|----------
+DS007|Đắc nhân tâm|15
+DS001|Mắt biếc|14
+DS002|Cho tôi xin một vé đi tuổi thơ|14
+DS013|Harry Potter và Hòn đá Phù thủy|12
+DS010|Database System Concepts|10
+SOPHIEU|SOLUOTSACH|TIENPHAT
+-------|----------|--------
+48|108|665000.0000

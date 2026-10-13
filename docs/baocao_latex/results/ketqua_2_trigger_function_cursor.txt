@@ -1,0 +1,452 @@
+Changed database context to 'QUANLYTHUVIEN'.
+### T1 CAPNHATSL
+MADS|SOLUONG|SLCON
+----|-------|-----
+DS004|1|1
+MADS|SOLUONG|SLCON
+----|-------|-----
+DS004|2|2
+MADS|SOLUONG|SLCON
+----|-------|-----
+DS004|2|1
+### T2a het han
+Msg 50000, Level 16, State 1, Server 8c9742e0ca7e, Procedure TRG_PHIEUMUON_KIEMTRA, Line 26
+Thẻ độc giả đã hết hạn, không thể lập phiếu mượn.
+Msg 3609, Level 16, State 1, Server 8c9742e0ca7e, Line 2
+The transaction ended in the trigger. The batch has been aborted.
+### T2b dang no
+Msg 50000, Level 16, State 1, Server 8c9742e0ca7e, Procedure TRG_PHIEUMUON_KIEMTRA, Line 34
+Độc giả còn nợ tiền phạt, phải thanh toán trước khi mượn.
+Msg 3609, Level 16, State 1, Server 8c9742e0ca7e, Line 2
+The transaction ended in the trigger. The batch has been aborted.
+### T3 sach mat
+Msg 50000, Level 16, State 1, Server 8c9742e0ca7e, Procedure TRG_CTPM_MUONSACH, Line 22
+Có cuốn sách không ở tình trạng "Có sẵn", không thể cho mượn.
+Msg 3609, Level 16, State 1, Server 8c9742e0ca7e, Line 4
+The transaction ended in the trigger. The batch has been aborted.
+### T3b dang muon
+Msg 50000, Level 16, State 1, Server 8c9742e0ca7e, Procedure TRG_CTPM_MUONSACH, Line 22
+Có cuốn sách không ở tình trạng "Có sẵn", không thể cho mượn.
+Msg 3609, Level 16, State 1, Server 8c9742e0ca7e, Line 4
+The transaction ended in the trigger. The batch has been aborted.
+PM0999_TONTAI
+-------------
+0
+### T4 tra tre
+MAPM|MACS|HANTRA|TINHTRANG
+----|----|------|---------
+PM0012|CS019|2026-09-24|Đang mượn
+PM0012|CS025|2026-09-24|Đang mượn
+MADG|TONGNO
+----|------
+DG004|.0000
+MAPP|LYDO|SOTIEN
+----|----|------
+PP1622|Trả trễ|95000.0000
+MACS|TINHTRANG
+----|---------
+CS025|Có sẵn
+MAPM|TINHTRANG
+----|---------
+PM0012|Đã trả
+MADG|TONGNO
+----|------
+DG004|95000.0000
+Msg 50000, Level 16, State 1, Server 8c9742e0ca7e, Procedure TRG_CTPM_TRASACH, Line 32
+Sách đã được trả, không thể cập nhật lại thông tin trả.
+Msg 3609, Level 16, State 1, Server 8c9742e0ca7e, Line 10
+The transaction ended in the trigger. The batch has been aborted.
+### T5 tongno
+MADG|TONGNO
+----|------
+DG109|95000.0000
+MAPP|LYDO|SOTIEN|DATHANHTOAN
+----|----|------|-----------
+PP1603|Trả trễ|15000.0000|0
+PP1608|Trả trễ|10000.0000|0
+PP1609|Trả trễ|50000.0000|0
+PP1610|Trả trễ|20000.0000|0
+MADG|TONGNO
+----|------
+DG109|80000.0000
+### F1
+DG007|DG012|DG999
+-----|-----|-----
+3|0|-1
+### F2
+TRE11|DUNGHAN
+-----|-------
+55000.0000|.0000
+### F3
+MAPM|MACS|TENDS|NGAYMUON|HANTRA|NGAYTRA|SONGAYTRE|TRANGTHAI
+----|----|-----|--------|------|-------|---------|---------
+PM0893|CS004|Cho tôi xin một vé đi tuổi thơ|2026-05-05|2026-05-19|2026-05-21|2|Đã trả (Hư hỏng)
+PM0893|CS025|Cơ sở văn hóa Việt Nam|2026-05-05|2026-05-19|2026-05-19|0|Đã trả (Bình thường)
+PM0014|CS003|Mắt biếc|2026-09-20|2026-10-04|NULL|9|Quá hạn
+PM0014|CS007|Dế Mèn phiêu lưu ký|2026-09-20|2026-10-04|NULL|9|Quá hạn
+PM0330|CS005|Cho tôi xin một vé đi tuổi thơ|2026-09-20|2026-10-04|2026-10-03|0|Đã trả (Bình thường)
+PM0330|CS021|Rừng Na Uy|2026-09-20|2026-10-04|2026-09-28|0|Đã trả (Bình thường)
+PM0330|CS022|Harry Potter và Hòn đá Phù thủy|2026-09-20|2026-10-04|2026-10-08|4|Đã trả (Bình thường)
+### C1
+MADG|HOTEN|SOLUOTMUON|SOLANTRE|SOLANHUMAT|TONGTIENPHAT|XEPLOAI
+----|-----|----------|--------|----------|------------|-------
+DG001|Nguyễn Minh Anh|6|2|1|105000.0000|Cảnh báo
+DG002|Trần Quốc Bảo|3|3|0|30000.0000|Cảnh báo
+DG003|Lê Thị Cẩm Tú|6|4|1|95000.0000|Cảnh báo
+DG004|Phạm Đức Duy|2|1|0|.0000|Bình thường
+DG005|Hoàng Gia Huy|2|0|0|.0000|Uy tín
+DG006|Võ Ngọc Hân|3|1|0|5000.0000|Bình thường
+DG007|Đặng Thanh Long|6|0|0|.0000|Uy tín
+DG008|Bùi Thị Mai|4|3|0|50000.0000|Cảnh báo
+DG009|Ngô Văn Nam|4|0|1|250000.0000|Hạn chế
+DG010|Huỳnh Kim Ngân|7|4|0|75000.0000|Cảnh báo
+DG011|Trịnh Công Phúc|5|3|0|45000.0000|Cảnh báo
+DG012|Đỗ Bảo Quyên|0|0|0|.0000|Chưa mượn
+DG013|Lý Minh Tâm|1|1|0|.0000|Bình thường
+DG014|Mai Anh Thư|7|4|1|100000.0000|Cảnh báo
+DG015|Phan Hoàng Vũ|2|1|1|73000.0000|Cảnh báo
+DG016|Trịnh Tuấn Phong|12|3|0|50000.0000|Cảnh báo
+DG017|Tạ Phương Xuân|1|0|0|.0000|Uy tín
+DG018|Bùi Mỹ Oanh|5|1|0|5000.0000|Bình thường
+DG019|Đặng Hữu Phúc|0|0|0|.0000|Chưa mượn
+DG020|Ngô Minh Nam|0|0|0|.0000|Chưa mượn
+DG021|Hồ Hoài Oanh|0|0|0|.0000|Chưa mượn
+DG022|Trịnh Tuấn Bình|2|1|1|55000.0000|Cảnh báo
+DG023|Dương Tuấn Thịnh|5|2|0|15000.0000|Cảnh báo
+DG024|Lý Bích Vy|7|3|0|45000.0000|Cảnh báo
+DG025|Lý Gia Phong|6|3|0|70000.0000|Cảnh báo
+DG026|Đặng Thanh Chi|0|0|0|.0000|Chưa mượn
+DG027|Ngô Bảo Hạnh|4|0|0|.0000|Uy tín
+DG028|Nguyễn Minh Nam|0|0|0|.0000|Chưa mượn
+DG029|Võ Tuấn Phúc|3|2|0|15000.0000|Cảnh báo
+DG030|Hoàng Hoài Vy|3|1|0|15000.0000|Bình thường
+DG031|Tạ Hữu Duy|3|1|0|10000.0000|Bình thường
+DG032|Trần Gia Cường|2|1|0|20000.0000|Bình thường
+DG033|Lý Hoàng Dũng|0|0|0|.0000|Chưa mượn
+DG034|Lê Công Hiếu|2|2|0|25000.0000|Cảnh báo
+DG035|Phan Hoàng Trung|0|0|0|.0000|Chưa mượn
+DG036|Huỳnh Khánh Hà|1|0|0|.0000|Uy tín
+DG037|Dương Hoàng Hùng|6|2|0|20000.0000|Cảnh báo
+DG038|Phạm Mỹ Lan|1|0|0|.0000|Uy tín
+DG039|Huỳnh Thị Uyên|0|0|0|.0000|Chưa mượn
+DG040|Mai Diệu Lan|2|1|1|50000.0000|Cảnh báo
+DG041|Huỳnh Minh Lộc|0|0|0|.0000|Chưa mượn
+DG042|Lê Hữu Quân|1|0|0|.0000|Uy tín
+DG043|Trần Minh An|0|0|0|.0000|Chưa mượn
+DG044|Châu Tuấn Nam|1|1|0|10000.0000|Bình thường
+DG045|Đỗ Hoài Giang|3|1|0|10000.0000|Bình thường
+DG046|Đặng Bảo Anh|3|2|0|40000.0000|Cảnh báo
+DG047|Phan Hoài Mai|0|0|0|.0000|Chưa mượn
+DG048|Đặng Văn Tài|0|0|0|.0000|Chưa mượn
+DG049|Huỳnh Công Duy|0|0|0|.0000|Chưa mượn
+DG050|Võ Công An|5|2|0|30000.0000|Cảnh báo
+DG051|Trịnh Hữu Vũ|0|0|0|.0000|Chưa mượn
+DG052|Vũ Tuấn Bình|1|0|0|.0000|Uy tín
+DG053|Phan Gia Vũ|0|0|0|.0000|Chưa mượn
+DG054|Ngô Quốc Đạt|0|0|0|.0000|Chưa mượn
+DG055|Mai Bảo Kiên|5|4|0|50000.0000|Cảnh báo
+DG056|Trần Bích Thảo|3|1|1|80000.0000|Cảnh báo
+DG057|Bùi Công Long|2|0|0|.0000|Uy tín
+DG058|Đỗ Quốc Khang|3|1|0|20000.0000|Bình thường
+DG059|Mai Quốc Tuấn|1|0|0|.0000|Uy tín
+DG060|Nguyễn Thanh Vy|3|1|0|25000.0000|Bình thường
+DG061|Phạm Bảo Oanh|2|0|0|.0000|Uy tín
+DG062|Vũ Gia Phong|3|2|0|30000.0000|Cảnh báo
+DG063|Vũ Thu Lan|3|2|1|40000.0000|Cảnh báo
+DG064|Huỳnh Đức Khoa|1|0|0|.0000|Uy tín
+DG065|Hoàng Phương Hằng|9|4|1|80000.0000|Cảnh báo
+DG066|Võ Thu Nhung|0|0|0|.0000|Chưa mượn
+DG067|Hồ Bích Trâm|0|0|0|.0000|Chưa mượn
+DG068|Mai Công Thắng|0|0|0|.0000|Chưa mượn
+DG069|Võ Quốc Thịnh|6|3|1|60000.0000|Cảnh báo
+DG070|Trần Đức An|2|0|0|.0000|Uy tín
+DG071|Đỗ Minh Tài|2|1|0|20000.0000|Bình thường
+DG072|Huỳnh Bảo Thắng|1|1|0|30000.0000|Bình thường
+DG073|Trần Quốc Lộc|5|2|0|40000.0000|Cảnh báo
+DG074|Lý Thanh Lan|3|2|0|20000.0000|Cảnh báo
+DG075|Đỗ Kim Hằng|2|0|0|.0000|Uy tín
+DG076|Trịnh Tuấn Trí|1|0|0|.0000|Uy tín
+DG077|Lý Thanh Mai|1|1|0|25000.0000|Bình thường
+DG078|Trịnh Bích Phương|0|0|0|.0000|Chưa mượn
+DG079|Trịnh Mỹ Hà|0|0|0|.0000|Chưa mượn
+DG080|Mai Diệu Nga|1|1|0|10000.0000|Bình thường
+DG081|Tạ Thị Tú|3|1|1|45000.0000|Cảnh báo
+DG082|Dương Thu Hà|0|0|0|.0000|Chưa mượn
+DG083|Đặng Mỹ Anh|0|0|0|.0000|Chưa mượn
+DG084|Trịnh Văn Thịnh|1|0|0|.0000|Uy tín
+DG085|Nguyễn Quốc Trung|0|0|0|.0000|Chưa mượn
+DG086|Lý Đức Thắng|3|1|0|25000.0000|Bình thường
+DG087|Dương Hoài Trâm|2|2|0|35000.0000|Cảnh báo
+DG088|Huỳnh Ngọc Vy|1|1|0|20000.0000|Bình thường
+DG089|Võ Kim Trâm|0|0|0|.0000|Chưa mượn
+DG090|Hoàng Hoài Giang|0|0|0|.0000|Chưa mượn
+DG091|Võ Khánh Mai|0|0|0|.0000|Chưa mượn
+DG092|Đặng Văn Hùng|0|0|0|.0000|Chưa mượn
+DG093|Châu Phương Nhung|2|0|0|.0000|Uy tín
+DG094|Trần Bảo Anh|9|4|1|80000.0000|Cảnh báo
+DG095|Vũ Gia Nghĩa|5|2|0|40000.0000|Cảnh báo
+DG096|Huỳnh Hoàng Sơn|1|1|0|15000.0000|Bình thường
+DG097|Trần Công Trí|2|0|0|.0000|Uy tín
+DG098|Nguyễn Thanh Thảo|8|5|2|120000.0000|Cảnh báo
+DG099|Dương Thanh Đạt|0|0|0|.0000|Chưa mượn
+DG100|Võ Thanh Phương|0|0|0|.0000|Chưa mượn
+DG101|Mai Tuấn Nam|1|0|0|.0000|Uy tín
+DG102|Lý Thị Hằng|3|2|1|95000.0000|Cảnh báo
+DG103|Lê Bảo Hùng|0|0|0|.0000|Chưa mượn
+DG104|Mai Bích Hương|1|0|0|.0000|Uy tín
+DG105|Vũ Thu Hạnh|3|3|0|30000.0000|Cảnh báo
+DG106|Lê Bảo Kiên|0|0|0|.0000|Chưa mượn
+DG107|Huỳnh Phương Mai|3|0|0|.0000|Uy tín
+DG108|Trịnh Thanh Mai|1|0|0|.0000|Uy tín
+DG109|Tạ Khánh Trang|4|4|1|95000.0000|Cảnh báo
+DG110|Tạ Minh Nam|0|0|0|.0000|Chưa mượn
+DG111|Trịnh Hữu Sơn|0|0|0|.0000|Chưa mượn
+DG112|Tạ Ngọc Nhung|2|1|0|30000.0000|Bình thường
+DG113|Dương Bảo Trung|2|2|0|20000.0000|Cảnh báo
+DG114|Mai Văn Sơn|3|2|0|45000.0000|Cảnh báo
+DG115|Huỳnh Ngọc Mai|0|0|0|.0000|Chưa mượn
+DG116|Mai Thanh Phúc|0|0|0|.0000|Chưa mượn
+DG117|Huỳnh Bích Linh|2|1|0|10000.0000|Bình thường
+DG118|Châu Hoài Tú|6|2|0|.0000|Cảnh báo
+DG119|Đặng Khánh Phương|2|1|2|50000.0000|Cảnh báo
+DG120|Vũ Công Kiên|0|0|0|.0000|Chưa mượn
+DG121|Huỳnh Thanh Vinh|3|0|0|.0000|Uy tín
+DG122|Đỗ Tuấn Sơn|3|2|0|35000.0000|Cảnh báo
+DG123|Bùi Khánh Xuân|0|0|0|.0000|Chưa mượn
+DG124|Bùi Diệu Oanh|2|1|0|25000.0000|Bình thường
+DG125|Ngô Thu Quyên|4|2|0|25000.0000|Cảnh báo
+DG126|Trần Thanh Dũng|0|0|0|.0000|Chưa mượn
+DG127|Nguyễn Quốc Đạt|0|0|0|.0000|Chưa mượn
+DG128|Lê Thanh Trung|2|0|0|.0000|Uy tín
+DG129|Châu Công Trí|3|3|0|45000.0000|Cảnh báo
+DG130|Võ Đức Vũ|0|0|0|.0000|Chưa mượn
+DG131|Châu Đức Vũ|1|1|0|15000.0000|Bình thường
+DG132|Ngô Đình Tài|0|0|0|.0000|Chưa mượn
+DG133|Tạ Thanh Khoa|1|0|0|.0000|Uy tín
+DG134|Dương Văn Lộc|2|1|0|15000.0000|Bình thường
+DG135|Võ Bích Ngân|5|4|0|85000.0000|Cảnh báo
+DG136|Châu Công Kiên|2|2|0|35000.0000|Cảnh báo
+DG137|Vũ Minh Lộc|0|0|0|.0000|Chưa mượn
+DG138|Mai Bảo Vinh|1|0|0|.0000|Uy tín
+DG139|Ngô Hữu Bình|3|2|0|20000.0000|Cảnh báo
+DG140|Lý Phương Ngân|9|2|1|55000.0000|Cảnh báo
+DG141|Dương Công Trí|5|0|1|60000.0000|Cảnh báo
+DG142|Hồ Minh Nam|0|0|0|.0000|Chưa mượn
+DG143|Võ Minh Khoa|0|0|0|.0000|Chưa mượn
+DG144|Huỳnh Thu Hà|0|0|0|.0000|Chưa mượn
+DG145|Huỳnh Gia Trung|2|1|0|30000.0000|Bình thường
+DG146|Mai Thanh Chi|2|1|0|15000.0000|Bình thường
+DG147|Phạm Đức Tuấn|0|0|0|.0000|Chưa mượn
+DG148|Trần Ngọc Vy|2|1|0|20000.0000|Bình thường
+DG149|Nguyễn Khánh Hằng|0|0|0|.0000|Chưa mượn
+DG150|Đỗ Khánh Chi|1|0|0|.0000|Uy tín
+DG151|Mai Kim Hằng|4|1|0|25000.0000|Bình thường
+DG152|Nguyễn Bích Tú|3|2|0|25000.0000|Cảnh báo
+DG153|Phạm Bảo Nga|0|0|0|.0000|Chưa mượn
+DG154|Dương Tuấn Hải|0|0|0|.0000|Chưa mượn
+DG155|Phan Bảo Hà|1|1|0|20000.0000|Bình thường
+DG156|Hồ Gia Long|0|0|0|.0000|Chưa mượn
+DG157|Vũ Bảo Thịnh|7|2|0|10000.0000|Cảnh báo
+DG158|Đặng Diệu Hương|0|0|0|.0000|Chưa mượn
+DG159|Trần Hữu Cường|0|0|0|.0000|Chưa mượn
+DG160|Võ Minh Thịnh|6|4|1|80000.0000|Cảnh báo
+DG161|Võ Văn Sơn|1|1|0|5000.0000|Bình thường
+DG162|Lê Hoài Vy|0|0|0|.0000|Chưa mượn
+DG163|Nguyễn Bảo Phúc|3|3|0|.0000|Cảnh báo
+DG164|Lý Văn An|3|0|0|.0000|Uy tín
+DG165|Phan Mỹ Oanh|0|0|0|.0000|Chưa mượn
+DG166|Phạm Bích Vy|0|0|0|.0000|Chưa mượn
+DG167|Vũ Công An|0|0|0|.0000|Chưa mượn
+DG168|Phan Hoàng Long|5|3|0|55000.0000|Cảnh báo
+DG169|Lê Quốc Bình|1|1|0|10000.0000|Bình thường
+DG170|Nguyễn Thanh Oanh|3|0|1|20000.0000|Cảnh báo
+DG171|Phan Mỹ Yến|0|0|0|.0000|Chưa mượn
+DG172|Phạm Quốc Vũ|0|0|0|.0000|Chưa mượn
+DG173|Võ Hoài Mai|3|0|0|.0000|Uy tín
+DG174|Hoàng Thanh Phương|5|0|0|.0000|Uy tín
+DG175|Huỳnh Thanh Thắng|3|2|0|25000.0000|Cảnh báo
+DG176|Châu Thu Uyên|1|1|0|5000.0000|Bình thường
+DG177|Hoàng Thanh Khang|3|2|0|35000.0000|Cảnh báo
+DG178|Trần Bích My|6|1|1|50000.0000|Cảnh báo
+DG179|Phạm Hoàng Khoa|6|4|1|85000.0000|Cảnh báo
+DG180|Đỗ Bảo Quân|0|0|0|.0000|Chưa mượn
+DG181|Trần Khánh Nga|3|1|0|10000.0000|Bình thường
+DG182|Hồ Thị My|2|0|0|.0000|Uy tín
+DG183|Phan Hữu Khoa|3|2|0|30000.0000|Cảnh báo
+DG184|Đỗ Minh Trí|4|4|0|20000.0000|Cảnh báo
+DG185|Lý Minh Thịnh|0|0|0|.0000|Chưa mượn
+DG186|Châu Hoài Chi|0|0|0|.0000|Chưa mượn
+DG187|Phan Tuấn Bình|5|3|0|75000.0000|Cảnh báo
+DG188|Phạm Minh Thịnh|0|0|0|.0000|Chưa mượn
+DG189|Phạm Diệu Linh|3|2|0|20000.0000|Cảnh báo
+DG190|Hoàng Bảo Tuấn|2|0|0|.0000|Uy tín
+DG191|Hồ Mỹ Uyên|0|0|0|.0000|Chưa mượn
+DG192|Đặng Thanh Đạt|8|3|0|35000.0000|Cảnh báo
+DG193|Huỳnh Đình Cường|1|0|0|.0000|Uy tín
+DG194|Dương Minh Trí|0|0|0|.0000|Chưa mượn
+DG195|Dương Thị My|0|0|0|.0000|Chưa mượn
+DG196|Châu Quốc Tuấn|0|0|0|.0000|Chưa mượn
+DG197|Võ Kim Linh|0|0|0|.0000|Chưa mượn
+DG198|Ngô Bích Hà|0|0|0|.0000|Chưa mượn
+DG199|Mai Văn Khang|1|0|0|.0000|Uy tín
+DG200|Trần Đình Đạt|0|0|0|.0000|Chưa mượn
+DG201|Lê Ngọc Oanh|2|1|0|20000.0000|Bình thường
+DG202|Trịnh Quốc Trung|0|0|0|.0000|Chưa mượn
+DG203|Trịnh Kim Trang|0|0|0|.0000|Chưa mượn
+DG204|Võ Kim Hà|2|1|0|5000.0000|Bình thường
+DG205|Phan Minh Tài|2|1|0|10000.0000|Bình thường
+DG206|Đặng Hữu Hải|5|3|0|35000.0000|Cảnh báo
+DG207|Tạ Đình Phúc|0|0|0|.0000|Chưa mượn
+DG208|Huỳnh Thu Thảo|0|0|0|.0000|Chưa mượn
+DG209|Lý Ngọc Yến|0|0|0|.0000|Chưa mượn
+DG210|Lý Kim Chi|3|2|1|45000.0000|Cảnh báo
+DG211|Đặng Thanh Hằng|0|0|0|.0000|Chưa mượn
+DG212|Lê Kim Dung|2|1|0|10000.0000|Bình thường
+DG213|Mai Hữu Tài|1|1|0|20000.0000|Bình thường
+DG214|Mai Minh Khang|10|4|0|70000.0000|Cảnh báo
+DG215|Mai Bảo Anh|5|3|0|55000.0000|Cảnh báo
+DG216|Lê Kim Nghĩa|0|0|0|.0000|Chưa mượn
+DG217|Đặng Minh Cường|0|0|0|.0000|Chưa mượn
+DG218|Ngô Ngọc Phong|4|1|0|15000.0000|Bình thường
+DG219|Hoàng Thị Xuân|1|0|0|.0000|Uy tín
+DG220|Huỳnh Ngọc Oanh|1|0|0|.0000|Uy tín
+DG221|Trần Quang Uyên|4|4|0|65000.0000|Cảnh báo
+DG222|Võ Đức Hiếu|2|0|0|.0000|Uy tín
+DG223|Lê Quốc Phúc|3|2|0|50000.0000|Cảnh báo
+DG224|Lý Hữu Xuân|4|2|0|20000.0000|Cảnh báo
+DG225|Nguyễn Ngọc Phúc|0|0|0|.0000|Chưa mượn
+DG226|Hoàng Bảo Phong|2|2|0|40000.0000|Cảnh báo
+DG227|Đỗ Đức Bình|0|0|0|.0000|Chưa mượn
+DG228|Phan Văn Linh|0|0|0|.0000|Chưa mượn
+DG229|Nguyễn Kim Dung|1|0|0|.0000|Uy tín
+DG230|Vũ Mỹ Tuấn|8|3|0|50000.0000|Cảnh báo
+DG231|Phạm Thanh Yến|3|1|1|55000.0000|Cảnh báo
+DG232|Hoàng Kim Anh|4|2|0|35000.0000|Cảnh báo
+DG233|Phạm Bảo Yến|0|0|0|.0000|Chưa mượn
+DG234|Phạm Minh Nghĩa|1|0|0|.0000|Uy tín
+DG235|Đặng Văn Nhung|0|0|0|.0000|Chưa mượn
+DG236|Huỳnh Minh Xuân|0|0|0|.0000|Chưa mượn
+DG237|Đỗ Quốc Dung|0|0|0|.0000|Chưa mượn
+DG238|Bùi Quang Đức|0|0|0|.0000|Chưa mượn
+DG239|Huỳnh Đức Khang|0|0|0|.0000|Chưa mượn
+DG240|Hồ Đức Mai|2|2|0|30000.0000|Cảnh báo
+DG241|Vũ Minh Em|0|0|0|.0000|Chưa mượn
+DG242|Lý Kim Nhung|0|0|0|.0000|Chưa mượn
+DG243|Ngô Thanh Tuấn|0|0|0|.0000|Chưa mượn
+DG244|Bùi Gia Tâm|3|0|1|40000.0000|Cảnh báo
+DG245|Đỗ Đình Cường|4|3|0|35000.0000|Cảnh báo
+DG246|Lý Hữu Cường|2|1|1|80000.0000|Cảnh báo
+DG247|Dương Quốc Giang|0|0|0|.0000|Chưa mượn
+DG248|Hoàng Hữu Bình|0|0|0|.0000|Chưa mượn
+DG249|Đỗ Đức Anh|9|5|2|135000.0000|Cảnh báo
+DG250|Võ Hữu Vinh|0|0|0|.0000|Chưa mượn
+DG251|Lý Gia Đạt|0|0|0|.0000|Chưa mượn
+DG252|Hồ Minh Phong|4|0|0|.0000|Uy tín
+DG253|Trần Gia Uyên|3|2|0|15000.0000|Cảnh báo
+DG254|Đặng Mỹ Đức|0|0|0|.0000|Chưa mượn
+DG255|Dương Hữu Tâm|0|0|0|.0000|Chưa mượn
+DG256|Bùi Quốc Trang|0|0|0|.0000|Chưa mượn
+DG257|Dương Tuyết Trang|5|1|1|30000.0000|Cảnh báo
+DG258|Bùi Ngọc Hải|3|2|0|30000.0000|Cảnh báo
+DG259|Nguyễn Bảo Bình|0|0|0|.0000|Chưa mượn
+DG260|Bùi Hữu Khang|0|0|0|.0000|Chưa mượn
+DG261|Vũ Gia Bình|2|1|0|20000.0000|Bình thường
+DG262|Võ Văn Dung|7|3|0|60000.0000|Cảnh báo
+DG263|Lê Thị Trí|3|1|0|30000.0000|Bình thường
+DG264|Ngô Quang Kiên|7|3|0|55000.0000|Cảnh báo
+DG265|Ngô Thị Uyên|7|2|0|40000.0000|Cảnh báo
+DG266|Bùi Văn Oanh|1|1|0|5000.0000|Bình thường
+DG267|Ngô Gia Phúc|2|1|0|30000.0000|Bình thường
+DG268|Nguyễn Đình Trí|4|1|1|75000.0000|Cảnh báo
+DG269|Phạm Bảo Phong|0|0|0|.0000|Chưa mượn
+DG270|Đặng Bảo Tài|0|0|0|.0000|Chưa mượn
+DG271|Hoàng Ngọc Hải|2|1|0|30000.0000|Bình thường
+DG272|Đặng Tuyết Khang|8|5|0|85000.0000|Cảnh báo
+DG273|Ngô Kim Yến|2|1|0|20000.0000|Bình thường
+DG274|Nguyễn Kim Nghĩa|0|0|0|.0000|Chưa mượn
+DG275|Trần Mỹ Phong|4|0|0|.0000|Uy tín
+DG276|Lê Hoài Trí|0|0|0|.0000|Chưa mượn
+DG277|Phạm Mỹ Em|2|1|0|30000.0000|Bình thường
+DG278|Võ Quốc Mai|2|1|0|20000.0000|Bình thường
+DG279|Huỳnh Đình Dung|0|0|0|.0000|Chưa mượn
+DG280|Võ Đức Yến|2|1|1|80000.0000|Cảnh báo
+DG281|Phạm Bảo Giang|0|0|0|.0000|Chưa mượn
+DG282|Hoàng Hoài Xuân|0|0|0|.0000|Chưa mượn
+DG283|Ngô Mỹ Kiên|1|0|0|.0000|Uy tín
+DG284|Trần Đức Anh|6|2|0|20000.0000|Cảnh báo
+DG285|Hồ Thị Đạt|2|2|0|40000.0000|Cảnh báo
+DG286|Hoàng Quốc Tuấn|2|1|0|20000.0000|Bình thường
+DG287|Đặng Hoài Xuân|0|0|0|.0000|Chưa mượn
+DG288|Lý Kim Đức|0|0|0|.0000|Chưa mượn
+DG289|Phạm Bảo Uyên|3|1|0|5000.0000|Bình thường
+DG290|Phan Bảo Kiên|0|0|0|.0000|Chưa mượn
+DG291|Hoàng Ngọc Em|2|2|0|30000.0000|Cảnh báo
+DG292|Võ Thanh Uyên|5|0|0|.0000|Uy tín
+DG293|Hồ Gia Tài|2|1|0|30000.0000|Bình thường
+DG294|Phan Quốc Tuấn|0|0|0|.0000|Chưa mượn
+DG295|Ngô Văn Nhung|3|1|0|5000.0000|Bình thường
+DG296|Ngô Văn Hiếu|5|4|0|95000.0000|Cảnh báo
+DG297|Vũ Ngọc Dung|3|1|1|30000.0000|Cảnh báo
+DG298|Hoàng Quốc Em|7|2|2|90000.0000|Cảnh báo
+DG299|Đặng Gia Khang|5|4|0|55000.0000|Cảnh báo
+DG300|Phạm Thanh Nghĩa|3|0|0|.0000|Uy tín
+DG301|Hồ Gia Phong|0|0|0|.0000|Chưa mượn
+DG302|Đỗ Minh Khang|3|1|0|25000.0000|Bình thường
+DG303|Phan Đình Uyên|4|3|0|40000.0000|Cảnh báo
+DG304|Phan Đức Em|0|0|0|.0000|Chưa mượn
+DG305|Võ Hoài Kiên|4|2|1|45000.0000|Cảnh báo
+DG306|Hoàng Hoài Đức|2|1|0|15000.0000|Bình thường
+DG307|Phạm Quang Phúc|0|0|0|.0000|Chưa mượn
+DG308|Nguyễn Minh Em|0|0|0|.0000|Chưa mượn
+DG309|Vũ Bảo Anh|2|1|0|25000.0000|Bình thường
+DG310|Huỳnh Kim Linh|0|0|0|.0000|Chưa mượn
+DG311|Bùi Minh Khang|4|3|0|40000.0000|Cảnh báo
+DG312|Dương Hoài Yến|4|2|1|85000.0000|Cảnh báo
+DG313|Dương Đình Tuấn|0|0|0|.0000|Chưa mượn
+DG314|Bùi Ngọc Vinh|0|0|0|.0000|Chưa mượn
+DG315|Đỗ Đình Xuân|0|0|0|.0000|Chưa mượn
+XEPLOAI|SODG
+-------|----
+Chưa mượn|119
+Cảnh báo|98
+Bình thường|53
+Uy tín|44
+Hạn chế|1
+### C2
+Đã tạo 15 nhắc nhở mới.
+MANN|MAPM|MACS|MADG|HOTEN|SODT|TENDS|HANTRA|SONGAYTRE|TIENPHATTAMTINH|NOIDUNG|NGAYLAP
+----|----|----|----|-----|----|-----|------|---------|---------------|-------|-------
+1|PM0011|CS011|DG001|Nguyễn Minh Anh|0901234561|Nhà giả kim|2026-09-15|28|140000.0000|Thư viện thông báo: bạn Nguyễn Minh Anh đang giữ sách "Nhà giả kim" quá hạn 28 ngày (hạn trả 15/09/2026). Tiền phạt tạm tính: 140,000đ. Vui lòng trả sách sớm.|2026-10-13
+2|PM0012|CS025|DG004|Phạm Đức Duy|0901234564|Cơ sở văn hóa Việt Nam|2026-09-24|19|95000.0000|Thư viện thông báo: bạn Phạm Đức Duy đang giữ sách "Cơ sở văn hóa Việt Nam" quá hạn 19 ngày (hạn trả 24/09/2026). Tiền phạt tạm tính: 95,000đ. Vui lòng trả sách sớm.|2026-10-13
+3|PM0015|CS014|DG013|Lý Minh Tâm|0901234573|Đắc nhân tâm|2026-09-29|14|70000.0000|Thư viện thông báo: bạn Lý Minh Tâm đang giữ sách "Đắc nhân tâm" quá hạn 14 ngày (hạn trả 29/09/2026). Tiền phạt tạm tính: 70,000đ. Vui lòng trả sách sớm.|2026-10-13
+4|PM0334|CS009|DG184|Đỗ Minh Trí|0918000184|Số đỏ|2026-09-30|13|65000.0000|Thư viện thông báo: bạn Đỗ Minh Trí đang giữ sách "Số đỏ" quá hạn 13 ngày (hạn trả 30/09/2026). Tiền phạt tạm tính: 65,000đ. Vui lòng trả sách sớm.|2026-10-13
+5|PM0334|CS010|DG184|Đỗ Minh Trí|0918000184|Nhà giả kim|2026-09-30|13|65000.0000|Thư viện thông báo: bạn Đỗ Minh Trí đang giữ sách "Nhà giả kim" quá hạn 13 ngày (hạn trả 30/09/2026). Tiền phạt tạm tính: 65,000đ. Vui lòng trả sách sớm.|2026-10-13
+6|PM0334|CS019|DG184|Đỗ Minh Trí|0918000184|Database System Concepts|2026-09-30|13|65000.0000|Thư viện thông báo: bạn Đỗ Minh Trí đang giữ sách "Database System Concepts" quá hạn 13 ngày (hạn trả 30/09/2026). Tiền phạt tạm tính: 65,000đ. Vui lòng trả sách sớm.|2026-10-13
+7|PM0387|CS001|DG163|Nguyễn Bảo Phúc|0918000163|Mắt biếc|2026-09-30|13|65000.0000|Thư viện thông báo: bạn Nguyễn Bảo Phúc đang giữ sách "Mắt biếc" quá hạn 13 ngày (hạn trả 30/09/2026). Tiền phạt tạm tính: 65,000đ. Vui lòng trả sách sớm.|2026-10-13
+8|PM0387|CS021|DG163|Nguyễn Bảo Phúc|0918000163|Rừng Na Uy|2026-09-30|13|65000.0000|Thư viện thông báo: bạn Nguyễn Bảo Phúc đang giữ sách "Rừng Na Uy" quá hạn 13 ngày (hạn trả 30/09/2026). Tiền phạt tạm tính: 65,000đ. Vui lòng trả sách sớm.|2026-10-13
+9|PM0387|CS024|DG163|Nguyễn Bảo Phúc|0918000163|Nguyên lý kinh tế học|2026-09-30|13|65000.0000|Thư viện thông báo: bạn Nguyễn Bảo Phúc đang giữ sách "Nguyên lý kinh tế học" quá hạn 13 ngày (hạn trả 30/09/2026). Tiền phạt tạm tính: 65,000đ. Vui lòng trả sách sớm.|2026-10-13
+10|PM0014|CS003|DG014|Mai Anh Thư|0901234574|Mắt biếc|2026-10-04|9|45000.0000|Thư viện thông báo: bạn Mai Anh Thư đang giữ sách "Mắt biếc" quá hạn 9 ngày (hạn trả 04/10/2026). Tiền phạt tạm tính: 45,000đ. Vui lòng trả sách sớm.|2026-10-13
+11|PM0014|CS007|DG014|Mai Anh Thư|0901234574|Dế Mèn phiêu lưu ký|2026-10-04|9|45000.0000|Thư viện thông báo: bạn Mai Anh Thư đang giữ sách "Dế Mèn phiêu lưu ký" quá hạn 9 ngày (hạn trả 04/10/2026). Tiền phạt tạm tính: 45,000đ. Vui lòng trả sách sớm.|2026-10-13
+12|PM0016|CS017|DG002|Trần Quốc Bảo|0901234562|Clean Code|2026-10-08|5|25000.0000|Thư viện thông báo: bạn Trần Quốc Bảo đang giữ sách "Clean Code" quá hạn 5 ngày (hạn trả 08/10/2026). Tiền phạt tạm tính: 25,000đ. Vui lòng trả sách sớm.|2026-10-13
+13|PM0016|CS026|DG002|Trần Quốc Bảo|0901234562|Giáo trình Giải tích 1|2026-10-08|5|25000.0000|Thư viện thông báo: bạn Trần Quốc Bảo đang giữ sách "Giáo trình Giải tích 1" quá hạn 5 ngày (hạn trả 08/10/2026). Tiền phạt tạm tính: 25,000đ. Vui lòng trả sách sớm.|2026-10-13
+14|PM0388|CS013|DG118|Châu Hoài Tú|0918000118|Đắc nhân tâm|2026-10-12|1|5000.0000|Thư viện thông báo: bạn Châu Hoài Tú đang giữ sách "Đắc nhân tâm" quá hạn 1 ngày (hạn trả 12/10/2026). Tiền phạt tạm tính: 5,000đ. Vui lòng trả sách sớm.|2026-10-13
+15|PM0388|CS022|DG118|Châu Hoài Tú|0918000118|Harry Potter và Hòn đá Phù thủy|2026-10-12|1|5000.0000|Thư viện thông báo: bạn Châu Hoài Tú đang giữ sách "Harry Potter và Hòn đá Phù thủy" quá hạn 1 ngày (hạn trả 12/10/2026). Tiền phạt tạm tính: 5,000đ. Vui lòng trả sách sớm.|2026-10-13
+### C2 lan 2
+Đã tạo 0 nhắc nhở mới.
+MANN|MAPM|MACS|MADG|HOTEN|SODT|TENDS|HANTRA|SONGAYTRE|TIENPHATTAMTINH|NOIDUNG|NGAYLAP
+----|----|----|----|-----|----|-----|------|---------|---------------|-------|-------
+1|PM0011|CS011|DG001|Nguyễn Minh Anh|0901234561|Nhà giả kim|2026-09-15|28|140000.0000|Thư viện thông báo: bạn Nguyễn Minh Anh đang giữ sách "Nhà giả kim" quá hạn 28 ngày (hạn trả 15/09/2026). Tiền phạt tạm tính: 140,000đ. Vui lòng trả sách sớm.|2026-10-13
+2|PM0012|CS025|DG004|Phạm Đức Duy|0901234564|Cơ sở văn hóa Việt Nam|2026-09-24|19|95000.0000|Thư viện thông báo: bạn Phạm Đức Duy đang giữ sách "Cơ sở văn hóa Việt Nam" quá hạn 19 ngày (hạn trả 24/09/2026). Tiền phạt tạm tính: 95,000đ. Vui lòng trả sách sớm.|2026-10-13
+3|PM0015|CS014|DG013|Lý Minh Tâm|0901234573|Đắc nhân tâm|2026-09-29|14|70000.0000|Thư viện thông báo: bạn Lý Minh Tâm đang giữ sách "Đắc nhân tâm" quá hạn 14 ngày (hạn trả 29/09/2026). Tiền phạt tạm tính: 70,000đ. Vui lòng trả sách sớm.|2026-10-13
+4|PM0334|CS009|DG184|Đỗ Minh Trí|0918000184|Số đỏ|2026-09-30|13|65000.0000|Thư viện thông báo: bạn Đỗ Minh Trí đang giữ sách "Số đỏ" quá hạn 13 ngày (hạn trả 30/09/2026). Tiền phạt tạm tính: 65,000đ. Vui lòng trả sách sớm.|2026-10-13
+5|PM0334|CS010|DG184|Đỗ Minh Trí|0918000184|Nhà giả kim|2026-09-30|13|65000.0000|Thư viện thông báo: bạn Đỗ Minh Trí đang giữ sách "Nhà giả kim" quá hạn 13 ngày (hạn trả 30/09/2026). Tiền phạt tạm tính: 65,000đ. Vui lòng trả sách sớm.|2026-10-13
+6|PM0334|CS019|DG184|Đỗ Minh Trí|0918000184|Database System Concepts|2026-09-30|13|65000.0000|Thư viện thông báo: bạn Đỗ Minh Trí đang giữ sách "Database System Concepts" quá hạn 13 ngày (hạn trả 30/09/2026). Tiền phạt tạm tính: 65,000đ. Vui lòng trả sách sớm.|2026-10-13
+7|PM0387|CS001|DG163|Nguyễn Bảo Phúc|0918000163|Mắt biếc|2026-09-30|13|65000.0000|Thư viện thông báo: bạn Nguyễn Bảo Phúc đang giữ sách "Mắt biếc" quá hạn 13 ngày (hạn trả 30/09/2026). Tiền phạt tạm tính: 65,000đ. Vui lòng trả sách sớm.|2026-10-13
+8|PM0387|CS021|DG163|Nguyễn Bảo Phúc|0918000163|Rừng Na Uy|2026-09-30|13|65000.0000|Thư viện thông báo: bạn Nguyễn Bảo Phúc đang giữ sách "Rừng Na Uy" quá hạn 13 ngày (hạn trả 30/09/2026). Tiền phạt tạm tính: 65,000đ. Vui lòng trả sách sớm.|2026-10-13
+9|PM0387|CS024|DG163|Nguyễn Bảo Phúc|0918000163|Nguyên lý kinh tế học|2026-09-30|13|65000.0000|Thư viện thông báo: bạn Nguyễn Bảo Phúc đang giữ sách "Nguyên lý kinh tế học" quá hạn 13 ngày (hạn trả 30/09/2026). Tiền phạt tạm tính: 65,000đ. Vui lòng trả sách sớm.|2026-10-13
+10|PM0014|CS003|DG014|Mai Anh Thư|0901234574|Mắt biếc|2026-10-04|9|45000.0000|Thư viện thông báo: bạn Mai Anh Thư đang giữ sách "Mắt biếc" quá hạn 9 ngày (hạn trả 04/10/2026). Tiền phạt tạm tính: 45,000đ. Vui lòng trả sách sớm.|2026-10-13
+11|PM0014|CS007|DG014|Mai Anh Thư|0901234574|Dế Mèn phiêu lưu ký|2026-10-04|9|45000.0000|Thư viện thông báo: bạn Mai Anh Thư đang giữ sách "Dế Mèn phiêu lưu ký" quá hạn 9 ngày (hạn trả 04/10/2026). Tiền phạt tạm tính: 45,000đ. Vui lòng trả sách sớm.|2026-10-13
+12|PM0016|CS017|DG002|Trần Quốc Bảo|0901234562|Clean Code|2026-10-08|5|25000.0000|Thư viện thông báo: bạn Trần Quốc Bảo đang giữ sách "Clean Code" quá hạn 5 ngày (hạn trả 08/10/2026). Tiền phạt tạm tính: 25,000đ. Vui lòng trả sách sớm.|2026-10-13
+13|PM0016|CS026|DG002|Trần Quốc Bảo|0901234562|Giáo trình Giải tích 1|2026-10-08|5|25000.0000|Thư viện thông báo: bạn Trần Quốc Bảo đang giữ sách "Giáo trình Giải tích 1" quá hạn 5 ngày (hạn trả 08/10/2026). Tiền phạt tạm tính: 25,000đ. Vui lòng trả sách sớm.|2026-10-13
+14|PM0388|CS013|DG118|Châu Hoài Tú|0918000118|Đắc nhân tâm|2026-10-12|1|5000.0000|Thư viện thông báo: bạn Châu Hoài Tú đang giữ sách "Đắc nhân tâm" quá hạn 1 ngày (hạn trả 12/10/2026). Tiền phạt tạm tính: 5,000đ. Vui lòng trả sách sớm.|2026-10-13
+15|PM0388|CS022|DG118|Châu Hoài Tú|0918000118|Harry Potter và Hòn đá Phù thủy|2026-10-12|1|5000.0000|Thư viện thông báo: bạn Châu Hoài Tú đang giữ sách "Harry Potter và Hòn đá Phù thủy" quá hạn 1 ngày (hạn trả 12/10/2026). Tiền phạt tạm tính: 5,000đ. Vui lòng trả sách sớm.|2026-10-13

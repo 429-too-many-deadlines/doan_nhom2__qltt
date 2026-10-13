@@ -9,10 +9,10 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
 :root {
-  --bg: #F8FAFC; --card: #FFFFFF; --line: #E2E8F0; --ink: #0F172A; --muted: #475569; --soft: #94A3B8;
-  --primary: #2563EB; --primary-50: #EFF6FF; --primary-100: #DBEAFE; --primary-700: #1D4ED8;
-  --sky: #0EA5E9; --sky-50: #F0F9FF; --green: #10B981; --green-50: #ECFDF5;
-  --amber: #F59E0B; --amber-50: #FFFBEB; --red: #EF4444; --red-50: #FEF2F2; --code-bg: #F1F5F9;
+  --bg: #FFFFFF; --card: #FFFFFF; --line: #E2E8F0; --ink: #0F172A; --muted: #475569; --soft: #94A3B8;
+  --primary: #1E3A8A; --primary-50: #F1F5F9; --primary-100: #E2E8F0; --primary-700: #1E3A8A;
+  --sky: #1E3A8A; --sky-50: #F1F5F9; --green: #047857; --green-50: #F0FDF4;
+  --amber: #475569; --amber-50: #F1F5F9; --red: #B91C1C; --red-50: #FEF2F2; --code-bg: #F8FAFC;
   --font: 'Be Vietnam Pro', 'Segoe UI', system-ui, sans-serif;
   --mono: 'JetBrains Mono', Consolas, 'Courier New', monospace;
   --s: 1;
@@ -24,14 +24,9 @@ html, body { margin: 0; height: 100%; background: #CBD5E1; font-family: var(--fo
   position: absolute; left: 50%; top: 50%; width: 1280px; height: 720px; margin: -360px 0 0 -640px;
   transform: scale(var(--s)); display: none; overflow: hidden;
   background-color: var(--bg);
-  background-image: radial-gradient(#CBD5E1 1px, transparent 1px); background-size: 24px 24px;
-  box-shadow: 0 20px 60px rgba(15, 23, 42, .25);
+  box-shadow: 0 8px 30px rgba(15, 23, 42, .15);
 }
 .slide.active, body.checking .slide { display: block; }
-.slide::before {
-  content: ""; position: absolute; width: 560px; height: 560px; right: -200px; top: -260px; pointer-events: none;
-  background: radial-gradient(circle, rgba(37, 99, 235, .16), rgba(14, 165, 233, .07) 45%, transparent 70%);
-}
 .slide > header { position: absolute; left: 56px; right: 56px; top: 34px; }
 .chip {
   display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px; border-radius: 999px;
@@ -45,7 +40,7 @@ html, body { margin: 0; height: 100%; background: #CBD5E1; font-family: var(--fo
   position: absolute; left: 56px; right: 56px; bottom: 22px; display: flex; justify-content: space-between;
   font-size: 13px; color: var(--soft); font-weight: 500;
 }
-.progress { position: absolute; left: 0; bottom: 0; height: 4px; width: calc(var(--p) * 100%); background: linear-gradient(90deg, var(--primary), var(--sky)); }
+.progress { position: absolute; left: 0; bottom: 0; height: 4px; width: calc(var(--p) * 100%); background: var(--primary); }
 
 /* lưới và thẻ */
 .grid { display: grid; gap: 20px; }
@@ -55,14 +50,13 @@ html, body { margin: 0; height: 100%; background: #CBD5E1; font-family: var(--fo
 .stack { display: flex; flex-direction: column; gap: 14px; min-height: 0; }
 .stack > * { flex-shrink: 0; }
 .card {
-  background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px 20px; overflow: hidden;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 8px 24px rgba(15, 23, 42, .06);
+  background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 16px 20px; overflow: hidden;
 }
 .card h3 { margin: 0 0 10px; font-size: 18px; line-height: 1.3; display: flex; align-items: center; gap: 10px; }
-.ico { width: 34px; height: 34px; border-radius: 10px; display: inline-grid; place-items: center; background: var(--primary-50); color: var(--primary); flex: none; }
+.ico { width: 34px; height: 34px; border-radius: 8px; display: inline-grid; place-items: center; background: var(--primary-50); color: var(--primary); flex: none; }
 .ico svg { width: 19px; height: 19px; }
-.ico.red { background: var(--red-50); color: var(--red); } .ico.green { background: var(--green-50); color: var(--green); }
-.ico.amber { background: var(--amber-50); color: #D97706; } .ico.sky { background: var(--sky-50); color: var(--sky); }
+.ico.red { background: var(--red-50); color: var(--red); } .ico.green { background: var(--primary-50); color: var(--primary); }
+.ico.amber { background: var(--primary-50); color: var(--primary); } .ico.sky { background: var(--primary-50); color: var(--primary); }
 svg.i, .ico svg, .res svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 ul.list { margin: 0; padding-left: 18px; font-size: 15px; line-height: 1.5; color: var(--muted); }
 ul.list li { margin-bottom: 6px; } ul.list li::marker { color: var(--primary); }
@@ -70,15 +64,15 @@ ul.list.check { list-style: none; padding-left: 0; }
 ul.list.check li { position: relative; padding-left: 24px; }
 ul.list.check li::before { content: "✓"; position: absolute; left: 2px; color: var(--green); font-weight: 700; }
 ul.list b, .muted b { color: var(--ink); }
-.note-box { margin: 12px 0 0; padding: 10px 12px; border-radius: 10px; background: var(--primary-50); color: #1E3A8A; font-size: 14px; line-height: 1.45; }
+.note-box { margin: 12px 0 0; padding: 10px 12px; border-radius: 6px; background: var(--primary-50); color: var(--ink); font-size: 14px; line-height: 1.45; }
 .pill { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 13px; font-weight: 600; background: var(--primary-50); color: var(--primary); border: 1px solid var(--primary-100); margin: 6px 6px 0 0; white-space: nowrap; }
-.pill.green { background: var(--green-50); color: #047857; border-color: #A7F3D0; }
-.pill.amber { background: var(--amber-50); color: #B45309; border-color: #FDE68A; }
+.pill.green { background: #fff; color: var(--muted); border-color: var(--line); }
+.pill.amber { background: #fff; color: var(--muted); border-color: var(--line); }
 .pill.red { background: var(--red-50); color: #B91C1C; border-color: #FECACA; }
-.pill.sky { background: var(--sky-50); color: #0369A1; border-color: #BAE6FD; }
+.pill.sky { background: #fff; color: var(--muted); border-color: var(--line); }
 .tag { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; background: var(--primary-50); color: var(--primary); white-space: nowrap; }
-.tag.green { background: var(--green-50); color: #047857; } .tag.amber { background: var(--amber-50); color: #B45309; }
-.tag.red { background: var(--red-50); color: #B91C1C; } .tag.sky { background: var(--sky-50); color: #0369A1; }
+.tag.green { background: var(--primary-50); color: var(--primary); } .tag.amber { background: var(--primary-50); color: var(--primary); }
+.tag.red { background: var(--red-50); color: #B91C1C; } .tag.sky { background: var(--primary-50); color: var(--primary); }
 .mono { font-family: var(--mono); } .muted { color: var(--muted); } .small { font-size: 13px; }
 
 /* bảng */
@@ -92,7 +86,7 @@ table.t.xs td, table.t.xs th { padding: 3px 8px; }
 
 /* code */
 pre.sql, pre.code {
-  margin: 0; background: var(--code-bg); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px;
+  margin: 0; background: var(--code-bg); border: 1px solid var(--line); border-radius: 6px; padding: 10px 14px;
   font: 12.5px/1.45 var(--mono); color: #334155; white-space: pre; overflow: hidden;
   font-variant-ligatures: none;
 }
@@ -101,13 +95,13 @@ pre .k { color: #7C3AED; font-weight: 600; } pre .s { color: #059669; } pre .c {
 pre .o { color: var(--primary); font-weight: 600; } pre .v { color: #0369A1; } pre .n { color: #D97706; }
 
 /* thành phần */
-.stat { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; }
+.stat { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; }
 .stat .v { font-size: 28px; font-weight: 800; color: var(--primary); line-height: 1.1; }
 .stat .l { font-size: 13px; color: var(--muted); margin-top: 4px; line-height: 1.35; }
 .ba { display: grid; grid-template-columns: 1fr 26px 1fr; gap: 6px; font-size: 13px; line-height: 1.45; }
-.ba > .before, .ba > .after { border-radius: 12px; padding: 8px 12px; }
+.ba > .before, .ba > .after { border-radius: 8px; padding: 8px 12px; }
 .before { background: #F1F5F9; border: 1px solid var(--line); }
-.after { background: var(--green-50); border: 1px solid #A7F3D0; }
+.after { background: var(--primary-50); border: 1px solid var(--line); }
 .ba .arrow { display: grid; place-items: center; color: var(--primary); font-weight: 800; font-size: 18px; }
 .ba b.h { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 2px; }
 .flow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
@@ -116,9 +110,9 @@ pre .o { color: var(--primary); font-weight: 600; } pre .v { color: #0369A1; } p
 .obj p { margin: 6px 0 8px; font-size: 13.5px; color: var(--muted); line-height: 1.45; }
 .obj-h { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .obj .name { font-family: var(--mono); font-weight: 700; color: var(--primary); font-size: 14.5px; }
-.res { margin-top: 8px; font-size: 13px; line-height: 1.45; background: var(--green-50); border: 1px solid #A7F3D0; border-radius: 10px; padding: 6px 10px; color: #065F46; }
+.res { margin-top: 8px; font-size: 13px; line-height: 1.45; background: var(--primary-50); border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; color: var(--ink); }
 .res.red { background: var(--red-50); border-color: #FECACA; color: #991B1B; }
-.role { border: 1px solid var(--line); border-radius: 12px; padding: 9px 12px; margin-top: 10px; }
+.role { border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; margin-top: 10px; }
 .role-h { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .role p { margin: 4px 0 0; font-size: 13.5px; color: var(--muted); line-height: 1.45; }
 .schema { padding: 10px 0; border-top: 1px dashed var(--line); }
@@ -128,23 +122,21 @@ pre .o { color: var(--primary); font-weight: 600; } pre .v { color: #0369A1; } p
 .schema .r u { text-decoration-thickness: 2px; text-underline-offset: 3px; }
 .schema .d { font-size: 14.5px; color: var(--muted); line-height: 1.4; margin-top: 2px; }
 .ph {
-  border: 2px dashed #93C5FD; border-radius: 14px; display: grid; place-items: center; text-align: center; padding: 12px;
-  background: repeating-linear-gradient(45deg, #F8FAFC, #F8FAFC 10px, #EFF6FF 10px, #EFF6FF 20px);
+  border: 2px dashed #CBD5E1; border-radius: 14px; display: grid; place-items: center; text-align: center; padding: 12px;
+  background: #F8FAFC;
   color: var(--primary); font-size: 14px; font-weight: 600;
 }
 .ph svg { width: 34px; height: 34px; display: block; margin: 0 auto 6px; }
 .hbar { display: grid; grid-template-columns: 1fr 120px 22px; align-items: center; gap: 8px; font-size: 12.5px; margin-top: 7px; }
 .hbar .track { height: 12px; border-radius: 6px; background: #F1F5F9; overflow: hidden; }
-.hbar .fill { height: 100%; border-radius: 6px; background: linear-gradient(90deg, var(--primary), var(--sky)); }
+.hbar .fill { height: 100%; border-radius: 6px; background: var(--primary); }
 .legend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12.5px; color: var(--muted); margin-top: 6px; }
 .dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
 
 /* bìa và slide kết */
-.slide.hero { background-color: #fff; background-image: radial-gradient(#DBEAFE 1px, transparent 1px); }
-.slide.hero::before { width: 780px; height: 780px; right: -260px; top: -280px; background: radial-gradient(circle, rgba(37, 99, 235, .22), rgba(14, 165, 233, .10) 45%, transparent 70%); }
-.slide.hero::after { content: ""; position: absolute; left: -220px; bottom: -280px; width: 600px; height: 600px; pointer-events: none; background: radial-gradient(circle, rgba(16, 185, 129, .14), transparent 65%); }
+.slide.hero { background-color: #fff; }
 .hero .body { top: 52px; bottom: 52px; left: 64px; right: 64px; }
-.gradient-text { background: linear-gradient(90deg, var(--primary-700), var(--sky)); -webkit-background-clip: text; background-clip: text; color: transparent;  padding-top: .14em; margin-top: -.14em; }  /* chừa chỗ cho dấu chồng (Ố, Ẩ) */
+.gradient-text { color: var(--primary); }
 .uni { font-size: 15px; font-weight: 700; color: #1E3A8A; line-height: 1.55; letter-spacing: .02em; }
 .hero h1 { margin: 16px 0 8px; font-size: 54px; line-height: 1.1; font-weight: 800; letter-spacing: -.02em; }
 .cover-head { display: flex; align-items: center; gap: 22px; padding-bottom: 18px; border-bottom: 2px solid var(--primary-100); }
@@ -167,7 +159,7 @@ pre .o { color: var(--primary); font-weight: 600; } pre .v { color: #0369A1; } p
   .slide { position: relative; left: 0; top: 0; margin: 0; display: block !important; transform: none !important; box-shadow: none; break-after: page; page-break-after: always; }
   .slide:last-child { break-after: auto; page-break-after: auto; }
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  .gradient-text { background: none; color: var(--primary-700); }  /* Chromium in PDF để lại viền quanh chữ clip-text */
+  .gradient-text { color: var(--primary); }
 }
 </style>
 </head>
@@ -304,15 +296,15 @@ pre .o { color: var(--primary); font-weight: 600; } pre .v { color: #0369A1; } p
         </g>
         <g stroke-width="1.5">
           <rect x="230" y="8" width="260" height="40" rx="10" fill="#fff" stroke="#CBD5E1"/>
-          <polygon points="240,98 360,64 480,98 360,132" fill="#EFF6FF" stroke="#93C5FD"/>
-          <polygon points="240,186 360,152 480,186 360,220" fill="#EFF6FF" stroke="#93C5FD"/>
+          <polygon points="240,98 360,64 480,98 360,132" fill="#F1F5F9" stroke="#94A3B8"/>
+          <polygon points="240,186 360,152 480,186 360,220" fill="#F1F5F9" stroke="#94A3B8"/>
           <rect x="548" y="120" width="160" height="52" rx="10" fill="#FEF2F2" stroke="#FCA5A5"/>
-          <rect x="230" y="240" width="260" height="40" rx="10" fill="#EFF6FF" stroke="#93C5FD"/>
+          <rect x="230" y="240" width="260" height="40" rx="10" fill="#F1F5F9" stroke="#94A3B8"/>
           <rect x="230" y="306" width="260" height="40" rx="10" fill="#fff" stroke="#CBD5E1"/>
-          <polygon points="240,392 360,358 480,392 360,426" fill="#FFFBEB" stroke="#FCD34D"/>
-          <rect x="10" y="372" width="180" height="40" rx="10" fill="#FFFBEB" stroke="#FCD34D"/>
-          <rect x="230" y="460" width="260" height="40" rx="10" fill="#ECFDF5" stroke="#6EE7B7"/>
-          <rect x="10" y="460" width="180" height="40" rx="10" fill="#ECFDF5" stroke="#6EE7B7"/>
+          <polygon points="240,392 360,358 480,392 360,426" fill="#FFFFFF" stroke="#94A3B8"/>
+          <rect x="10" y="372" width="180" height="40" rx="10" fill="#FFFFFF" stroke="#94A3B8"/>
+          <rect x="230" y="460" width="260" height="40" rx="10" fill="#F1F5F9" stroke="#94A3B8"/>
+          <rect x="10" y="460" width="180" height="40" rx="10" fill="#F1F5F9" stroke="#94A3B8"/>
         </g>
         <g text-anchor="middle" fill="#0F172A">
           <text x="360" y="33">Độc giả đưa thẻ và sách muốn mượn</text>
@@ -320,12 +312,12 @@ pre .o { color: var(--primary); font-weight: 600; } pre .v { color: #0369A1; } p
           <text x="360" y="191">Cuốn sách “Có sẵn”?</text>
           <text x="628" y="142" fill="#B91C1C" font-weight="600">Từ chối:</text>
           <text x="628" y="160" fill="#B91C1C">gia hạn thẻ / trả nợ</text>
-          <text x="360" y="265" font-weight="600" fill="#1D4ED8">Lập phiếu mượn, hạn trả 14 ngày</text>
+          <text x="360" y="265" font-weight="600" fill="#1E3A8A">Lập phiếu mượn, hạn trả 14 ngày</text>
           <text x="360" y="331">Trả sách: ghi ngày trả, tình trạng</text>
           <text x="360" y="397">Trễ hạn, hư hoặc mất?</text>
-          <text x="100" y="397" fill="#B45309" font-weight="600">Tự lập phiếu phạt, tăng nợ</text>
-          <text x="360" y="485" fill="#047857" font-weight="600">Cập nhật cuốn sách, đóng phiếu</text>
-          <text x="100" y="485" fill="#047857">Thanh toán, công nợ về 0</text>
+          <text x="100" y="397" fill="#1E3A8A" font-weight="600">Tự lập phiếu phạt, tăng nợ</text>
+          <text x="360" y="485" fill="#1E3A8A" font-weight="600">Cập nhật cuốn sách, đóng phiếu</text>
+          <text x="100" y="485" fill="#1E3A8A">Thanh toán, công nợ về 0</text>
         </g>
       </svg>
     </div>
@@ -377,7 +369,7 @@ pre .o { color: var(--primary); font-weight: 600; } pre .v { color: #0369A1; } p
           <path d="M210 46L320 150"/><path d="M210 160H320"/><path d="M510 160H620"/><path d="M715 76V130"/>
           <path d="M415 190V250"/><path d="M115 310V370"/><path d="M210 400H320"/><path d="M415 310V370"/><path d="M510 400H620"/>
         </g>
-        <g font-size="11.5" fill="#1D4ED8" font-weight="600">
+        <g font-size="11.5" fill="#1E3A8A" font-weight="600">
           <text x="236" y="86">thuộc · 1:n</text>
           <text x="222" y="152">phát hành · 1:n</text>
           <text x="532" y="152">viết · 1:n</text>
@@ -389,17 +381,17 @@ pre .o { color: var(--primary); font-weight: 600; } pre .v { color: #0369A1; } p
           <text x="530" y="392">phát sinh · 1:n</text>
         </g>
         <g font-size="14" font-weight="700" fill="#0F172A" text-anchor="middle">
-          <rect x="20" y="16" width="190" height="60" rx="10" fill="#fff" stroke="#93C5FD"/><text x="115" y="40">THELOAI</text>
-          <rect x="20" y="130" width="190" height="60" rx="10" fill="#fff" stroke="#93C5FD"/><text x="115" y="154">NHAXUATBAN</text>
-          <rect x="320" y="130" width="190" height="60" rx="10" fill="#EFF6FF" stroke="#2563EB" stroke-width="2"/><text x="415" y="154">DAUSACH</text>
-          <rect x="620" y="16" width="190" height="60" rx="10" fill="#fff" stroke="#93C5FD"/><text x="715" y="40">TACGIA</text>
-          <rect x="620" y="130" width="190" height="60" rx="10" fill="#F0F9FF" stroke="#0EA5E9"/><text x="715" y="154">DAUSACH_TACGIA</text>
-          <rect x="320" y="250" width="190" height="60" rx="10" fill="#fff" stroke="#93C5FD"/><text x="415" y="274">CUONSACH</text>
+          <rect x="20" y="16" width="190" height="60" rx="10" fill="#fff" stroke="#94A3B8"/><text x="115" y="40">THELOAI</text>
+          <rect x="20" y="130" width="190" height="60" rx="10" fill="#fff" stroke="#94A3B8"/><text x="115" y="154">NHAXUATBAN</text>
+          <rect x="320" y="130" width="190" height="60" rx="10" fill="#F1F5F9" stroke="#1E3A8A" stroke-width="2"/><text x="415" y="154">DAUSACH</text>
+          <rect x="620" y="16" width="190" height="60" rx="10" fill="#fff" stroke="#94A3B8"/><text x="715" y="40">TACGIA</text>
+          <rect x="620" y="130" width="190" height="60" rx="10" fill="#FFFFFF" stroke="#94A3B8"/><text x="715" y="154">DAUSACH_TACGIA</text>
+          <rect x="320" y="250" width="190" height="60" rx="10" fill="#fff" stroke="#94A3B8"/><text x="415" y="274">CUONSACH</text>
           <rect x="620" y="250" width="190" height="60" rx="10" fill="#F8FAFC" stroke="#94A3B8" stroke-dasharray="5 4"/><text x="715" y="274">TAIKHOAN</text>
-          <rect x="20" y="250" width="190" height="60" rx="10" fill="#fff" stroke="#93C5FD"/><text x="115" y="274">DOCGIA</text>
-          <rect x="20" y="370" width="190" height="60" rx="10" fill="#fff" stroke="#93C5FD"/><text x="115" y="394">PHIEUMUON</text>
-          <rect x="320" y="370" width="190" height="60" rx="10" fill="#F0F9FF" stroke="#0EA5E9"/><text x="415" y="394">CTPHIEUMUON</text>
-          <rect x="620" y="370" width="190" height="60" rx="10" fill="#FFFBEB" stroke="#F59E0B"/><text x="715" y="394">PHIEUPHAT</text>
+          <rect x="20" y="250" width="190" height="60" rx="10" fill="#fff" stroke="#94A3B8"/><text x="115" y="274">DOCGIA</text>
+          <rect x="20" y="370" width="190" height="60" rx="10" fill="#fff" stroke="#94A3B8"/><text x="115" y="394">PHIEUMUON</text>
+          <rect x="320" y="370" width="190" height="60" rx="10" fill="#FFFFFF" stroke="#94A3B8"/><text x="415" y="394">CTPHIEUMUON</text>
+          <rect x="620" y="370" width="190" height="60" rx="10" fill="#FFFFFF" stroke="#94A3B8"/><text x="715" y="394">PHIEUPHAT</text>
         </g>
         <g font-family="JetBrains Mono, Consolas, monospace" font-size="11" fill="#475569" text-anchor="middle">
           <text x="115" y="62">PK MATL</text><text x="115" y="176">PK MANXB</text><text x="415" y="176">PK MADS · FK MATL, MANXB</text>
@@ -641,8 +633,8 @@ END</pre>
       <div class="small muted" style="margin:10px 0 6px;font-weight:600">Trả CS003 (giá 110.000đ, phiếu PM0014) ngày 2026-10-11, tình trạng “Hư hỏng”</div>
       <div class="grid g4" style="gap:8px">
         <div class="stat" style="padding:8px 10px"><div class="v" style="font-size:16px">Hư hỏng</div><div class="l">CS003</div></div>
-        <div class="stat" style="padding:8px 10px"><div class="v" style="font-size:16px;color:#D97706">55.000</div><div class="l">PP0012 hư 50%</div></div>
-        <div class="stat" style="padding:8px 10px"><div class="v" style="font-size:16px;color:#D97706">35.000</div><div class="l">PP0013 trễ 7 ngày</div></div>
+        <div class="stat" style="padding:8px 10px"><div class="v" style="font-size:16px;color:#8A5A12">55.000</div><div class="l">PP0012 hư 50%</div></div>
+        <div class="stat" style="padding:8px 10px"><div class="v" style="font-size:16px;color:#8A5A12">35.000</div><div class="l">PP0013 trễ 7 ngày</div></div>
         <div class="stat" style="padding:8px 10px"><div class="v" style="font-size:16px">90.000</div><div class="l">TONGNO DG014</div></div>
       </div>
     </div>
@@ -685,11 +677,11 @@ RETURN @SONGAYTRE * 5000</pre>
   WHEN @SOTRE = 1                     THEN N'Bình thường'
   ELSE N'Uy tín' END</pre>
         <div style="display:flex;height:14px;border-radius:7px;overflow:hidden;margin-top:10px">
-          <div style="width:84.9%;background:#CBD5E1"></div><div style="width:5.0%;background:#F59E0B"></div>
-          <div style="width:4.2%;background:#0EA5E9"></div><div style="width:4.2%;background:#10B981"></div><div style="width:1.7%;background:#EF4444"></div>
+          <div style="width:84.9%;background:#CBD5E1"></div><div style="width:5.0%;background:#C08A2E"></div>
+          <div style="width:4.2%;background:#5B7DB1"></div><div style="width:4.2%;background:#3F8F6B"></div><div style="width:1.7%;background:#B84A4A"></div>
         </div>
-        <div class="legend"><span><i class="dot" style="background:#CBD5E1"></i>Chưa mượn 101</span><span><i class="dot" style="background:#F59E0B"></i>Cảnh báo 6</span>
-          <span><i class="dot" style="background:#0EA5E9"></i>Bình thường 5</span><span><i class="dot" style="background:#10B981"></i>Uy tín 5</span><span><i class="dot" style="background:#EF4444"></i>Hạn chế 2</span></div>
+        <div class="legend"><span><i class="dot" style="background:#CBD5E1"></i>Chưa mượn 101</span><span><i class="dot" style="background:#C08A2E"></i>Cảnh báo 6</span>
+          <span><i class="dot" style="background:#5B7DB1"></i>Bình thường 5</span><span><i class="dot" style="background:#3F8F6B"></i>Uy tín 5</span><span><i class="dot" style="background:#B84A4A"></i>Hạn chế 2</span></div>
       </div>
       <div class="card obj">
         <div class="obj-h"><span class="tag amber">Cursor</span><span class="name">SP_CURSOR_NHACNHOQUAHAN</span></div>
@@ -768,17 +760,17 @@ RESTORE DATABASE QUANLYTHUVIEN FROM DISK = N'..._DIFF.bak'
         <div style="display:flex;gap:14px;align-items:center">
           <svg viewBox="0 0 120 120" width="104" height="104" aria-label="Donut tình trạng kho">
             <g transform="rotate(-90 60 60)" fill="none" stroke-width="18">
-              <circle cx="60" cy="60" r="44" stroke="#10B981" stroke-dasharray="138.23 276.46"/>
-              <circle cx="60" cy="60" r="44" stroke="#2563EB" stroke-dasharray="106.33 276.46" stroke-dashoffset="-138.23"/>
-              <circle cx="60" cy="60" r="44" stroke="#F59E0B" stroke-dasharray="21.27 276.46" stroke-dashoffset="-244.56"/>
-              <circle cx="60" cy="60" r="44" stroke="#EF4444" stroke-dasharray="10.63 276.46" stroke-dashoffset="-265.83"/>
+              <circle cx="60" cy="60" r="44" stroke="#3F8F6B" stroke-dasharray="138.23 276.46"/>
+              <circle cx="60" cy="60" r="44" stroke="#1E3A8A" stroke-dasharray="106.33 276.46" stroke-dashoffset="-138.23"/>
+              <circle cx="60" cy="60" r="44" stroke="#C08A2E" stroke-dasharray="21.27 276.46" stroke-dashoffset="-244.56"/>
+              <circle cx="60" cy="60" r="44" stroke="#B84A4A" stroke-dasharray="10.63 276.46" stroke-dashoffset="-265.83"/>
             </g>
             <text x="60" y="60" text-anchor="middle" font-size="22" font-weight="800" fill="#0F172A">26</text>
             <text x="60" y="78" text-anchor="middle" font-size="11" fill="#475569">cuốn</text>
           </svg>
           <div class="legend" style="flex-direction:column;gap:3px;margin:0">
-            <span><i class="dot" style="background:#10B981"></i>Có sẵn 13</span><span><i class="dot" style="background:#2563EB"></i>Đang mượn 10</span>
-            <span><i class="dot" style="background:#F59E0B"></i>Hư hỏng 2</span><span><i class="dot" style="background:#EF4444"></i>Mất 1</span>
+            <span><i class="dot" style="background:#3F8F6B"></i>Có sẵn 13</span><span><i class="dot" style="background:#1E3A8A"></i>Đang mượn 10</span>
+            <span><i class="dot" style="background:#C08A2E"></i>Hư hỏng 2</span><span><i class="dot" style="background:#B84A4A"></i>Mất 1</span>
           </div>
         </div>
         <div class="muted small" style="margin-top:8px;line-height:1.4">“Clean Code” đang được mượn hết 2 cuốn, cần nhập thêm.</div>
@@ -797,9 +789,9 @@ RESTORE DATABASE QUANLYTHUVIEN FROM DISK = N'..._DIFF.bak'
         <div class="mono small muted" style="margin:2px 0 4px">VW_BC_LUOTMUON_THANG</div>
         <svg viewBox="0 0 300 120" width="100%" height="112" aria-label="Lượt mượn tháng 4 đến 9">
           <g stroke="#E2E8F0"><path d="M20 100H290M20 72H290M20 44H290"/></g>
-          <polygon points="30,100 30,79 78,79 126,51 174,51 222,51 270,23 270,100" fill="#2563EB" opacity=".10"/>
-          <polyline points="30,79 78,79 126,51 174,51 222,51 270,23" fill="none" stroke="#2563EB" stroke-width="3" stroke-linejoin="round"/>
-          <g fill="#fff" stroke="#2563EB" stroke-width="2.5"><circle cx="30" cy="79" r="4"/><circle cx="78" cy="79" r="4"/><circle cx="126" cy="51" r="4"/><circle cx="174" cy="51" r="4"/><circle cx="222" cy="51" r="4"/><circle cx="270" cy="23" r="4"/></g>
+          <polygon points="30,100 30,79 78,79 126,51 174,51 222,51 270,23 270,100" fill="#1E3A8A" opacity=".10"/>
+          <polyline points="30,79 78,79 126,51 174,51 222,51 270,23" fill="none" stroke="#1E3A8A" stroke-width="3" stroke-linejoin="round"/>
+          <g fill="#fff" stroke="#1E3A8A" stroke-width="2.5"><circle cx="30" cy="79" r="4"/><circle cx="78" cy="79" r="4"/><circle cx="126" cy="51" r="4"/><circle cx="174" cy="51" r="4"/><circle cx="222" cy="51" r="4"/><circle cx="270" cy="23" r="4"/></g>
           <g font-size="11" fill="#0F172A" font-weight="700" text-anchor="middle"><text x="30" y="70">3</text><text x="78" y="70">3</text><text x="126" y="42">7</text><text x="174" y="42">7</text><text x="222" y="42">7</text><text x="270" y="14">11</text></g>
           <g font-size="10.5" fill="#475569" text-anchor="middle"><text x="30" y="115">T4</text><text x="78" y="115">T5</text><text x="126" y="115">T6</text><text x="174" y="115">T7</text><text x="222" y="115">T8</text><text x="270" y="115">T9</text></g>
         </svg>
@@ -809,11 +801,11 @@ RESTORE DATABASE QUANLYTHUVIEN FROM DISK = N'..._DIFF.bak'
     <div class="grid g2" style="gap:16px">
       <div class="card obj">
         <div class="obj-h"><span class="tag amber">Report 4</span><b>Tiền phạt theo tháng và lý do</b><span class="mono small muted">VW_BC_TIENPHAT_THANG</span></div>
-        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:8px"><span class="small muted">10 phiếu phạt</span><b style="font-size:22px;color:#D97706">498.000đ</b></div>
-        <div style="display:flex;height:14px;border-radius:7px;overflow:hidden;margin-top:6px"><div style="width:46.8%;background:#10B981"></div><div style="width:53.2%;background:#F59E0B"></div></div>
-        <div class="legend"><span><i class="dot" style="background:#10B981"></i>Đã thu 233.000đ</span><span><i class="dot" style="background:#F59E0B"></i>Chưa thu 265.000đ</span></div>
-        <div style="display:flex;height:14px;border-radius:7px;overflow:hidden;margin-top:8px"><div style="width:50.2%;background:#EF4444"></div><div style="width:49.8%;background:#CBD5E1"></div></div>
-        <div class="legend"><span><i class="dot" style="background:#EF4444"></i>Mất sách 250.000đ (~50%)</span><span><i class="dot" style="background:#CBD5E1"></i>Trả trễ, hư hỏng</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:8px"><span class="small muted">10 phiếu phạt</span><b style="font-size:22px;color:#8A5A12">498.000đ</b></div>
+        <div style="display:flex;height:14px;border-radius:7px;overflow:hidden;margin-top:6px"><div style="width:46.8%;background:#3F8F6B"></div><div style="width:53.2%;background:#C08A2E"></div></div>
+        <div class="legend"><span><i class="dot" style="background:#3F8F6B"></i>Đã thu 233.000đ</span><span><i class="dot" style="background:#C08A2E"></i>Chưa thu 265.000đ</span></div>
+        <div style="display:flex;height:14px;border-radius:7px;overflow:hidden;margin-top:8px"><div style="width:50.2%;background:#B84A4A"></div><div style="width:49.8%;background:#CBD5E1"></div></div>
+        <div class="legend"><span><i class="dot" style="background:#B84A4A"></i>Mất sách 250.000đ (~50%)</span><span><i class="dot" style="background:#CBD5E1"></i>Trả trễ, hư hỏng</span></div>
       </div>
       <div class="card obj">
         <div class="obj-h"><span class="tag red">Report 5</span><b>Độc giả giữ sách quá hạn</b><span class="mono small muted">VW_BC_DOCGIA_QUAHAN</span></div>

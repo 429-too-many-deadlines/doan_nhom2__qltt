@@ -1,0 +1,1032 @@
+% =====================================================================
+%  BÁO CÁO ĐỒ ÁN IE103 – QUẢN LÝ THÔNG TIN
+%  Đề tài : Xây dựng hệ thống quản lý thư viện
+%  Biên dịch: ./build.sh   (lualatex, 2 lượt)
+%  Font    : Times New Roman (lấy từ /mnt/c/Windows/Fonts hoặc ./fonts),
+%            tự chuyển sang TeX Gyre Termes nếu không tìm thấy.
+% =====================================================================
+\documentclass[a4paper,oneside]{report}
+
+% ---------- Cỡ chữ 13pt, lề, giãn dòng ----------
+\usepackage[fontsize=13pt]{scrextend}
+\usepackage[left=3cm,right=2cm,top=2.5cm,bottom=2.5cm,headheight=15pt]{geometry}
+\usepackage{setspace}
+\setstretch{1.08}
+\setlength{\parskip}{2pt}
+\setlength{\parindent}{0pt}
+\sloppy\setlength{\emergencystretch}{3em}
+
+% ---------- Font Times New Roman / Courier New ----------
+\usepackage{fontspec}
+\newcommand{\fontdirA}{./fonts/}
+\newcommand{\fontdirB}{/mnt/c/Windows/Fonts/}
+\IfFileExists{\fontdirA times.ttf}{%
+  \setmainfont{times.ttf}[Path=\fontdirA,BoldFont=timesbd.ttf,ItalicFont=timesi.ttf,BoldItalicFont=timesbi.ttf]}{%
+  \IfFileExists{\fontdirB times.ttf}{%
+    \setmainfont{times.ttf}[Path=\fontdirB,BoldFont=timesbd.ttf,ItalicFont=timesi.ttf,BoldItalicFont=timesbi.ttf]}{%
+    \setmainfont{TeX Gyre Termes}}}
+\IfFileExists{\fontdirA cour.ttf}{%
+  \setmonofont{cour.ttf}[Path=\fontdirA,BoldFont=courbd.ttf,ItalicFont=couri.ttf]}{%
+  \IfFileExists{\fontdirB cour.ttf}{%
+    \setmonofont{cour.ttf}[Path=\fontdirB,BoldFont=courbd.ttf,ItalicFont=couri.ttf]}{%
+    \setmonofont{TeX Gyre Cursor}}}
+
+\usepackage[vietnamese]{babel}
+
+% ---------- Gói hỗ trợ ----------
+\usepackage{graphicx,xcolor,array,booktabs,tabularx,longtable,multirow,makecell}
+\usepackage{enumitem,float,caption,titlesec,tocloft,fancyhdr,amssymb}
+\usepackage{tikz,pgfplots}
+\usetikzlibrary{positioning,shapes.geometric,arrows.meta,calc,fit}
+\pgfplotsset{compat=1.18}
+\pgfkeys{/pgf/number format/.cd, assume math mode=true, use comma, 1000 sep={.}}
+\usepackage[hidelinks]{hyperref}
+
+\setlist{nosep,leftmargin=1.5em}
+\renewcommand{\arraystretch}{1.15}
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+\newcolumntype{C}{>{\centering\arraybackslash}X}
+
+% ---------- Màu biểu đồ (bảng màu đã kiểm tra CVD) ----------
+\definecolor{s1}{HTML}{2A78D6}  % xanh dương
+\definecolor{s2}{HTML}{EB6834}  % cam
+\definecolor{s3}{HTML}{1BAF7A}  % xanh ngọc
+\definecolor{s4}{HTML}{EDA100}  % vàng
+\definecolor{gridc}{HTML}{DDDDD8}
+\definecolor{codebg}{HTML}{F6F6F4}
+\definecolor{kw}{HTML}{1F4E9A}
+\definecolor{cmt}{HTML}{5E7F5E}
+\definecolor{strc}{HTML}{9A3B1F}
+
+% ---------- Chương, mục ----------
+\titleformat{\chapter}[block]{\centering\bfseries\fontsize{15}{20}\selectfont}{CHƯƠNG \thechapter:}{0.4em}{\MakeUppercase}
+\titlespacing*{\chapter}{0pt}{-10pt}{14pt}
+\titleformat{\section}{\bfseries\fontsize{13.5}{17}\selectfont}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\bfseries}{\thesubsection.}{0.5em}{}
+\titlespacing*{\section}{0pt}{8pt}{3pt}
+\titlespacing*{\subsection}{0pt}{6pt}{2pt}
+\setcounter{secnumdepth}{2}
+\setcounter{tocdepth}{2}
+
+% ---------- Chú thích bảng, hình ----------
+\captionsetup{labelsep=colon,font=small,labelfont=bf,skip=4pt}
+\captionsetup[table]{position=top}
+\addto\captionsvietnamese{%
+  \renewcommand{\figurename}{Hình}%
+  \renewcommand{\tablename}{Bảng}%
+  \renewcommand{\contentsname}{MỤC LỤC}%
+  \renewcommand{\listtablename}{DANH MỤC BẢNG}%
+  \renewcommand{\listfigurename}{DANH MỤC HÌNH VẼ}%
+  \renewcommand{\bibname}{TÀI LIỆU THAM KHẢO}}
+\renewcommand{\cftfigpresnum}{Hình~}
+\renewcommand{\cfttabpresnum}{Bảng~}
+\setlength{\cftfignumwidth}{4.2em}
+\setlength{\cfttabnumwidth}{4.4em}
+\renewcommand{\cftchappresnum}{Chương~}
+\renewcommand{\cftchapaftersnum}{:}
+\setlength{\cftchapnumwidth}{5.8em}
+\renewcommand{\cftchapleader}{\cftdotfill{\cftdotsep}}
+\renewcommand{\cfttoctitlefont}{\hfill\bfseries\fontsize{15}{20}\selectfont}
+\renewcommand{\cftaftertoctitle}{\hfill}
+\renewcommand{\cftlottitlefont}{\hfill\bfseries\fontsize{15}{20}\selectfont}
+\renewcommand{\cftafterlottitle}{\hfill}
+\renewcommand{\cftloftitlefont}{\hfill\bfseries\fontsize{15}{20}\selectfont}
+\renewcommand{\cftafterloftitle}{\hfill}
+
+% ---------- Header / footer ----------
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small IE103 – Quản lý thông tin}
+\fancyhead[R]{\small Hệ thống quản lý thư viện}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\fancypagestyle{plain}{\fancyhf{}\fancyfoot[C]{\thepage}\renewcommand{\headrulewidth}{0pt}}
+
+% ---------- Code SQL: Courier New cỡ 11 (minted + Pygments, cần -shell-escape) ----------
+\usepackage[outputdir=build]{minted}
+\setminted[tsql]{fontsize=\fontsize{11}{13}\selectfont, breaklines, breakanywhere, breaksymbolleft={\textcolor{gray}{»}}, bgcolor=codebg, style=default}
+\newenvironment{Code}{\VerbatimEnvironment\begin{minted}{tsql}}{\end{minted}}
+
+% ---------- Macro tiện ích ----------
+% Khối mô tả mỗi đối tượng xử lý: \obj{Procedure 1}{TÊN}
+\newcommand{\obj}[2]{\par\smallskip\noindent{\bfseries #1: \texttt{#2}}\par}
+\newcommand{\muc}[1]{\noindent\textit{\textbf{#1:}}~}
+% Bảng kết quả nhỏ
+\newenvironment{kq}[1]{\par\smallskip\noindent\footnotesize\begin{tabular}{@{}#1@{}}\toprule}{\bottomrule\end{tabular}\par\smallskip}
+% Khung chờ ảnh chụp màn hình
+\newcommand{\anh}[2]{%
+  \begin{center}\fcolorbox{gray!60}{gray!5}{\parbox[c][#1][c]{0.9\linewidth}{\centering\small\itshape [#2]}}\end{center}}
+\newcommand{\tien}[1]{#1\,đ}
+
+% =====================================================================
+\begin{document}
+
+% ============================ TRANG BÌA ==============================
+\begin{titlepage}
+\begin{center}
+\setstretch{1.15}
+{\fontsize{14}{18}\selectfont ĐẠI HỌC QUỐC GIA THÀNH PHỐ HỒ CHÍ MINH\\
+\textbf{TRƯỜNG ĐẠI HỌC CÔNG NGHỆ THÔNG TIN}\\
+\textbf{KHOA KHOA HỌC VÀ KỸ THUẬT THÔNG TIN}}\\[2pt]
+---------\\[1.6cm]
+\includegraphics[width=4.6cm]{figures/logo-uit.png}\\[1.6cm]
+{\bfseries\fontsize{18}{24}\selectfont BÁO CÁO ĐỒ ÁN QUẢN LÝ THÔNG TIN}\\[0.8cm]
+{\bfseries\fontsize{20}{28}\selectfont XÂY DỰNG HỆ THỐNG\\QUẢN LÝ THƯ VIỆN}\\[1.6cm]
+\begin{minipage}{11cm}
+\fontsize{14}{20}\selectfont
+\textbf{Sinh viên thực hiện:}\\
+\hspace*{1.2cm}[Họ tên SV1] – [MSSV 1] (nhóm trưởng)\\
+\hspace*{1.2cm}[Họ tên SV2] – [MSSV 2]\\
+\hspace*{1.2cm}[Họ tên SV3] – [MSSV 3]\\
+\hspace*{1.2cm}[Họ tên SV4] – [MSSV 4]\\[6pt]
+\textbf{Giảng viên:}\\
+\hspace*{1.2cm}ThS. Nguyễn Thành Luân
+\end{minipage}
+\vfill
+{\fontsize{14}{18}\selectfont Thành phố Hồ Chí Minh, tháng 10 năm 2026}
+\end{center}
+\end{titlepage}
+\setcounter{page}{2}
+
+% ========================= BÁO CÁO TÓM TẮT ===========================
+\chapter*{BÁO CÁO TÓM TẮT}
+\textbf{1. Tiêu đề báo cáo:} XÂY DỰNG HỆ THỐNG QUẢN LÝ THƯ VIỆN
+
+\medskip
+\textbf{2. Danh sách thành viên}
+\begin{center}
+\begin{tabularx}{0.95\linewidth}{|>{\centering}p{3cm}|L|>{\centering\arraybackslash}p{3.5cm}|}
+\hline
+\textbf{MSSV} & \textbf{Họ tên} & \textbf{Ghi chú}\\\hline
+[MSSV] & [Họ tên] & Nhóm trưởng\\\hline
+[MSSV] & [Họ tên] & \\\hline
+[MSSV] & [Họ tên] & \\\hline
+[MSSV] & [Họ tên] & \\\hline
+\end{tabularx}
+\end{center}
+
+\textbf{3. Nội dung chi tiết}
+
+\textbf{Nội dung 1: Mô tả bài toán}
+\begin{itemize}[label=+]
+\item Phát biểu bài toán: thư viện quản lý thủ công không theo dõi được từng cuốn sách và công nợ phạt.
+\item Mục tiêu và đối tượng sử dụng: quản lý, thủ thư, độc giả với quyền hạn khác nhau.
+\item Quy trình nghiệp vụ: lập thẻ, mượn sách, trả sách và xử lý phạt.
+\end{itemize}
+\textbf{Nội dung 2: Phân tích và thiết kế}
+\begin{itemize}[label=+]
+\item Tám nhóm chức năng của hệ thống, từ xác thực đến báo cáo và quản trị CSDL.
+\item 11 thực thể, 17 ràng buộc toàn vẹn (12 cài bằng CHECK/UNIQUE, 5 cài bằng trigger).
+\item Sơ đồ ERD mức quan niệm và 11 lược đồ quan hệ kèm tân từ.
+\end{itemize}
+\textbf{Nội dung 3: Cài đặt}
+\begin{itemize}[label=+]
+\item Cài đặt CSDL \texttt{QUANLYTHUVIEN} trên SQL Server 2022 (Docker), collation tiếng Việt.
+\item Dữ liệu mẫu 1.691 dòng trên 11 bảng, bao quát các tình huống nghiệp vụ đặc biệt.
+\end{itemize}
+\textbf{Nội dung 4: Quản lý thông tin}
+\begin{itemize}[label=+]
+\item Xử lý thông tin: 5 stored procedure, 5 trigger, 3 function, 2 cursor tiêu biểu.
+\item An toàn thông tin: xác thực hai lớp, phân quyền 3 role, import/export, backup/restore.
+\item Trình bày thông tin: 5 report lấy dữ liệu trực tiếp từ 5 view.
+\end{itemize}
+\textbf{Nội dung 5: Demo và kết luận}
+\begin{itemize}[label=+]
+\item Website demo React + ASP.NET Core gọi trực tiếp các SP, function, view của CSDL.
+\item Kết quả đạt được, hạn chế và hướng phát triển.
+\end{itemize}
+
+\textbf{4. Phân công công việc}
+\begin{center}
+\begin{tabularx}{0.95\linewidth}{|>{\centering}p{2.6cm}|>{\raggedright}p{4.2cm}|L|}
+\hline
+\textbf{MSSV} & \textbf{Họ tên} & \textbf{Nội dung được phân công}\\\hline
+[MSSV] & [Họ tên] & [Ví dụ: Chương 1; mục 4.1.1]\\\hline
+[MSSV] & [Họ tên] & \\\hline
+[MSSV] & [Họ tên] & \\\hline
+[MSSV] & [Họ tên] & \\\hline
+\end{tabularx}
+\end{center}
+
+% ============================ MỤC LỤC ================================
+\cleardoublepage
+\tableofcontents
+\cleardoublepage
+\listoftables
+\vspace{1cm}
+\listoffigures
+
+% =====================================================================
+%                       CHƯƠNG 1: MÔ TẢ BÀI TOÁN
+% =====================================================================
+\chapter{Mô tả bài toán}
+
+\section{Phát biểu bài toán}
+Một thư viện trường học quản lý khoảng vài chục đầu sách, vài trăm độc giả và hàng trăm lượt mượn mỗi tháng. Khi mọi việc còn ghi bằng sổ và bảng tính, thủ thư gặp ba khó khăn chính. Thứ nhất, thư viện chỉ biết \emph{tựa sách} mà không biết \emph{từng cuốn} đang nằm trên kệ, đang được mượn, đã hư hay đã mất. Thứ hai, tiền phạt trả trễ, làm hư, làm mất được tính tay nên dễ sai, và một độc giả còn nợ vẫn có thể mượn tiếp. Thứ ba, dữ liệu nằm rải rác, ai cũng sửa được, không có bản sao lưu.
+
+Đồ án xây dựng CSDL \texttt{QUANLYTHUVIEN} trên SQL Server để tin học hóa các nghiệp vụ: quản lý danh mục (thể loại, tác giả, nhà xuất bản, đầu sách), quản lý kho đến từng cuốn sách, quản lý thẻ độc giả, mượn – trả – phạt, nhắc nhở quá hạn và báo cáo thống kê. Phạm vi không bao gồm mua sách, kế toán và đặt chỗ trước.
+
+\section{Mục tiêu}
+\begin{itemize}
+\item Theo dõi tình trạng của từng cuốn sách vật lý; số cuốn còn lại của mỗi đầu sách luôn đúng mà không cần cập nhật tay.
+\item Kiểm tra điều kiện mượn (thẻ còn hạn, không nợ, sách có sẵn) ngay trong CSDL, ứng dụng nào ghi vào cũng phải tuân theo.
+\item Tự động lập phiếu phạt khi trả sách và cộng dồn công nợ của độc giả.
+\item Phân quyền theo vai trò, sao lưu và phục hồi được dữ liệu; cung cấp báo cáo luôn phản ánh số liệu mới nhất.
+\end{itemize}
+
+\section{Đối tượng sử dụng}
+\begin{itemize}
+\item \textbf{Quản lý thư viện:} toàn quyền trên dữ liệu, thực thi mọi thủ tục, xem mọi báo cáo, sao lưu CSDL.
+\item \textbf{Thủ thư:} lập thẻ độc giả, nhập sách, lập phiếu mượn, nhận trả, thu tiền phạt, chạy nhắc nhở quá hạn; được thêm và sửa nhưng \emph{không được xóa} dữ liệu.
+\item \textbf{Độc giả:} chỉ tra cứu danh mục sách và số cuốn còn sẵn; không xem được thông tin của người khác.
+\end{itemize}
+
+\section{Quy trình nghiệp vụ thực tế}
+\subsection{Quy trình lập thẻ độc giả}
+(1) Người đăng ký điền phiếu thông tin: họ tên, ngày sinh, giới tính, số điện thoại, địa chỉ, email. (2) Thủ thư kiểm tra người đăng ký đủ 16 tuổi. (3) Hệ thống cấp mã độc giả, ngày lập thẻ là ngày hiện tại, thẻ có hạn 2 năm, tổng nợ ban đầu bằng 0. (4) Thủ thư in thẻ giao cho độc giả.
+
+\subsection{Quy trình mượn sách}
+(1) Độc giả đưa thẻ và các cuốn sách muốn mượn. (2) Hệ thống kiểm tra thẻ còn hạn và độc giả không còn nợ phạt; nếu vi phạm thì từ chối. (3) Với từng cuốn, kiểm tra cuốn đó đang ở tình trạng \emph{Có sẵn}. (4) Lập phiếu mượn gồm các cuốn hợp lệ, hạn trả là 14 ngày sau ngày mượn; nếu một cuốn không hợp lệ thì hủy cả phiếu. (5) Các cuốn được chuyển sang \emph{Đang mượn}, số cuốn còn của đầu sách giảm tương ứng.
+
+\subsection{Quy trình trả sách và xử lý phạt}
+(1) Độc giả trả từng cuốn; thủ thư ghi ngày trả và tình trạng khi trả (bình thường, hư hỏng, mất). (2) Cuốn sách chuyển về \emph{Có sẵn}, hoặc sang \emph{Hư hỏng}/\emph{Mất}. (3) Hệ thống tự lập phiếu phạt: trả trễ 5.000\,đ/ngày, hư hỏng 50\% giá sách, mất 100\% giá sách; một lần trả có thể phát sinh nhiều phiếu (vừa trễ vừa hư). (4) Tiền phạt cộng vào tổng nợ của độc giả; khi độc giả thanh toán, tổng nợ giảm về 0. (5) Khi mọi cuốn của phiếu đã trả, phiếu chuyển sang \emph{Đã trả}.
+
+\begin{figure}[!htbp]
+\centering
+\begin{tikzpicture}[font=\footnotesize, node distance=3mm and 6mm,
+  box/.style={draw, rounded corners=2pt, align=center, minimum height=6.5mm, text width=40mm, fill=s1!8},
+  dec/.style={draw, diamond, aspect=2.6, align=center, inner sep=1pt, text width=24mm, fill=s4!15},
+  bad/.style={draw, rounded corners=2pt, align=center, text width=18mm, minimum height=7mm, fill=s2!12},
+  arr/.style={-{Stealth[length=2mm]}, thick}]
+% --- Mượn sách
+\node[box, fill=gray!12] (m0) {Độc giả đưa thẻ\\và sách muốn mượn};
+\node[dec, below=of m0] (m1) {Thẻ còn hạn?};
+\node[dec, below=of m1] (m2) {Không còn nợ?};
+\node[dec, below=of m2] (m3) {Mọi cuốn\\“Có sẵn”?};
+\node[box, below=of m3] (m4) {Lập phiếu mượn,\\hạn trả = ngày mượn + 14};
+\node[box, below=of m4] (m5) {Cuốn sách → “Đang mượn”,\\SLCON giảm};
+\node[bad, right=7mm of m2] (rj) {Từ chối\\(hủy cả phiếu)};
+\draw[arr] (m0)--(m1); \draw[arr] (m1)--node[right]{có}(m2);
+\draw[arr] (m2)--node[right]{có}(m3); \draw[arr] (m3)--node[right]{có}(m4); \draw[arr] (m4)--(m5);
+\draw[arr] (m1.east)-|node[pos=0.2,above]{không}(rj.north);
+\draw[arr] (m2.east)--node[above]{không}(rj.west);
+\draw[arr] (m3.east)-|node[pos=0.2,below]{không}(rj.south);
+% --- Trả sách
+\node[box, fill=gray!12, right=34mm of m0] (t0) {Độc giả trả sách};
+\node[box, below=of t0] (t1) {Ghi ngày trả và\\tình trạng khi trả};
+\node[box, below=of t1] (t2) {Cập nhật tình trạng cuốn:\\Có sẵn / Hư hỏng / Mất};
+\node[box, below=of t2, fill=s2!10] (t3) {Tự lập phiếu phạt: trễ 5.000\,đ/ngày,\\hư 50\%, mất 100\% giá sách};
+\node[box, below=of t3] (t4) {TONGNO += tiền phạt\\chưa thanh toán};
+\node[dec, below=of t4] (t5) {Đã trả hết\\sách của phiếu?};
+\node[box, below=of t5] (t6) {Phiếu → “Đã trả”};
+\draw[arr] (t0)--(t1); \draw[arr] (t1)--(t2); \draw[arr] (t2)--(t3); \draw[arr] (t3)--(t4); \draw[arr] (t4)--(t5);
+\draw[arr] (t5)--node[right]{có}(t6);
+\node[font=\bfseries\small, above=1mm of m0] {Mượn sách};
+\node[font=\bfseries\small, above=1mm of t0] {Trả sách và xử lý phạt};
+\end{tikzpicture}
+\caption{Lưu đồ quy trình mượn sách và trả sách}
+\label{fig:quytrinh}
+\end{figure}
+
+% =====================================================================
+%                    CHƯƠNG 2: PHÂN TÍCH VÀ THIẾT KẾ
+% =====================================================================
+\chapter{Phân tích và thiết kế}
+
+\section{Các chức năng của hệ thống}
+\begin{enumerate}
+\item \textbf{Xác thực:} đăng nhập bằng tài khoản ứng dụng (mật khẩu băm), đổi mật khẩu, khóa tài khoản nghỉ việc.
+\item \textbf{Quản lý danh mục:} thêm, sửa, xóa, tra cứu thể loại, tác giả, nhà xuất bản, đầu sách và tác giả của đầu sách.
+\item \textbf{Quản lý kho sách:} nhập từng cuốn sách, ghi vị trí kệ, theo dõi tình trạng; tổng số cuốn và số cuốn còn được tính tự động.
+\item \textbf{Quản lý độc giả:} lập thẻ, gia hạn, sửa thông tin, tra cứu, xem lịch sử mượn và công nợ.
+\item \textbf{Mượn – trả:} lập phiếu mượn nhiều cuốn trong một giao tác, trả từng cuốn, tự lập phiếu phạt, thanh toán phạt.
+\item \textbf{Nhắc nhở và xếp loại:} lập danh sách nhắc nhở sách quá hạn; xếp loại uy tín độc giả.
+\item \textbf{Báo cáo:} tình trạng kho, sách mượn nhiều, lượt mượn theo tháng, tiền phạt, độc giả quá hạn, thống kê tháng.
+\item \textbf{Quản trị CSDL:} phân quyền theo vai trò, import/export dữ liệu, sao lưu và phục hồi.
+\end{enumerate}
+
+\section{Các thực thể, thuộc tính và mối quan hệ}
+Điểm then chốt của thiết kế là tách \textbf{đầu sách} (một tựa sách, có giá, năm xuất bản) khỏi \textbf{cuốn sách} (một bản vật lý trên kệ, có tình trạng riêng). Nhờ vậy thư viện biết chính xác cuốn nào đang ở đâu, và phiếu mượn tham chiếu đến từng cuốn chứ không phải đến tựa sách.
+
+\begin{table}[!htbp]
+\centering\small
+\caption{Danh sách thực thể và thuộc tính chính}
+\label{tab:thucthe}
+\begin{tabularx}{\linewidth}{|p{3.1cm}|L|p{5.3cm}|}
+\hline
+\textbf{Thực thể} & \textbf{Ý nghĩa} & \textbf{Thuộc tính chính}\\\hline
+THELOAI & Thể loại sách & MATL, TENTL\\\hline
+TACGIA & Tác giả, dịch giả & MATG, TENTG, NAMSINH, QUOCTICH\\\hline
+NHAXUATBAN & Nhà xuất bản & MANXB, TENNXB, DIACHI, SODT\\\hline
+DAUSACH & Một tựa sách & MADS, TENDS, NAMXB, SOTRANG, GIA, SOLUONG, SLCON\\\hline
+CUONSACH & Một bản sách vật lý & MACS, NGAYNHAP, VITRI, TINHTRANG\\\hline
+DOCGIA & Người có thẻ thư viện & MADG, HOTEN, NGSINH, GIOITINH, SODT, EMAIL, NGAYLAPTHE, NGAYHETHAN, TONGNO\\\hline
+PHIEUMUON & Một lần mượn & MAPM, NGAYMUON, HANTRA, TINHTRANG\\\hline
+CTPHIEUMUON & Một cuốn trong phiếu (thực thể kết hợp) & NGAYTRA, TINHTRANGTRA\\\hline
+PHIEUPHAT & Khoản phạt của một cuốn & MAPP, NGAYLAP, LYDO, SOTIEN, DATHANHTOAN\\\hline
+TAIKHOAN & Tài khoản đăng nhập ứng dụng & TENDANGNHAP, MATKHAU, TRANGTHAI\\\hline
+\end{tabularx}
+\end{table}
+
+\textbf{Mối quan hệ và bản số:} mỗi đầu sách thuộc đúng một thể loại và một NXB (1,1), một thể loại/NXB có nhiều đầu sách (0,n). Đầu sách và tác giả có quan hệ nhiều – nhiều qua \texttt{DAUSACH\_TACGIA} kèm thuộc tính VAITRO. Một đầu sách gồm nhiều cuốn sách (0,n), mỗi cuốn thuộc một đầu sách (1,1). Một độc giả lập nhiều phiếu mượn (0,n). Phiếu mượn và cuốn sách có quan hệ nhiều – nhiều, được cụ thể hóa thành thực thể kết hợp \texttt{CTPHIEUMUON}; mỗi phiếu có ít nhất một cuốn (1,n). Mỗi dòng chi tiết phát sinh 0 hoặc nhiều phiếu phạt. \texttt{TAIKHOAN} đứng độc lập, chỉ phục vụ đăng nhập.
+
+\section{Ràng buộc toàn vẹn}
+Ràng buộc có bối cảnh trên một quan hệ được cài bằng CHECK/UNIQUE ngay trong lệnh tạo bảng; ràng buộc liên quan hệ hoặc ràng buộc do thuộc tính tổng hợp được cài bằng trigger.
+
+\begin{table}[!htbp]
+\centering\small
+\caption{Danh sách ràng buộc toàn vẹn}
+\label{tab:rbtv}
+\begin{tabularx}{\linewidth}{|c|L|>{\raggedright\arraybackslash}p{3.4cm}|>{\raggedright\footnotesize\arraybackslash}p{3.3cm}|}
+\hline
+\textbf{RB} & \textbf{Nội dung} & \textbf{Bối cảnh} & \textbf{Cài đặt}\\\hline
+1 & Tên thể loại, tên NXB không trùng & THELOAI, NXB & UNIQUE\\\hline
+2 & Năm sinh tác giả từ 1000 đến năm hiện tại (hoặc NULL) & TACGIA & CHECK\\\hline
+3 & Năm XB từ 1900 đến năm hiện tại; số trang > 0; giá > 0 & DAUSACH & CHECK\\\hline
+4 & 0 ≤ SLCON ≤ SOLUONG & DAUSACH & CHECK\\\hline
+5 & Vai trò thuộc \{Tác giả, Đồng tác giả, Dịch giả\} & DAUSACH\_ TACGIA & CHECK\\\hline
+6 & Tình trạng cuốn thuộc \{Có sẵn, Đang mượn, Hư hỏng, Mất\} & CUONSACH & CHECK\\\hline
+7 & Giới tính thuộc \{Nam, Nữ\}; email đúng dạng; TONGNO ≥ 0 & DOCGIA & CHECK\\\hline
+8 & Ngày hết hạn thẻ > ngày lập thẻ & DOCGIA & CHECK\\\hline
+9 & Độc giả đủ 16 tuổi tại ngày lập thẻ & DOCGIA & CHECK\\\hline
+10 & Hạn trả > ngày mượn; tình trạng phiếu thuộc \{Đang mượn, Đã trả\} & PHIEUMUON & CHECK\\\hline
+11 & Đã trả thì có cả NGAYTRA và TINHTRANGTRA, chưa trả thì cả hai NULL & CTPHIEUMUON & CHECK\\\hline
+12 & Lý do phạt thuộc \{Trả trễ, Hư hỏng, Mất sách\}; số tiền > 0 & PHIEUPHAT & CHECK\\\hline
+13 & SOLUONG = số cuốn; SLCON = số cuốn “Có sẵn” & DAUSACH, CUONSACH & \texttt{TRG\_CUONSACH\_} \texttt{CAPNHATSL}\\\hline
+14 & Chỉ lập phiếu khi thẻ còn hạn và độc giả không nợ & PHIEUMUON, DOCGIA & \texttt{TRG\_PHIEUMUON\_} \texttt{KIEMTRA}\\\hline
+15 & Chỉ mượn cuốn “Có sẵn”; một cuốn không nằm trên 2 phiếu chưa trả; phiếu phải đang mở & CTPHIEUMUON, CUONSACH, PHIEUMUON & \texttt{TRG\_CTPM\_} \texttt{MUONSACH}\\\hline
+16 & Trả sách: không sửa lại lần trả, ngày trả ≥ ngày mượn; tự cập nhật tình trạng, lập phiếu phạt, đóng phiếu & CTPHIEUMUON, CUONSACH, PHIEUMUON, PHIEUPHAT & \texttt{TRG\_CTPM\_} \texttt{TRASACH}\\\hline
+17 & TONGNO = tổng tiền phạt chưa thanh toán & DOCGIA, PHIEUPHAT & \texttt{TRG\_PHIEUPHAT\_} \texttt{TONGNO}\\\hline
+\end{tabularx}
+\end{table}
+
+Bảng~\ref{tab:tahbuong} là bảng tầm ảnh hưởng của các ràng buộc liên quan hệ, dùng để xác định trigger cần bắt sự kiện nào (+: có thể vi phạm, –: không vi phạm).
+
+\begin{table}[!htbp]
+\centering\small
+\caption{Bảng tầm ảnh hưởng của các ràng buộc cài bằng trigger}
+\label{tab:tahbuong}
+\begin{tabular}{|c|l|c|c|l|}
+\hline
+\textbf{RB} & \textbf{Bảng} & \textbf{Thêm} & \textbf{Xóa} & \textbf{Sửa}\\\hline
+13 & CUONSACH & + & + & + (MADS, TINHTRANG)\\\hline
+14 & PHIEUMUON & + & – & + (MADG, NGAYMUON, HANTRA)\\\hline
+15 & CTPHIEUMUON & + & – & + (MAPM, MACS)\\\hline
+16 & CTPHIEUMUON & – & – & + (NGAYTRA, TINHTRANGTRA)\\\hline
+17 & PHIEUPHAT & + & + & + (SOTIEN, DATHANHTOAN, MAPM)\\\hline
+\end{tabular}
+\end{table}
+
+\section{Sơ đồ ERD (mức quan niệm)}
+Sơ đồ dùng ký hiệu Chen: hình chữ nhật là thực thể, hình thoi là mối kết hợp, bản số ghi dạng (min, max). Để sơ đồ gọn, thuộc tính được liệt kê ở Bảng~\ref{tab:thucthe} thay vì vẽ hình elip.
+
+\begin{figure}[!htbp]
+\centering
+\resizebox{\linewidth}{!}{%
+\begin{tikzpicture}[font=\small,
+  ent/.style={draw, thick, minimum width=27mm, minimum height=9mm, fill=s1!10, font=\small\bfseries},
+  asc/.style={draw, thick, double, double distance=1.2pt, minimum width=29mm, minimum height=9mm, fill=s3!12, font=\small\bfseries},
+  rel/.style={draw, diamond, aspect=2.2, inner sep=1.5pt, fill=s4!18, font=\small},
+  card/.style={font=\footnotesize, fill=white, inner sep=1pt}]
+\node[ent] (TL) at (0,6) {THELOAI};
+\node[rel] (r1) at (3.8,6) {phân loại};
+\node[ent] (DS) at (7.5,6) {DAUSACH};
+\node[rel] (r2) at (12.3,6) {viết};
+\node[ent] (TG) at (17,6) {TACGIA};
+\node[ent] (NXB) at (0,3.6) {NHAXUATBAN};
+\node[rel] (r3) at (3.8,3.6) {xuất bản};
+\node[rel] (r4) at (7.5,3.6) {gồm};
+\node[ent] (CS) at (7.5,1.2) {CUONSACH};
+\node[asc] (CT) at (12.3,1.2) {CTPHIEUMUON};
+\node[ent] (PM) at (17,1.2) {PHIEUMUON};
+\node[rel] (r5) at (17,-1.2) {lập};
+\node[ent] (DG) at (17,-3.4) {DOCGIA};
+\node[rel] (r6) at (12.3,-1.2) {phát sinh};
+\node[ent] (PP) at (12.3,-3.4) {PHIEUPHAT};
+\node[ent, fill=gray!12] (TK) at (2,-2.2) {TAIKHOAN};
+\node[font=\footnotesize\itshape, below=1mm of TK] {(độc lập, phục vụ đăng nhập)};
+\node[font=\footnotesize\itshape, above=1mm of r2] {VAITRO};
+\node[font=\footnotesize\itshape, above=1mm of CT] {NGAYTRA, TINHTRANGTRA};
+\draw (TL)--node[card,above,pos=0.35]{(0,n)}(r1); \draw (r1)--node[card,above,pos=0.6]{(1,1)}(DS);
+\draw (DS)--node[card,above,pos=0.4]{(0,n)}(r2); \draw (r2)--node[card,above,pos=0.6]{(0,n)}(TG);
+\draw (NXB)--node[card,above,pos=0.35]{(0,n)}(r3); \draw (r3)--node[card,above left,pos=0.6]{(1,1)}(DS);
+\draw (DS)--node[card,right,pos=0.4]{(0,n)}(r4); \draw (r4)--node[card,right,pos=0.6]{(1,1)}(CS);
+\draw (CS)--node[card,below,pos=0.5]{(0,n)}(CT); \draw (CT)--node[card,below,pos=0.5]{(1,n)}(PM);
+\draw (PM)--node[card,right,pos=0.4]{(1,1)}(r5); \draw (r5)--node[card,right,pos=0.6]{(0,n)}(DG);
+\draw (CT)--node[card,right,pos=0.5]{(0,n)}(r6); \draw (r6)--node[card,right,pos=0.6]{(1,1)}(PP);
+\end{tikzpicture}}
+\caption{Sơ đồ ERD hệ thống quản lý thư viện}
+\label{fig:erd}
+\end{figure}
+
+\section{Mô hình logic và tân từ}
+Áp dụng quy tắc chuyển đổi: mối kết hợp (1,1)–(0,n) đưa khóa của phía “n” vào phía “1”; mối kết hợp nhiều – nhiều tạo quan hệ mới có khóa ghép. Khóa chính \underline{gạch chân}, khóa ngoại \textit{in nghiêng}.
+
+\begin{enumerate}[leftmargin=1.8em]
+\item THELOAI(\underline{MATL}, TENTL): mỗi thể loại có mã duy nhất và tên không trùng.
+\item TACGIA(\underline{MATG}, TENTG, NAMSINH, QUOCTICH): mỗi tác giả có mã, họ tên, năm sinh (có thể không rõ) và quốc tịch.
+\item NHAXUATBAN(\underline{MANXB}, TENNXB, DIACHI, SODT): mỗi NXB có mã, tên không trùng và thông tin liên hệ.
+\item DAUSACH(\underline{MADS}, TENDS, \textit{MATL}, \textit{MANXB}, NAMXB, SOTRANG, GIA, SOLUONG, SLCON): mỗi tựa sách thuộc một thể loại, do một NXB phát hành năm NAMXB với giá GIA; SOLUONG là tổng số cuốn, SLCON là số cuốn đang có sẵn (thuộc tính dẫn xuất).
+\item DAUSACH\_TACGIA(\underline{\textit{MADS}, \textit{MATG}}, VAITRO): tác giả MATG tham gia đầu sách MADS với vai trò tác giả, đồng tác giả hoặc dịch giả.
+\item CUONSACH(\underline{MACS}, \textit{MADS}, NGAYNHAP, VITRI, TINHTRANG): mỗi cuốn vật lý thuộc một đầu sách, nhập kho ngày NGAYNHAP, đặt ở kệ VITRI và có một tình trạng hiện tại.
+\item DOCGIA(\underline{MADG}, HOTEN, NGSINH, GIOITINH, DIACHI, SODT, EMAIL, NGAYLAPTHE, NGAYHETHAN, TONGNO): mỗi độc giả có thẻ lập ngày NGAYLAPTHE, hết hạn ngày NGAYHETHAN; TONGNO là tiền phạt chưa thanh toán (dẫn xuất).
+\item PHIEUMUON(\underline{MAPM}, \textit{MADG}, NGAYMUON, HANTRA, TINHTRANG): độc giả MADG mượn sách ngày NGAYMUON, phải trả trước HANTRA; phiếu “Đang mượn” cho đến khi trả hết.
+\item CTPHIEUMUON(\underline{\textit{MAPM}, \textit{MACS}}, NGAYTRA, TINHTRANGTRA): cuốn MACS được mượn theo phiếu MAPM; khi trả ghi ngày trả và tình trạng lúc trả.
+\item PHIEUPHAT(\underline{MAPP}, \textit{MAPM}, \textit{MACS}, NGAYLAP, LYDO, SOTIEN, DATHANHTOAN): khoản phạt SOTIEN lập ngày NGAYLAP cho cuốn MACS của phiếu MAPM vì lý do LYDO; (MAPM, MACS) tham chiếu CTPHIEUMUON.
+\item TAIKHOAN(\underline{TENDANGNHAP}, MATKHAU, TRANGTHAI): tài khoản đăng nhập ứng dụng; MATKHAU lưu giá trị băm SHA2-256; TRANGTHAI = 0 là bị khóa.
+\end{enumerate}
+
+% =====================================================================
+%                          CHƯƠNG 3: CÀI ĐẶT
+% =====================================================================
+\chapter{Cài đặt}
+
+\section{Tạo bảng, khóa chính, khóa ngoại và ràng buộc}
+CSDL được cài trên \textbf{Microsoft SQL Server 2022} chạy trong Docker (\texttt{docker-compose.yml}), collation \texttt{Vietnamese\_CI\_AS} để sắp xếp và so sánh tiếng Việt đúng. Mã nguồn gồm 10 script trong thư mục \texttt{db/}, chạy theo thứ tự: \texttt{1\_TaoBang} → \texttt{2\_DuLieuMau} → \texttt{3\_Function} → \texttt{4\_Trigger} → \texttt{5\_StoredProcedure} → \texttt{6\_Cursor} → \texttt{7\_AnToanThongTin} → \texttt{8\_Report} → \texttt{9\_DuLieuThem2026} → \texttt{10\_DuLieuPhatSinhMoi}. Function phải có trước trigger vì trigger trả sách gọi \texttt{FN\_TIENPHATTRE}. Bảng tiêu biểu DOCGIA (các bảng còn lại khai báo tương tự):
+
+\begin{Code}
+CREATE TABLE DOCGIA (
+  MADG       CHAR(5)       PRIMARY KEY,
+  HOTEN      NVARCHAR(40)  NOT NULL,
+  NGSINH     DATE          NOT NULL,
+  GIOITINH   NVARCHAR(3)   NOT NULL,
+  SODT       VARCHAR(15)   NOT NULL,
+  EMAIL      VARCHAR(50)   NULL,
+  NGAYLAPTHE DATE          NOT NULL DEFAULT GETDATE(),
+  NGAYHETHAN DATE          NOT NULL,
+  TONGNO     MONEY         NOT NULL DEFAULT 0,   -- ... DIACHI
+  CONSTRAINT CK_DOCGIA_NGAYTHE CHECK (NGAYHETHAN > NGAYLAPTHE),
+  CONSTRAINT CK_DOCGIA_TUOI    CHECK (DATEADD(YEAR,16,NGSINH) <= NGAYLAPTHE),
+  CONSTRAINT CK_DOCGIA_EMAIL   CHECK (EMAIL IS NULL OR EMAIL LIKE '%_@_%._%'))
+\end{Code}
+
+\begin{figure}[!htbp]
+\anh{3cm}{Chèn ảnh Database Diagram của QUANLYTHUVIEN trong SSMS (11 bảng và các khóa ngoại)}
+\caption{Cấu trúc bảng và khóa ngoại của CSDL QUANLYTHUVIEN}
+\label{fig:cautruc}
+\end{figure}
+
+\section{Dữ liệu mẫu}
+Dữ liệu gồm hai lớp. Lớp thứ nhất (\texttt{2\_DuLieuMau}) nhỏ, được dựng tay để mỗi tình huống đặc biệt có ít nhất một dòng: độc giả DG006 thẻ hết hạn ngày 31/08/2026, DG009 đang nợ \tien{250.000} do làm mất sách, DG012 chưa từng mượn; cuốn CS006 và CS012 bị hư, CS015 bị mất; đầu sách DS016 không có tác giả; phiếu trả một phần, phiếu đang quá hạn; phiếu phạt đã và chưa thanh toán. Lớp thứ hai (\texttt{9\_}, \texttt{10\_}) bổ sung 300 độc giả và 300 phiếu mượn trải từ tháng 1 đến tháng 10/2026 để report có xu hướng theo thời gian. Bảng~\ref{tab:sodong} là số dòng thực tế sau khi chạy toàn bộ script.
+
+\begin{table}[!htbp]
+\centering\small
+\caption{Số dòng dữ liệu của từng bảng}
+\label{tab:sodong}
+\begin{tabular}{|l|r||l|r||l|r|}
+\hline
+THELOAI & 10 & DAUSACH\_TACGIA & 17 & PHIEUMUON & 320\\\hline
+TACGIA & 16 & CUONSACH & 26 & CTPHIEUMUON & 647\\\hline
+NHAXUATBAN & 10 & DOCGIA & 315 & PHIEUPHAT & 302\\\hline
+DAUSACH & 16 & TAIKHOAN & 12 & \textbf{Tổng} & \textbf{1.691}\\\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[!htbp]
+\centering\small
+\caption{Dữ liệu mẫu bảng DAUSACH (trích 6/16 dòng)}
+\label{tab:mau}
+\begin{tabular}{|l|l|r|r|r|}
+\hline
+\textbf{MADS} & \textbf{TENDS} & \textbf{GIA} & \textbf{SOLUONG} & \textbf{SLCON}\\\hline
+DS001 & Mắt biếc & 110.000 & 3 & 1\\\hline
+DS002 & Cho tôi xin một vé đi tuổi thơ & 80.000 & 2 & 2\\\hline
+DS003 & Dế Mèn phiêu lưu ký & 50.000 & 2 & 0\\\hline
+DS008 & Sapiens: Lược sử loài người & 250.000 & 1 & 0\\\hline
+DS010 & Database System Concepts & 450.000 & 2 & 1\\\hline
+DS016 & Giáo trình Giải tích 1 & 65.000 & 1 & 0\\\hline
+\end{tabular}
+\end{table}
+
+% =====================================================================
+%                     CHƯƠNG 4: QUẢN LÝ THÔNG TIN
+% =====================================================================
+\chapter{Quản lý thông tin}
+Mọi kết quả trong chương này được chạy thật trên CSDL ngày 13/10/2026. Các kịch bản thay đổi dữ liệu được bọc trong \texttt{BEGIN TRAN … ROLLBACK} để chạy lại được nhiều lần; kịch bản và output đầy đủ lưu trong thư mục \texttt{docs/baocao\_latex/results/}.
+
+\section{Xử lý thông tin}
+\subsection{Stored Procedure}
+CSDL có 38 stored procedure (33 trong \texttt{5\_StoredProcedure}, 3 cho xác thực/sao lưu, 2 bọc cursor). Dưới đây là 5 thủ tục nghiệp vụ chính.
+
+\obj{Procedure 1}{SP\_THEMDOCGIA}
+\muc{Bài toán} Lập thẻ cho độc giả mới. Nếu mã đã tồn tại thì trả về 0; ngược lại thêm độc giả với ngày lập thẻ là hôm nay, hạn thẻ 2 năm, trả về 2.
+\begin{Code}
+CREATE OR ALTER PROCEDURE SP_THEMDOCGIA @MADG CHAR(5), @HOTEN NVARCHAR(40),
+  @NGSINH DATE, @GIOITINH NVARCHAR(3), @DIACHI NVARCHAR(100), @SODT VARCHAR(15), @EMAIL VARCHAR(50)
+AS BEGIN
+  IF EXISTS (SELECT * FROM DOCGIA WHERE MADG = @MADG) RETURN 0
+  DECLARE @NGAYLAP DATE = GETDATE()
+  INSERT INTO DOCGIA (MADG, HOTEN, NGSINH, GIOITINH, DIACHI, SODT, EMAIL, NGAYLAPTHE, NGAYHETHAN)
+  VALUES (@MADG, @HOTEN, @NGSINH, @GIOITINH, @DIACHI, @SODT, @EMAIL, @NGAYLAP, DATEADD(YEAR, 2, @NGAYLAP))
+  RETURN 2
+END
+\end{Code}
+\muc{Kết quả} Trước: 315 độc giả. Gọi \texttt{EXEC SP\_THEMDOCGIA 'DG316', N'Trương Thị Hoa', ...} trả về 2; gọi lại cùng mã trả về 0.
+\begin{kq}{lllll}
+MADG & HOTEN & NGAYLAPTHE & NGAYHETHAN & TONGNO\\\midrule
+DG316 & Trương Thị Hoa & 2026-10-13 & 2028-10-13 & 0\\
+\end{kq}
+\muc{Giải thích} Thủ tục chỉ kiểm tra trùng mã; các ràng buộc còn lại (đủ 16 tuổi, email hợp lệ, giới tính) do CHECK của bảng đảm nhận, nên dù dữ liệu vào từ thủ tục hay từ import đều bị kiểm tra như nhau.
+
+\obj{Procedure 2}{SP\_LAPPHIEUMUON}
+\muc{Bài toán} Lập phiếu mượn cho một độc giả với danh sách mã cuốn sách cách nhau bởi dấu phẩy; trả mã phiếu qua tham số ra. Nếu một cuốn không hợp lệ thì hủy cả phiếu.
+\begin{Code}
+CREATE OR ALTER PROCEDURE SP_LAPPHIEUMUON @MADG CHAR(5), @DSMACS VARCHAR(200), @MAPM CHAR(6) OUTPUT
+AS BEGIN
+  BEGIN TRY
+    BEGIN TRANSACTION
+    DECLARE @MAX INT
+    SELECT @MAX = ISNULL(MAX(CAST(SUBSTRING(MAPM, 3, 4) AS INT)), 0)
+    FROM PHIEUMUON WITH (UPDLOCK, HOLDLOCK)              -- tránh cấp trùng mã
+    SET @MAPM = 'PM' + RIGHT('0000' + CAST(@MAX + 1 AS VARCHAR(4)), 4)
+    INSERT INTO PHIEUMUON (MAPM, MADG, NGAYMUON, HANTRA, TINHTRANG)
+    VALUES (@MAPM, @MADG, CAST(GETDATE() AS DATE), DATEADD(DAY, 14, CAST(GETDATE() AS DATE)), N'Đang mượn')
+    INSERT INTO CTPHIEUMUON (MAPM, MACS)
+    SELECT DISTINCT @MAPM, LTRIM(RTRIM(value)) FROM STRING_SPLIT(@DSMACS, ',') WHERE LTRIM(RTRIM(value)) <> ''
+    COMMIT TRANSACTION   RETURN 1
+  END TRY
+  BEGIN CATCH
+    IF @@TRANCOUNT > 0 ROLLBACK
+    SET @MAPM = NULL   RAISERROR (...)   RETURN 0
+  END CATCH
+END
+\end{Code}
+\muc{Kết quả} \texttt{EXEC SP\_LAPPHIEUMUON 'DG012', 'CS004,CS005', @MAPM OUTPUT} trả về 1 và \texttt{@MAPM = PM0921}, hạn trả 27/10/2026.
+
+\begin{minipage}[t]{0.48\linewidth}\centering\small\textit{Trước}\\[2pt]
+\begin{tabular}{lll}\toprule MACS & TINHTRANG & DS002.SLCON\\\midrule CS004 & Có sẵn & \multirow{2}{*}{2}\\ CS005 & Có sẵn & \\\bottomrule\end{tabular}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\linewidth}\centering\small\textit{Sau}\\[2pt]
+\begin{tabular}{lll}\toprule MACS & TINHTRANG & DS002.SLCON\\\midrule CS004 & Đang mượn & \multirow{2}{*}{0}\\ CS005 & Đang mượn & \\\bottomrule\end{tabular}
+\end{minipage}
+
+\muc{Giải thích} Thủ tục không tự kiểm tra thẻ, công nợ hay tình trạng sách; các điều kiện đó do trigger RB14, RB15 kiểm tra và \texttt{ROLLBACK} nếu vi phạm, khối \texttt{CATCH} chỉ chuyển lỗi lên ứng dụng. Số cuốn còn của đầu sách giảm từ 2 về 0 nhờ trigger RB13.
+
+\obj{Procedure 3}{SP\_TRASACH}
+\muc{Bài toán} Ghi nhận trả một cuốn sách với tình trạng khi trả; trả về tổng tiền phạt phát sinh qua tham số ra. Trả 0 nếu không có chi tiết phiếu, 1 nếu sách đã trả trước đó, 2 nếu thành công.
+\begin{Code}
+CREATE OR ALTER PROCEDURE SP_TRASACH @MAPM CHAR(6), @MACS CHAR(5),
+  @TINHTRANGTRA NVARCHAR(20) = N'Bình thường', @TIENPHAT MONEY OUTPUT
+AS BEGIN
+  SET @TIENPHAT = 0
+  IF NOT EXISTS (SELECT * FROM CTPHIEUMUON WHERE MAPM = @MAPM AND MACS = @MACS) RETURN 0
+  IF EXISTS (SELECT * FROM CTPHIEUMUON WHERE MAPM = @MAPM AND MACS = @MACS AND NGAYTRA IS NOT NULL) RETURN 1
+  UPDATE CTPHIEUMUON SET NGAYTRA = CAST(GETDATE() AS DATE), TINHTRANGTRA = @TINHTRANGTRA
+  WHERE MAPM = @MAPM AND MACS = @MACS                     -- kích hoạt TRG_CTPM_TRASACH
+  SELECT @TIENPHAT = ISNULL(SUM(SOTIEN), 0) FROM PHIEUPHAT
+  WHERE MAPM = @MAPM AND MACS = @MACS AND DATHANHTOAN = 0
+  RETURN 2
+END
+\end{Code}
+\muc{Kết quả} Cuốn CS003 của phiếu PM0014 (hạn 04/10/2026) được trả ngày 13/10 trong tình trạng hư: thủ tục trả về \texttt{@TIENPHAT = 100.000}. Trước khi trả, DG014 nợ \tien{80.000}; sau khi trả, nợ \tien{180.000}.
+\begin{kq}{llllr}
+MAPP & MACS & LYDO & Diễn giải & SOTIEN\\\midrule
+PP1622 & CS003 & Hư hỏng & 50\% × 110.000 & 55.000\\
+PP1623 & CS003 & Trả trễ & 9 ngày × 5.000 & 45.000\\
+\end{kq}
+\muc{Giải thích} Một câu \texttt{UPDATE} kích hoạt chuỗi hai trigger: trigger trả sách lập phiếu phạt, trigger phiếu phạt cập nhật TONGNO. Phiếu PM0014 vẫn “Đang mượn” vì cuốn CS007 chưa trả.
+
+\obj{Procedure 4}{SP\_THANHTOANPHAT}
+\muc{Bài toán} Thanh toán toàn bộ tiền phạt chưa trả của một độc giả, trả số tiền đã thu qua tham số ra; trả 0 nếu độc giả không tồn tại, 1 nếu không có nợ.
+\begin{Code}
+CREATE OR ALTER PROCEDURE SP_THANHTOANPHAT @MADG CHAR(5), @SOTIEN MONEY OUTPUT
+AS BEGIN
+  SET @SOTIEN = 0
+  IF NOT EXISTS (SELECT * FROM DOCGIA WHERE MADG = @MADG) RETURN 0
+  SELECT @SOTIEN = ISNULL(SUM(PP.SOTIEN), 0)
+  FROM PHIEUPHAT PP JOIN PHIEUMUON PM ON PP.MAPM = PM.MAPM
+  WHERE PM.MADG = @MADG AND PP.DATHANHTOAN = 0
+  IF @SOTIEN = 0 RETURN 1
+  UPDATE PHIEUPHAT SET DATHANHTOAN = 1
+  WHERE DATHANHTOAN = 0 AND MAPM IN (SELECT MAPM FROM PHIEUMUON WHERE MADG = @MADG)
+  RETURN 2
+END
+\end{Code}
+\muc{Kết quả} DG009 có phiếu PP0003 (mất sách, \tien{250.000}, chưa thanh toán), TONGNO = \tien{250.000}. Sau \texttt{EXEC SP\_THANHTOANPHAT 'DG009', @TIEN OUTPUT}: kết quả 2, \texttt{@TIEN = 250.000}, PP0003 có DATHANHTOAN = 1, TONGNO = 0. Gọi lần hai trả về 1.
+
+\muc{Giải thích} Thủ tục không sửa TONGNO trực tiếp; trigger RB17 tính lại từ PHIEUPHAT nên công nợ không thể lệch với các phiếu phạt.
+
+\obj{Procedure 5}{SP\_THONGKETHANG}
+\muc{Bài toán} Thống kê hoạt động một tháng: số phiếu mượn, số lượt sách, tổng tiền phạt (3 tham số ra) và bảng 5 đầu sách được mượn nhiều nhất.
+\begin{Code}
+CREATE OR ALTER PROCEDURE SP_THONGKETHANG @THANG INT, @NAM INT,
+  @SOPHIEU INT OUTPUT, @SOLUOTSACH INT OUTPUT, @TIENPHAT MONEY OUTPUT
+AS BEGIN
+  SELECT @SOPHIEU = COUNT(*) FROM PHIEUMUON WHERE MONTH(NGAYMUON) = @THANG AND YEAR(NGAYMUON) = @NAM
+  -- ... @SOLUOTSACH (đếm CTPHIEUMUON), @TIENPHAT (tổng PHIEUPHAT) tính tương tự
+  SELECT TOP 5 DS.MADS, DS.TENDS, COUNT(*) AS SOLUOTMUON
+  FROM CTPHIEUMUON CT JOIN PHIEUMUON PM ON CT.MAPM = PM.MAPM
+       JOIN CUONSACH CS ON CT.MACS = CS.MACS JOIN DAUSACH DS ON CS.MADS = DS.MADS
+  WHERE MONTH(PM.NGAYMUON) = @THANG AND YEAR(PM.NGAYMUON) = @NAM
+  GROUP BY DS.MADS, DS.TENDS ORDER BY SOLUOTMUON DESC, DS.MADS
+END
+\end{Code}
+\muc{Kết quả} Tháng 9/2026: 48 phiếu, 108 lượt sách, tiền phạt \tien{665.000}. Top 5: Đắc nhân tâm (15), Mắt biếc (14), Cho tôi xin một vé đi tuổi thơ (14), Harry Potter (12), Database System Concepts (10).
+
+\muc{Giải thích} Thủ tục vừa trả tham số ra (dùng cho ô số liệu trên web) vừa trả một tập kết quả (dùng cho bảng xếp hạng), cho thấy khác biệt của SP so với function.
+
+\subsection{Trigger}
+\obj{Trigger 1}{TRG\_CUONSACH\_CAPNHATSL (RB13)}
+\muc{Bài toán} Giữ SOLUONG và SLCON của đầu sách luôn bằng số cuốn và số cuốn “Có sẵn” mỗi khi thêm, xóa, sửa cuốn sách.
+\begin{Code}
+CREATE TRIGGER TRG_CUONSACH_CAPNHATSL ON CUONSACH AFTER INSERT, UPDATE, DELETE
+AS BEGIN
+  UPDATE DAUSACH
+  SET SOLUONG = (SELECT COUNT(*) FROM CUONSACH CS WHERE CS.MADS = DAUSACH.MADS),
+      SLCON   = (SELECT COUNT(*) FROM CUONSACH CS WHERE CS.MADS = DAUSACH.MADS AND CS.TINHTRANG = N'Có sẵn')
+  WHERE MADS IN (SELECT MADS FROM inserted UNION SELECT MADS FROM deleted)
+END
+\end{Code}
+\muc{Kết quả} DS004 (Chí Phèo) ban đầu SOLUONG = 1, SLCON = 1. Thêm cuốn CS027: 2 / 2. Đánh dấu CS008 hư hỏng: 2 / 1.
+
+\muc{Giải thích} Trigger tính lại từ đầu cho các đầu sách bị ảnh hưởng thay vì cộng/trừ, nên vẫn đúng khi một câu lệnh tác động nhiều dòng hoặc đổi MADS (dòng xuất hiện ở cả \texttt{inserted} lẫn \texttt{deleted}).
+
+\obj{Trigger 2}{TRG\_PHIEUMUON\_KIEMTRA (RB14)}
+\muc{Bài toán} Chỉ cho lập (hoặc sửa) phiếu mượn khi thẻ độc giả còn hạn vào ngày mượn và độc giả không còn nợ phạt.
+\begin{Code}
+CREATE TRIGGER TRG_PHIEUMUON_KIEMTRA ON PHIEUMUON AFTER INSERT, UPDATE
+AS BEGIN
+  IF NOT (UPDATE(MADG) OR UPDATE(NGAYMUON) OR UPDATE(HANTRA)) RETURN
+  IF EXISTS (SELECT * FROM inserted I JOIN DOCGIA DG ON I.MADG = DG.MADG WHERE I.NGAYMUON > DG.NGAYHETHAN)
+  BEGIN RAISERROR (N'Thẻ độc giả đã hết hạn, không thể lập phiếu mượn.', 16, 1)
+        ROLLBACK TRANSACTION  RETURN END
+  IF EXISTS (SELECT * FROM inserted I JOIN DOCGIA DG ON I.MADG = DG.MADG WHERE DG.TONGNO > 0)
+  BEGIN RAISERROR (N'Độc giả còn nợ tiền phạt, phải thanh toán trước khi mượn.', 16, 1)
+        ROLLBACK TRANSACTION  RETURN END
+END
+\end{Code}
+\muc{Kết quả} Thêm phiếu cho DG006 (thẻ hết hạn 31/08/2026) và cho DG009 (nợ \tien{250.000}): cả hai bị từ chối với thông báo tương ứng, bảng PHIEUMUON không có thêm dòng nào.
+
+\muc{Giải thích} \texttt{IF UPDATE(...)} giúp trigger bỏ qua khi chỉ đổi cột TINHTRANG (việc trigger trả sách làm khi đóng phiếu), tránh từ chối nhầm một phiếu cũ của độc giả đang nợ.
+
+\obj{Trigger 3}{TRG\_CTPM\_MUONSACH (RB15)}
+\muc{Bài toán} Khi thêm chi tiết phiếu mượn: cuốn sách phải “Có sẵn”, không đồng thời nằm trên hai phiếu chưa trả, phiếu phải còn mở; hợp lệ thì chuyển cuốn sang “Đang mượn”.
+\begin{Code}
+CREATE TRIGGER TRG_CTPM_MUONSACH ON CTPHIEUMUON AFTER INSERT
+AS BEGIN
+  IF EXISTS (SELECT * FROM inserted I JOIN CUONSACH CS ON I.MACS = CS.MACS
+             WHERE I.NGAYTRA IS NULL AND CS.TINHTRANG <> N'Có sẵn')
+  BEGIN RAISERROR (N'Có cuốn sách không ở tình trạng "Có sẵn", không thể cho mượn.', 16, 1)
+        ROLLBACK TRANSACTION  RETURN END
+  -- ... kiểm tra cuốn nằm trên 2 phiếu chưa trả, phiếu đã đóng
+  UPDATE CUONSACH SET TINHTRANG = N'Đang mượn'
+  WHERE MACS IN (SELECT MACS FROM inserted WHERE NGAYTRA IS NULL)
+END
+\end{Code}
+\muc{Kết quả} Thêm CS015 (đã mất) hoặc CS001 (đang được mượn) vào phiếu mới: bị từ chối, và vì \texttt{ROLLBACK} hủy cả giao tác nên phiếu PM0999 vừa tạo cũng không còn (\texttt{COUNT = 0}). Trường hợp hợp lệ đã thấy ở Procedure 2.
+
+\muc{Giải thích} Đây là lý do SP lập phiếu đặt phiếu và chi tiết trong cùng một transaction: một cuốn vi phạm làm hủy cả phiếu, không để lại phiếu rỗng.
+
+\obj{Trigger 4}{TRG\_CTPM\_TRASACH (RB16)}
+\muc{Bài toán} Khi ghi nhận trả sách: không cho sửa lại lần trả, ngày trả không trước ngày mượn; cập nhật tình trạng cuốn, tự lập phiếu phạt, đóng phiếu khi đã trả hết.
+\begin{Code}
+CREATE TRIGGER TRG_CTPM_TRASACH ON CTPHIEUMUON AFTER UPDATE
+AS BEGIN
+  IF EXISTS (SELECT * FROM inserted I JOIN deleted D ON I.MAPM = D.MAPM AND I.MACS = D.MACS WHERE D.NGAYTRA IS NOT NULL)
+  BEGIN RAISERROR (N'Sách đã được trả, không thể cập nhật lại.', 16, 1)
+        ROLLBACK TRANSACTION  RETURN END
+  -- ... kiểm tra ngày trả >= ngày mượn; cập nhật CUONSACH.TINHTRANG theo TINHTRANGTRA
+  ;WITH TRA AS (...), PHAT AS (
+    SELECT MAPM, MACS, NGAYTRA, N'Trả trễ' AS LYDO, dbo.FN_TIENPHATTRE(HANTRA, NGAYTRA) AS SOTIEN
+    FROM TRA WHERE NGAYTRA > HANTRA
+    UNION ALL SELECT MAPM, MACS, NGAYTRA, N'Hư hỏng', GIA * 0.5 FROM TRA WHERE TINHTRANGTRA = N'Hư hỏng'
+    UNION ALL SELECT MAPM, MACS, NGAYTRA, N'Mất sách', GIA FROM TRA WHERE TINHTRANGTRA = N'Mất')
+  INSERT INTO PHIEUPHAT (...) SELECT 'PP' + ..., MAPM, MACS, NGAYTRA, LYDO, SOTIEN, 0 FROM PHAT
+  -- ... phiếu không còn cuốn nào chưa trả -> TINHTRANG = N'Đã trả'
+END
+\end{Code}
+\muc{Kết quả} Trả cuốn CS025 của PM0012 (hạn 24/09) vào 13/10, tình trạng bình thường: lập PP1622 “Trả trễ” \tien{95.000} (19 ngày); CS025 về “Có sẵn”; PM0012 chuyển “Đã trả” vì cuốn còn lại đã trả trước đó; TONGNO của DG004 từ 0 lên \tien{95.000}. Cập nhật lại ngày trả lần nữa bị từ chối.
+
+\muc{Giải thích} Trigger xử lý theo tập (CTE + \texttt{UNION ALL}) nên trả nhiều cuốn trong một câu lệnh vẫn lập đủ phiếu phạt với mã liên tiếp; mức phạt trễ dùng chung \texttt{FN\_TIENPHATTRE}.
+
+\obj{Trigger 5}{TRG\_PHIEUPHAT\_TONGNO (RB17)}
+\muc{Bài toán} Giữ TONGNO của độc giả luôn bằng tổng tiền các phiếu phạt chưa thanh toán.
+\begin{Code}
+CREATE TRIGGER TRG_PHIEUPHAT_TONGNO ON PHIEUPHAT AFTER INSERT, UPDATE, DELETE
+AS BEGIN
+  UPDATE DOCGIA
+  SET TONGNO = ISNULL((SELECT SUM(PP.SOTIEN) FROM PHIEUPHAT PP JOIN PHIEUMUON PM ON PP.MAPM = PM.MAPM
+                       WHERE PM.MADG = DOCGIA.MADG AND PP.DATHANHTOAN = 0), 0)
+  WHERE MADG IN (SELECT PM.MADG FROM PHIEUMUON PM
+                 WHERE PM.MAPM IN (SELECT MAPM FROM inserted UNION SELECT MAPM FROM deleted))
+END
+\end{Code}
+\muc{Kết quả} DG109 có 4 phiếu chưa thanh toán (15.000 + 10.000 + 50.000 + 20.000), TONGNO = \tien{95.000}. Đánh dấu thanh toán phiếu PP1603: TONGNO còn \tien{80.000}.
+
+\muc{Giải thích} Trigger này là mắt xích cuối của chuỗi trả sách → lập phiếu phạt → cập nhật nợ, và cũng là điều kiện đầu vào cho Trigger 2.
+
+\subsection{Function}
+\obj{Function 1}{FN\_SOSACHDANGMUON}
+\muc{Bài toán} Cho mã độc giả, trả về số cuốn đang mượn chưa trả; trả −1 nếu độc giả không tồn tại.
+\begin{Code}
+CREATE FUNCTION FN_SOSACHDANGMUON (@MADG CHAR(5)) RETURNS INT
+AS BEGIN
+  IF NOT EXISTS (SELECT * FROM DOCGIA WHERE MADG = @MADG) RETURN -1
+  DECLARE @SOSACH INT
+  SELECT @SOSACH = COUNT(*) FROM CTPHIEUMUON CT JOIN PHIEUMUON PM ON CT.MAPM = PM.MAPM
+  WHERE PM.MADG = @MADG AND CT.NGAYTRA IS NULL
+  RETURN @SOSACH
+END
+\end{Code}
+\muc{Kết quả} \texttt{DG007} → 3, \texttt{DG012} → 0, \texttt{DG999} → −1.
+\muc{Giải thích} Hàm vô hướng dùng được ngay trong \texttt{SELECT} danh sách độc giả của web để hiện cột “đang mượn”.
+
+\obj{Function 2}{FN\_TIENPHATTRE}
+\muc{Bài toán} Cho hạn trả và ngày trả, trả về tiền phạt trễ hạn 5.000\,đ/ngày; trả đúng hạn thì bằng 0.
+\begin{Code}
+CREATE FUNCTION FN_TIENPHATTRE (@HANTRA DATE, @NGAYTRA DATE) RETURNS MONEY
+AS BEGIN
+  DECLARE @SONGAYTRE INT = DATEDIFF(DAY, @HANTRA, @NGAYTRA)
+  IF @SONGAYTRE <= 0 RETURN 0
+  RETURN @SONGAYTRE * 5000
+END
+\end{Code}
+\muc{Kết quả} \texttt{('2026-09-15','2026-09-26')} → 55.000; \texttt{('2026-09-15','2026-09-10')} → 0.
+\muc{Giải thích} Quy định phạt chỉ nằm ở một chỗ và được tái sử dụng trong Trigger 4, Cursor 2 và view Report 5; đổi mức phạt chỉ cần sửa hàm này.
+
+\obj{Function 3}{FN\_LICHSUMUON}
+\muc{Bài toán} Cho mã độc giả, trả về bảng lịch sử mượn: phiếu, tên sách, ngày mượn, hạn trả, ngày trả, số ngày trễ và trạng thái từng cuốn.
+\begin{Code}
+CREATE FUNCTION FN_LICHSUMUON (@MADG CHAR(5)) RETURNS TABLE
+AS RETURN (
+  SELECT PM.MAPM, CS.MACS, DS.TENDS, PM.NGAYMUON, PM.HANTRA, CT.NGAYTRA,
+    CASE ... END AS SONGAYTRE,   -- trễ tính đến hôm nay nếu chưa trả, đến ngày trả nếu đã trả
+    CASE WHEN CT.NGAYTRA IS NOT NULL THEN N'Đã trả (' + CT.TINHTRANGTRA + N')'
+         WHEN PM.HANTRA < CAST(GETDATE() AS DATE) THEN N'Quá hạn' ELSE N'Đang mượn' END AS TRANGTHAI
+  FROM PHIEUMUON PM JOIN CTPHIEUMUON CT ON PM.MAPM = CT.MAPM
+       JOIN CUONSACH CS ON CT.MACS = CS.MACS JOIN DAUSACH DS ON CS.MADS = DS.MADS
+  WHERE PM.MADG = @MADG)
+\end{Code}
+\muc{Kết quả} \texttt{SELECT * FROM dbo.FN\_LICHSUMUON('DG014')} trả 7 dòng, ví dụ PM0014/CS003 “Mắt biếc” hạn 04/10, trễ 9 ngày, “Quá hạn”; PM0893/CS004 “Đã trả (Hư hỏng)”, trễ 2 ngày.
+\muc{Giải thích} Hàm trả bảng (inline table-valued) có thể \texttt{JOIN}, lọc, sắp xếp như một bảng, điều mà stored procedure không làm được.
+
+\subsection{Cursor}
+\obj{Cursor 1}{SP\_CURSOR\_XEPLOAIDOCGIA}
+\muc{Bài toán} Duyệt từng độc giả, tính số lượt mượn, số lần trễ, số lần làm hư/mất, tổng tiền phạt rồi xếp loại: \emph{Chưa mượn}; \emph{Hạn chế} (từng làm mất sách hoặc nợ trên \tien{100.000}); \emph{Cảnh báo} (trễ từ 2 lần hoặc làm hư); \emph{Bình thường} (trễ 1 lần); \emph{Uy tín}. Kết quả lưu vào bảng \texttt{DOCGIA\_XEPLOAI}.
+\begin{Code}
+DECLARE CUR_DOCGIA CURSOR FOR SELECT MADG, TONGNO FROM DOCGIA
+OPEN CUR_DOCGIA
+FETCH NEXT FROM CUR_DOCGIA INTO @MADG, @TONGNO
+WHILE @@FETCH_STATUS = 0
+BEGIN
+  -- tính @SOLUOT, @SOTRE, @SOHUMAT, @SOMAT, @TIENPHAT bằng COUNT/SUM trên CTPHIEUMUON, PHIEUPHAT
+  SET @XEPLOAI = CASE WHEN @SOLUOT = 0 THEN N'Chưa mượn'
+                      WHEN @SOMAT > 0 OR @TONGNO > 100000 THEN N'Hạn chế'
+                      WHEN @SOTRE >= 2 OR @SOHUMAT > 0 THEN N'Cảnh báo'
+                      WHEN @SOTRE = 1 THEN N'Bình thường' ELSE N'Uy tín' END
+  INSERT INTO DOCGIA_XEPLOAI (MADG, SOLUOTMUON, SOLANTRE, SOLANHUMAT, TONGTIENPHAT, XEPLOAI)
+  VALUES (@MADG, @SOLUOT, @SOTRE, @SOHUMAT, @TIENPHAT, @XEPLOAI)
+  FETCH NEXT FROM CUR_DOCGIA INTO @MADG, @TONGNO
+END
+CLOSE CUR_DOCGIA  DEALLOCATE CUR_DOCGIA
+\end{Code}
+\muc{Kết quả} Bảng \texttt{DOCGIA\_XEPLOAI} trước khi chạy rỗng; sau khi chạy có 315 dòng: Chưa mượn 119, Cảnh báo 98, Bình thường 53, Uy tín 44, Hạn chế 1 (DG009, người làm mất sách).
+\muc{Giải thích} Mỗi độc giả cần nhiều phép đếm khác nhau rồi một quyết định nhiều nhánh có thứ tự ưu tiên, nên cursor giúp viết rõ ràng theo từng dòng; cursor được bọc trong SP để web gọi lại được.
+
+\obj{Cursor 2}{SP\_CURSOR\_NHACNHOQUAHAN}
+\muc{Bài toán} Với một ngày kiểm tra, duyệt từng cuốn chưa trả đã quá hạn, tính số ngày trễ, tiền phạt tạm tính và soạn nội dung tin nhắn nhắc nhở; cuốn đã được nhắc trong cùng ngày thì không thêm lại.
+\begin{Code}
+DECLARE CUR_QUAHAN CURSOR FOR
+  SELECT PM.MAPM, CT.MACS, DG.MADG, DG.HOTEN, DG.SODT, DS.TENDS, PM.HANTRA
+  FROM CTPHIEUMUON CT JOIN PHIEUMUON PM ON CT.MAPM = PM.MAPM JOIN DOCGIA DG ON ... -- CUONSACH, DAUSACH
+  WHERE CT.NGAYTRA IS NULL AND PM.HANTRA < @NGAYKIEMTRA ORDER BY PM.HANTRA
+OPEN CUR_QUAHAN  FETCH NEXT FROM CUR_QUAHAN INTO @MAPM, @MACS, @MADG, @HOTEN, @SODT, @TENDS, @HANTRA
+WHILE @@FETCH_STATUS = 0
+BEGIN
+  IF NOT EXISTS (SELECT * FROM NHACNHO_QUAHAN WHERE MAPM = @MAPM AND MACS = @MACS AND NGAYLAP = @NGAYKIEMTRA)
+  BEGIN
+    SET @TIENPHAT = dbo.FN_TIENPHATTRE(@HANTRA, @NGAYKIEMTRA)
+    SET @NOIDUNG  = N'Thư viện thông báo: bạn ' + @HOTEN + N' đang giữ sách "' + @TENDS + N'" quá hạn ...'
+    INSERT INTO NHACNHO_QUAHAN (...) VALUES (...)
+  END
+  FETCH NEXT FROM CUR_QUAHAN INTO @MAPM, @MACS, @MADG, @HOTEN, @SODT, @TENDS, @HANTRA
+END
+CLOSE CUR_QUAHAN  DEALLOCATE CUR_QUAHAN
+\end{Code}
+\muc{Kết quả} \texttt{EXEC SP\_CURSOR\_NHACNHOQUAHAN '2026-10-13'} in “Đã tạo 15 nhắc nhở mới.”, ví dụ \textit{“… bạn Nguyễn Minh Anh đang giữ sách "Nhà giả kim" quá hạn 28 ngày … Tiền phạt tạm tính: 140,000đ …”} Chạy lại cùng ngày in “Đã tạo 0 nhắc nhở mới.”
+\muc{Giải thích} Kiểm tra \texttt{NOT EXISTS} theo (phiếu, cuốn, ngày) giúp thủ tục chạy lại an toàn (idempotent), phù hợp để lên lịch chạy hằng ngày.
+
+\section{An toàn thông tin}
+\subsection{Xác thực}
+Hệ thống xác thực ở hai lớp. \textbf{Lớp SQL Server:} ba login \texttt{LG\_QUANLY}, \texttt{LG\_THUTHU}, \texttt{LG\_DOCGIA} dùng SQL authentication với \texttt{CHECK\_POLICY = ON} (bắt buộc mật khẩu mạnh), mỗi login ánh xạ đến một user trong CSDL. \textbf{Lớp ứng dụng:} bảng \texttt{TAIKHOAN} lưu \texttt{HASHBYTES('SHA2\_256', mật khẩu)} thay vì mật khẩu gốc; thủ tục \texttt{SP\_DANGNHAP} trả 0 nếu sai tên hoặc mật khẩu, 1 nếu tài khoản bị khóa, 2 nếu thành công.
+\begin{Code}
+CREATE LOGIN LG_THUTHU WITH PASSWORD = 'ThuThu@2026', DEFAULT_DATABASE = QUANLYTHUVIEN, CHECK_POLICY = ON
+CREATE USER U_THUTHU FOR LOGIN LG_THUTHU
+-- Lớp ứng dụng
+IF NOT EXISTS (SELECT * FROM TAIKHOAN WHERE TENDANGNHAP = @TENDANGNHAP
+               AND MATKHAU = HASHBYTES('SHA2_256', @MATKHAU)) ... SET @KETQUA = 0
+\end{Code}
+Kiểm tra: \texttt{admin/123456} → 2; \texttt{admin/sai} → 0; \texttt{thuthu09/123456} (đã nghỉ việc, TRANGTHAI = 0) → 1. Cột MATKHAU chỉ chứa chuỗi băm \texttt{0xEC278A38\ldots}
+
+\subsection{Phân quyền}
+Ba role tương ứng ba đối tượng sử dụng. Quyền được cấp cho role, user chỉ là thành viên của role, nên khi thêm nhân viên mới chỉ cần \texttt{ALTER ROLE … ADD MEMBER}.
+
+\begin{table}[!htbp]
+\centering\small
+\caption{Quyền của từng role}
+\label{tab:quyen}
+\begin{tabularx}{\linewidth}{|p{2.3cm}|L|L|}
+\hline
+\textbf{Role} & \textbf{GRANT} & \textbf{DENY}\\\hline
+R\_QUANLY & db\_datareader, db\_datawriter, db\_backupoperator; EXECUTE trên schema dbo; SELECT 5 view report & –\\\hline
+R\_THUTHU & SELECT schema dbo; INSERT, UPDATE trên 6 bảng nghiệp vụ; EXECUTE 6 SP mượn – trả & DELETE schema dbo; SELECT TAIKHOAN\\\hline
+R\_DOCGIA & SELECT danh mục sách và view sách mượn nhiều; SELECT CUONSACH chỉ 4 cột (phân quyền mức cột); EXECUTE SP\_TIMSACH & SELECT DOCGIA, TAIKHOAN; INSERT, UPDATE, DELETE schema dbo\\\hline
+\end{tabularx}
+\end{table}
+
+\begin{Code}
+GRANT SELECT ON SCHEMA::dbo TO R_THUTHU
+DENY  DELETE ON SCHEMA::dbo TO R_THUTHU
+GRANT SELECT ON CUONSACH (MACS, MADS, VITRI, TINHTRANG) TO R_DOCGIA
+GRANT SELECT ON PHIEUPHAT TO R_DOCGIA   REVOKE SELECT ON PHIEUPHAT FROM R_DOCGIA   -- minh họa REVOKE
+\end{Code}
+Kiểm tra bằng \texttt{EXECUTE AS USER}: U\_THUTHU đếm được 315 độc giả nhưng \texttt{DELETE FROM PHIEUPHAT} báo \textit{“The DELETE permission was denied on the object 'PHIEUPHAT'”} và \texttt{SELECT * FROM TAIKHOAN} bị từ chối. U\_DOCGIA chạy \texttt{SP\_TIMSACH N'Harry'} được, nhưng \texttt{SELECT * FROM DOCGIA} bị từ chối và \texttt{SELECT NGAYNHAP FROM CUONSACH} báo \textit{“permission was denied on the column 'NGAYNHAP'”}.
+
+\subsection{Import và Export}
+\textbf{Import:} file \texttt{db/data/DOCGIA\_IMPORT.csv} (UTF-16, xuất từ Excel) được nạp bằng \texttt{BULK INSERT} vào bảng tạm, sau đó chỉ thêm những mã chưa có vào \texttt{DOCGIA}; các CHECK và trigger vẫn kiểm tra từng dòng.
+\begin{Code}
+BULK INSERT #DOCGIA_IMPORT FROM '/tmp/DOCGIA_IMPORT.csv'
+WITH (FORMAT = 'CSV', DATAFILETYPE = 'widechar', FIRSTROW = 2, FIELDTERMINATOR = ',', ROWTERMINATOR = '\r\n')
+INSERT INTO DOCGIA (MADG, HOTEN, NGSINH, GIOITINH, DIACHI, SODT, EMAIL, NGAYLAPTHE, NGAYHETHAN)
+SELECT ... FROM #DOCGIA_IMPORT I WHERE NOT EXISTS (SELECT * FROM DOCGIA DG WHERE DG.MADG = I.MADG)
+\end{Code}
+Kết quả: file có 3 dòng, DOCGIA tăng từ 315 lên 318 (DG316 Nguyễn Thị Thu Hà, DG317 Lê Văn Hậu, DG318 Trần Bích Ngọc), tiếng Việt giữ nguyên dấu.
+
+\textbf{Export:} công cụ \texttt{bcp} xuất kết quả truy vấn ra CSV UTF-8; cũng có thể dùng \textit{Tasks > Export Data} trong SSMS sang Excel.
+\begin{Code}
+bcp "SELECT MADS, TENDS, SOLUONG, SLCON FROM QUANLYTHUVIEN.dbo.DAUSACH" queryout DAUSACH.csv -c -C 65001 -t, -S localhost -U sa -P ***
+\end{Code}
+Kết quả: “16 rows copied.”, dòng đầu của file là \texttt{DS001,Mắt biếc,3,1}.
+
+\subsection{Backup và Restore}
+CSDL dùng recovery model FULL. Thủ tục \texttt{SP\_SAOLUU} nhận đường dẫn và loại (FULL hoặc DIFF), sao lưu rồi trả về lịch sử từ \texttt{msdb.dbo.backupset}; chỉ role R\_QUANLY được thực thi. Khi phục hồi, bản FULL được khôi phục với \texttt{NORECOVERY}, sau đó áp bản DIFF với \texttt{RECOVERY}.
+\begin{Code}
+EXEC SP_SAOLUU N'/var/opt/mssql/data/QUANLYTHUVIEN_FULL.bak', 'FULL'
+EXEC SP_SAOLUU N'/var/opt/mssql/data/QUANLYTHUVIEN_DIFF.bak', 'DIFF'
+DROP DATABASE QUANLYTHUVIEN
+RESTORE DATABASE QUANLYTHUVIEN FROM DISK = N'.../QUANLYTHUVIEN_FULL.bak' WITH NORECOVERY, REPLACE
+RESTORE DATABASE QUANLYTHUVIEN FROM DISK = N'.../QUANLYTHUVIEN_DIFF.bak' WITH RECOVERY
+\end{Code}
+Kết quả thực nghiệm: bản FULL 826 trang (6,53 MB), bản DIFF chỉ 98 trang (0,84 MB). Sau khi xóa CSDL, \texttt{sys.databases} không còn \texttt{QUANLYTHUVIEN}; sau hai lệnh restore, CSDL trở lại trạng thái ONLINE với đúng 315 độc giả, 320 phiếu mượn, 302 phiếu phạt.
+
+\section{Trình bày thông tin (Report)}
+Mỗi report lấy dữ liệu từ một view trong \texttt{8\_Report.sql}, nên báo cáo luôn phản ánh số liệu hiện tại và có thể hiển thị bằng Power BI, Tableau hoặc trực tiếp trên web. Các biểu đồ dưới đây được vẽ từ chính kết quả truy vấn view ngày 13/10/2026; mỗi biểu đồ đi kèm số liệu để đọc được cả khi in đen trắng.
+
+\begin{figure}[!htbp]
+\raggedright \textbf{Report 1: Tình trạng kho sách} (\texttt{VW\_BC\_TINHTRANGKHO})\par\smallskip
+\centering
+\begin{tikzpicture}
+\begin{axis}[xbar stacked, width=0.74\linewidth, height=5.6cm, bar width=7pt,
+  xmin=0, xmax=8, xlabel={Số cuốn}, font=\footnotesize,
+  symbolic y coords={Toán học,Kinh tế,Lịch sử - Văn hóa,Kỹ năng sống,Văn học nước ngoài,Thiếu nhi,Công nghệ thông tin,Văn học Việt Nam},
+  ytick=data, y dir=reverse, axis line style={gray}, major grid style={gridc}, xmajorgrids,
+  legend style={at={(0.5,1.02)},anchor=south,legend columns=4,draw=none,font=\footnotesize},
+  every axis plot/.append style={draw=white, line width=0.8pt}]
+\addplot[fill=s3] coordinates {(0,Toán học) (0,Kinh tế) (0,Lịch sử - Văn hóa) (0,Kỹ năng sống) (0,Văn học nước ngoài) (0,Thiếu nhi) (1,Công nghệ thông tin) (4,Văn học Việt Nam)};
+\addplot[fill=s1] coordinates {(1,Toán học) (1,Kinh tế) (1,Lịch sử - Văn hóa) (2,Kỹ năng sống) (3,Văn học nước ngoài) (3,Thiếu nhi) (4,Công nghệ thông tin) (3,Văn học Việt Nam)};
+\addplot[fill=s4] coordinates {(0,Toán học) (0,Kinh tế) (0,Lịch sử - Văn hóa) (1,Kỹ năng sống) (0,Văn học nước ngoài) (1,Thiếu nhi) (0,Công nghệ thông tin) (0,Văn học Việt Nam)};
+\addplot[fill=s2] coordinates {(0,Toán học) (0,Kinh tế) (1,Lịch sử - Văn hóa) (0,Kỹ năng sống) (0,Văn học nước ngoài) (0,Thiếu nhi) (0,Công nghệ thông tin) (0,Văn học Việt Nam)};
+\legend{Có sẵn,Đang mượn,Hư hỏng,Mất}
+\end{axis}
+\end{tikzpicture}
+\caption{Report 1 – Tình trạng 26 cuốn sách theo thể loại}
+\label{fig:r1}
+\raggedright\small Toàn kho có 26 cuốn: 5 có sẵn, 18 đang mượn, 2 hư hỏng, 1 mất. Chỉ hai thể loại còn sách trên kệ, cho thấy thư viện nên bổ sung bản sao cho các đầu sách công nghệ thông tin và thiếu nhi.
+\end{figure}
+
+\begin{figure}[!htbp]
+\raggedright \textbf{Report 2: Đầu sách được mượn nhiều nhất} (\texttt{VW\_BC\_SACHMUONNHIEU})\par\smallskip
+\centering
+\begin{tikzpicture}
+\begin{axis}[xbar, width=0.70\linewidth, height=5.4cm, bar width=8pt,
+  xmin=0, xmax=100, xlabel={Lượt mượn (năm 2026)}, font=\footnotesize,
+  symbolic y coords={Mắt biếc,Nhà giả kim,Cho tôi xin một vé đi tuổi thơ,Harry Potter và Hòn đá Phù thủy,Đắc nhân tâm,Database System Concepts,Chí Phèo,Nguyên lý kinh tế học},
+  ytick=data, y dir=reverse, axis line style={gray}, major grid style={gridc}, xmajorgrids,
+  nodes near coords, nodes near coords style={font=\footnotesize, text=black}]
+\addplot[fill=s1, draw=none] coordinates {(88,Mắt biếc) (74,Nhà giả kim) (65,Cho tôi xin một vé đi tuổi thơ) (64,Harry Potter và Hòn đá Phù thủy) (64,Đắc nhân tâm) (62,Database System Concepts) (47,Chí Phèo) (35,Nguyên lý kinh tế học)};
+\end{axis}
+\end{tikzpicture}
+\caption{Report 2 – Top 8 đầu sách theo lượt mượn}
+\label{fig:r2}
+\raggedright\small “Mắt biếc” dẫn đầu với 88 lượt từ 67 độc giả khác nhau; view dùng \texttt{RANK()} nên hai đầu sách cùng 64 lượt đồng hạng 4.
+\end{figure}
+
+\begin{figure}[!htbp]
+\raggedright \textbf{Report 3: Lượt mượn theo tháng và thể loại} (\texttt{VW\_BC\_LUOTMUON\_THANG})\par\smallskip
+\centering
+\begin{tikzpicture}
+\begin{axis}[width=0.92\linewidth, height=5.4cm, xmin=1, xmax=9, ymin=0, ymax=40,
+  xtick={1,...,9}, xlabel={Tháng (năm 2026)}, ylabel={Lượt mượn}, font=\footnotesize,
+  axis line style={gray}, major grid style={gridc}, ymajorgrids,
+  legend style={at={(0.5,1.02)},anchor=south,legend columns=4,draw=none,font=\footnotesize},
+  every axis plot/.append style={line width=1.4pt, mark size=2.2pt}]
+\addplot[s1, mark=*] coordinates {(1,20)(2,22)(3,20)(4,19)(5,33)(6,14)(7,31)(8,32)(9,37)};
+\addplot[s2, mark=square*] coordinates {(1,12)(2,7)(3,12)(4,9)(5,14)(6,11)(7,14)(8,17)(9,11)};
+\addplot[s3, mark=triangle*] coordinates {(1,5)(2,3)(3,12)(4,11)(5,8)(6,3)(7,13)(8,10)(9,17)};
+\addplot[s4, mark=diamond*] coordinates {(1,9)(2,10)(3,4)(4,9)(5,14)(6,9)(7,8)(8,15)(9,17)};
+\legend{Văn học Việt Nam,Văn học nước ngoài,Thiếu nhi,Công nghệ thông tin}
+\end{axis}
+\end{tikzpicture}
+\caption{Report 3 – Lượt mượn theo tháng của 4 thể loại lớn nhất}
+\label{fig:r3}
+\raggedright\small Tổng lượt mượn tăng từ 58 (tháng 1) lên 108 (tháng 9, đầu năm học); tháng 6 thấp nhất (47) do nghỉ hè. Văn học Việt Nam luôn chiếm khoảng một phần ba. Tháng 10 chưa được vẽ vì dữ liệu mới đến ngày 05/10.
+\end{figure}
+
+\begin{figure}[!htbp]
+\raggedright \textbf{Report 4: Tiền phạt theo lý do} (\texttt{VW\_BC\_TIENPHAT\_THANG})\par\smallskip
+\centering
+\begin{minipage}{0.52\linewidth}
+\begin{tikzpicture}
+\begin{axis}[xbar stacked, width=0.78\linewidth, height=4.2cm, bar width=12pt,
+  xmin=0, xmax=5000, xlabel={Nghìn đồng}, font=\footnotesize,
+  symbolic y coords={Trả trễ,Hư hỏng,Mất sách}, ytick=data, y dir=reverse,
+  axis line style={gray}, major grid style={gridc}, xmajorgrids,
+  legend style={at={(0.5,1.03)},anchor=south,legend columns=2,draw=none,font=\footnotesize},
+  every axis plot/.append style={draw=white, line width=0.8pt}]
+\addplot[fill=s1] coordinates {(3055,Trả trễ) (788,Hư hỏng) (0,Mất sách)};
+\addplot[fill=s2] coordinates {(1475,Trả trễ) (420,Hư hỏng) (250,Mất sách)};
+\legend{Đã thu,Chưa thu}
+\end{axis}
+\end{tikzpicture}
+\end{minipage}\hfill
+\begin{minipage}{0.45\linewidth}\small
+\begin{tabular}{@{}lrrr@{}}\toprule
+Lý do & Số phiếu & Tổng (đ) & Tỷ lệ\\\midrule
+Trả trễ & 271 & 4.530.000 & 75,6\%\\
+Hư hỏng & 30 & 1.208.000 & 20,2\%\\
+Mất sách & 1 & 250.000 & 4,2\%\\\midrule
+\textbf{Cộng} & 302 & 5.988.000 & 100\%\\
+\multicolumn{2}{@{}l}{Đã thu} & 3.843.000 & 64,2\%\\
+\multicolumn{2}{@{}l}{Chưa thu} & 2.145.000 & 35,8\%\\\bottomrule
+\end{tabular}
+\end{minipage}
+\caption{Report 4 – Tiền phạt theo lý do, đã thu và chưa thu}
+\label{fig:r4}
+\raggedright\small Trả trễ chiếm ba phần tư tiền phạt nhưng mỗi phiếu nhỏ (bình quân \tien{16.700}); còn \tien{2.145.000} chưa thu.
+\end{figure}
+
+\begin{figure}[!htbp]
+\raggedright \textbf{Report 5: Độc giả đang giữ sách quá hạn} (\texttt{VW\_BC\_DOCGIA\_QUAHAN})\par\smallskip
+\centering\footnotesize\setlength{\tabcolsep}{4pt}
+\begin{tabular}{rllllrr}\toprule
+STT & MADG & Họ tên & Phiếu & Tên sách & Trễ (ngày) & Phạt tạm tính\\\midrule
+1 & DG001 & Nguyễn Minh Anh & PM0011 & Nhà giả kim & 28 & 140.000\\
+2 & DG004 & Phạm Đức Duy & PM0012 & Cơ sở văn hóa Việt Nam & 19 & 95.000\\
+3 & DG013 & Lý Minh Tâm & PM0015 & Đắc nhân tâm & 14 & 70.000\\
+4–6 & DG163 & Nguyễn Bảo Phúc & PM0387 & 3 cuốn & 13 & 3 × 65.000\\
+7–9 & DG184 & Đỗ Minh Trí & PM0334 & 3 cuốn & 13 & 3 × 65.000\\
+10–11 & DG014 & Mai Anh Thư & PM0014 & 2 cuốn & 9 & 2 × 45.000\\
+12–13 & DG002 & Trần Quốc Bảo & PM0016 & 2 cuốn & 5 & 2 × 25.000\\
+14–15 & DG118 & Châu Hoài Tú & PM0388 & 2 cuốn & 1 & 2 × 5.000\\\bottomrule
+\end{tabular}
+\caption{Report 5 – 15 cuốn sách quá hạn của 8 độc giả (tính đến 13/10/2026)}
+\label{fig:r5}
+\raggedright\small Danh sách khớp với 15 nhắc nhở do Cursor 2 tạo cùng ngày vì cả hai dùng \texttt{FN\_TIENPHATTRE}.
+
+% =====================================================================
+%                     CHƯƠNG 5: DEMO VÀ KẾT LUẬN
+% =====================================================================
+\end{figure}
+
+\chapter{Demo và kết luận}
+
+\section{Website demo}
+\textbf{Frontend} React 19, TypeScript, Vite, Tailwind CSS, shadcn/ui với các trang Đăng nhập, Tổng quan, Sách, Độc giả, Mượn – trả, Danh mục, Báo cáo, Tài khoản. \textbf{Backend} ASP.NET Core Web API dùng Dapper và \texttt{Microsoft.Data.SqlClient} để gọi trực tiếp các stored procedure, function và view (ví dụ \texttt{SP\_LAPPHIEUMUON}, \texttt{SP\_TRASACH}, \texttt{FN\_SOSACHDANGMUON}, \texttt{VW\_BC\_*}); backend không lưu sẵn dữ liệu. \textbf{.NET Aspire} điều phối chạy cả hai.
+
+Chạy: \texttt{docker compose up -d}, chạy 10 script \texttt{db/}, rồi \texttt{dotnet run --project QuanLyThuVien.AppHost}. Mỗi màn hình demo gồm: bài toán, câu SQL, bảng liên quan, nút thực thi, kết quả.
+
+\section{Kết quả đạt được}
+\begin{itemize}
+\item CSDL 11 bảng, tách đầu sách và cuốn sách; 17 ràng buộc toàn vẹn (5 cài bằng trigger).
+\item 38 SP, 5 trigger, 3 function, 2 cursor; mượn, trả, phạt, công nợ tự động trong CSDL.
+\item Xác thực hai lớp, phân quyền đến mức cột, import/export, backup/restore; report và web lấy dữ liệu trực tiếp từ CSDL.
+\end{itemize}
+
+\section{Hạn chế}
+\begin{itemize}
+\item Hạn mượn 14 ngày và mức phạt cố định trong code, chưa có bảng tham số.
+\item Mã phiếu sinh bằng \texttt{MAX + 1} nên phụ thuộc khóa \texttt{UPDLOCK}; tải lớn nên dùng \texttt{SEQUENCE}.
+\item Chưa giới hạn số cuốn mượn, chưa có gia hạn, đặt trước; mật khẩu chưa dùng muối.
+\end{itemize}
+
+\section{Hướng phát triển}
+\begin{itemize}
+\item Bảng tham số quy định (hạn mượn, số cuốn tối đa, mức phạt); đặt trước, gia hạn; gửi nhắc nhở email/SMS từ \texttt{NHACNHO\_QUAHAN} theo lịch SQL Agent.
+\item Nhiều chi nhánh: phân mảnh ngang CUONSACH, PHIEUMUON theo chi nhánh (CSDL phân tán).
+\end{itemize}
+
+% =====================================================================
+\chapter*{TÀI LIỆU THAM KHẢO}
+\addcontentsline{toc}{chapter}{TÀI LIỆU THAM KHẢO}
+\begin{enumerate}[label={[\arabic*]}, leftmargin=2.2em]
+\item Khoa Khoa học và Kỹ thuật thông tin, “Bài giảng IE103 – Quản lý thông tin, Chương 1–5,” Trường ĐH Công nghệ Thông tin, ĐHQG-HCM, 2026.
+\item Nguyễn Gia Tuấn Anh, Trương Châu Long, \textit{Bài tập và bài giải SQL Server}. TP.HCM: NXB Thanh niên, 2005.
+\item Đỗ Phúc, Nguyễn Đăng Tỵ, \textit{Cơ sở dữ liệu}. TP.HCM: NXB ĐHQG TP.HCM, 2010.
+\item Nguyễn Gia Tuấn Anh, Mai Văn Cường, Bùi Danh Hường, \textit{Cơ sở dữ liệu nâng cao}. TP.HCM: NXB ĐHQG TP.HCM, 2019.
+\item I. Ben-Gan, \textit{Microsoft SQL Server 2012 T-SQL Fundamentals}. Redmond, WA: Microsoft Press, 2012.
+\item P. P. Chen, “The Entity-Relationship Model – Toward a Unified View of Data,” \textit{ACM Trans. Database Syst.}, vol. 1, no. 1, pp. 9–36, 1976.
+\item Microsoft, “CREATE TRIGGER (Transact-SQL),” Microsoft Learn. [Online]. Available: https://learn.microsoft.com/sql/t-sql/statements/create-trigger-transact-sql
+\item Microsoft, “Back up and restore of SQL Server databases,” Microsoft Learn. [Online]. Available: https://learn.microsoft.com/sql/relational-databases/backup-restore/
+\end{enumerate}
+
+\end{document}
